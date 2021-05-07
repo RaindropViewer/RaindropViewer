@@ -20,7 +20,7 @@ namespace Raindrop
         //manages all child Viewmodels
         public RaindropViewManager()
         {
-            Debug.Log("VM manager setup ok");
+            //Debug.Log("VM manager setup ok");
 
             //subscribe all events from raindropclient
             Global.MainRaindropInstance.LoginCompleted += MainRaindropInstance_LoginCompleted;
@@ -42,7 +42,7 @@ namespace Raindrop
 
         private void MainRaindropInstance_LoginFailed()
         {
-            showFailedLoginModal();
+            Debug.Log("failed login TODO: why?");
         }
 
         private void showFailedLoginModal()
@@ -53,7 +53,8 @@ namespace Raindrop
         private void MainRaindropInstance_LoginCompleted()
         {
             cm.popCanvas();
-            showSuccessLoginModal();
+            cm.pushCanvas(CanvasType.Game);
+            //showSuccessLoginModal();
         }
 
         private void removeLoginView()

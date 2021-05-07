@@ -45,6 +45,7 @@ public class CanvasManager : Singleton<CanvasManager>
     {
         if (activeCanvasStack.Count() == 0)
         {
+            Debug.LogWarning("tried to pop empty canvas stack.");
             return;
         }
 
@@ -52,6 +53,7 @@ public class CanvasManager : Singleton<CanvasManager>
         if (lastActiveCanvas != null)
         {
             lastActiveCanvas.gameObject.SetActive(false);
+            activeCanvasStack.Pop();
         }
 
 
