@@ -1104,6 +1104,7 @@ namespace OpenMetaverse
 
             if (loginParams.Password == null)
                 loginParams.Password = string.Empty;
+            Logger.Log("pass: " + loginParams.Password, Helpers.LogLevel.Warning);
 
             // Convert the password to MD5 if it isn't already
             if (loginParams.Password.Length != 35 && !loginParams.Password.StartsWith("$1$"))
@@ -1171,6 +1172,9 @@ namespace OpenMetaverse
             if (Client.Settings.USE_LLSD_LOGIN)
             {
                 #region LLSD Based Login
+                Logger.Log("LLSD!", Helpers.LogLevel.Warning);
+                Logger.Log("first "+ loginParams.FirstName, Helpers.LogLevel.Warning);
+                Logger.Log("last "+ loginParams.LastName, Helpers.LogLevel.Warning);
 
                 // Create the CAPS login structure
                 OSDMap loginLLSD = new OSDMap
@@ -1231,6 +1235,7 @@ namespace OpenMetaverse
             }
             else
             {
+                Logger.Log("XML-RPC!", Helpers.LogLevel.Warning);
                 #region XML-RPC Based Login Code
 
                 // Create the Hashtable for XmlRpcCs

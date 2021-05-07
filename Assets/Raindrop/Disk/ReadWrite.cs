@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,13 +8,16 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Disk
+namespace Raindrop.Disk
 {
-    class ReadWrite
+    //contains functions that directly write to disk.
+    static class ReadWrite
     {
-        public bool saveCredentials(Raindrop.Types.Credential cred, String path)
+        private static string filenameCredentials = "/SaveCredentials.data";
+
+        public static bool saveCredentials(Raindrop.Types.Credential cred, String path)
         {
-            var dirPath = path + "/SaveCredentials.data";
+            var dirPath = path + filenameCredentials;
 
             if (dirPath != null)
                 SaveSerialisable(ref cred, dirPath);
@@ -23,7 +27,7 @@ namespace Disk
         }
 
         //writes the obj/data to the filepath.
-        public void SaveSerialisable<T>(ref T data , String filePath)
+        public static void SaveSerialisable<T>(ref T data , String filePath)
         {
             FileStream dataStream = new FileStream(filePath, FileMode.Create);
 
@@ -33,7 +37,7 @@ namespace Disk
             dataStream.Close();
         }
 
-        public List<Raindrop.Types.Credential> readCredentials(String path)
+        public static List<Raindrop.Types.Credential> ReadCredentials(String path)
         {
             String dirPath = path + "/SaveCredentials.data";
 
@@ -52,7 +56,7 @@ namespace Disk
 
         }
         //reads filepath, returns the object of specified type
-        public object ReadSerialisable(String filePath)
+        public static object ReadSerialisable(String filePath)
         {
             FileStream dataStream = new FileStream(filePath, FileMode.Open);
 
@@ -71,6 +75,14 @@ namespace Disk
             return cred;
         }
 
+
+
+        public static bool SaveTextureToFile(Image image)
+        {
+
+            //image.Save(outputStream, format);
+            return true;
+        }
 
     }
 }

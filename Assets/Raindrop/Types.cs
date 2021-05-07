@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Raindrop
 {
-    class Types
+    public class Types
     {
         [Serializable]
         public class Credential
