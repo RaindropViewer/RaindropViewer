@@ -52,10 +52,10 @@ namespace Raindrop
         private void RegisterClientEvents()
         {
             ////register events
-            Client.Appearance.AgentWearablesReply += Appearance_AgentWearablesReply;
-            Client.Appearance.AppearanceSet += Appearance_AppearanceSet;
-            Client.Appearance.CachedBakesReply += Appearance_CachedBakesReply;
-            Client.Appearance.RebakeAvatarRequested += Appearance_RebakeAvatarRequested;
+            //Client.Appearance.AgentWearablesReply += Appearance_AgentWearablesReply;
+            //Client.Appearance.AppearanceSet += Appearance_AppearanceSet;
+            //Client.Appearance.CachedBakesReply += Appearance_CachedBakesReply;
+            //Client.Appearance.RebakeAvatarRequested += Appearance_RebakeAvatarRequested;
 
             ////local chat
             Client.Self.ChatFromSimulator += Self_ChatFromSimulator;
@@ -68,10 +68,35 @@ namespace Raindrop
             Client.Grid.CoarseLocationUpdate += Grid_CoarseLocationUpdate;
             Client.Network.SimChanged += Network_SimChanged;
 
-
+            //log
+            OpenMetaverse.Logger.OnLogMessage += Logger_OnLogMessage;
         }
 
-            internal void setConfigPath(string app_data_Path)
+        private void Logger_OnLogMessage(object message, Helpers.LogLevel level)
+        {
+            if (level == Helpers.LogLevel.Debug)
+            {
+                Debug.Log(message);
+            }
+            else if (level == Helpers.LogLevel.Error)
+            {
+                Debug.LogError(message);
+            }
+            else if (level == Helpers.LogLevel.Info)
+            {
+                Debug.Log(message);
+            }
+            else if (level == Helpers.LogLevel.Warning)
+            {
+                Debug.LogWarning(message);
+            }
+            else 
+            {
+                Debug.LogError(message);
+            }
+        }
+
+        internal void setConfigPath(string app_data_Path)
         {
             this.configdatapath = app_data_Path;
 
@@ -110,6 +135,11 @@ namespace Raindrop
             {
                 Debug.Log("ConnectingToLogin. \n Message: " + e.Message);
 
+            } 
+            else if (e.Status == LoginStatus.ConnectingToSim)
+            {
+                Debug.Log("ConnectingToSim. \n Message: " + e.Message);
+
             }
             else
             {
@@ -127,25 +157,25 @@ namespace Raindrop
             throw new System.NotImplementedException();
         }
 
-        private void Appearance_RebakeAvatarRequested(object sender, RebakeAvatarTexturesEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void Appearance_RebakeAvatarRequested(object sender, RebakeAvatarTexturesEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
-        private void Appearance_CachedBakesReply(object sender, AgentCachedBakesReplyEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void Appearance_CachedBakesReply(object sender, AgentCachedBakesReplyEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
-        private void Appearance_AppearanceSet(object sender, AppearanceSetEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void Appearance_AppearanceSet(object sender, AppearanceSetEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
-        private void Appearance_AgentWearablesReply(object sender, AgentWearablesReplyEventArgs e)
-        {
-            throw new System.NotImplementedException();
-        }
+        //private void Appearance_AgentWearablesReply(object sender, AgentWearablesReplyEventArgs e)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
         //connects to SL. username is either format; ie: "firstname lastname" or "Jaken69" are both compaitble.
         public void connectTo(string username, string password)
@@ -169,7 +199,7 @@ namespace Raindrop
                 return;
             }
 
-            var lp = new LoginParams(Global.MainRaindropInstance.Client, _splitname[0], _splitname[1], password, "test", "0.1");
+            var lp = new LoginParams(Global.MainRaindropInstance.Client, _splitname[0], _splitname[1], password, "raindropviewer@gmail.com", "RaindropViewer_0.1");
             Debug.Log("attempt login with name1 " + _splitname[0] + " name 2 " + _splitname[1] + " password " + password);
             Global.MainRaindropInstance.Client.Network.BeginLogin(lp);
 

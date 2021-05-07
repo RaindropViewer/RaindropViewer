@@ -4641,8 +4641,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modalReference: {fileID: 1999675307}
-  modal_message: 
-  modal_title: 
+  modal_message: login failed!
+  modal_title: login failed!
 --- !u!114 &1999675310
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -29,7 +29,6 @@ using System.Reflection;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
-using UnityEngine;
 
 [assembly: XmlConfigurator(Watch = true)]
 
@@ -118,7 +117,6 @@ namespace OpenMetaverse
         /// <param name="exception">Exception that was raised</param>
         public static void Log(object message, Helpers.LogLevel level, GridClient client, Exception exception)
         {
-            Debug.Log(message);
 
             if (client != null && client.Settings.LOG_NAMES)
                 message = $"<{client.Self.Name}>: {message}";
