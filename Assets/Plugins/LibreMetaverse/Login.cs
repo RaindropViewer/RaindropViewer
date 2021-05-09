@@ -1619,6 +1619,8 @@ namespace OpenMetaverse
                 LoginErrorKey = "no connection";
                 UpdateLoginStatus(LoginStatus.Failed, error.Message);
             }
+
+
         }
 
         /// <summary>

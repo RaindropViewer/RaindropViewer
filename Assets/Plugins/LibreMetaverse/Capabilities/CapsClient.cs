@@ -113,14 +113,14 @@ namespace OpenMetaverse.Http
             if (postData == null)
             {
                 // GET
-                //Logger.Log.Debug("[CapsClient] GET " + _Address);
+                Logger.DebugLog("[CapsClient] GET " + _Address);
                 _Request = CapsBase.DownloadStringAsync(_Address, _ClientCert, millisecondsTimeout, DownloadProgressHandler,
                     RequestCompletedHandler);
             }
             else
             {
                 // POST
-                //Logger.Log.Debug("[CapsClient] POST (" + postData.Length + " bytes) " + _Address);
+                Logger.DebugLog("[CapsClient] POST (" + postData.Length + " bytes) " + _Address);
                 _Request = CapsBase.UploadDataAsync(_Address, _ClientCert, contentType, postData, millisecondsTimeout, null,
                     DownloadProgressHandler, RequestCompletedHandler);
             }
@@ -171,8 +171,11 @@ namespace OpenMetaverse.Http
 
             if (responseData != null)
             {
+                Logger.DebugLog("RequestCompletedHandler" + ":" +" responseData is not null.");
                 try { result = OSDParser.Deserialize(responseData); }
-                catch (Exception ex) { error = ex; }
+                catch (Exception ex) {
+                    Logger.Log("RequestCompletedHandler" + ":" + " responseData is not null but ran an exception!.",Helpers.LogLevel.Error); 
+                    error = ex; }
             }
 
             FireCompleteCallback(result, error);
@@ -185,11 +188,11 @@ namespace OpenMetaverse.Http
             {
                 try
                 {
-                    callback(this, result, error);
+                    callback(this, result, error); //exception is "notimplementedexception"
                 }
                 catch (Exception ex)
                 {
-                    Logger.DebugLog($"CapsBase.GetResponse() {_CapName} : {ex.Message}");
+                    Logger.DebugLog($"CapsBase.GetResponse() {_CapName} : {ex.Message} : {ex.ToString()}"); //here the log is coming from!
                     Logger.Log(ex.Message, Helpers.LogLevel.Error, ex);
                 }
             }

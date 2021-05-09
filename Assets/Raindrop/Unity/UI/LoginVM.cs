@@ -1,4 +1,5 @@
 using OpenMetaverse;
+using Raindrop;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,10 @@ using UnityWeld.Binding;
 [Binding]
 public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 {
+    public Global globalRef;
+
+    private RaindropInstance instance;
+    private RaindropNetcom netcom { get { return instance.Netcom; } }
 
     #region state
 
@@ -116,9 +121,25 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
     void Start()
     {
         initialise();
-        Global.MainRaindropInstance.LoginCompleted += cb_LoginCompleted;
-        Global.MainRaindropInstance.LoginFailed += cb_LoginFailed;
 
+
+    }
+
+
+    private void AddNetcomEvents()
+    {
+        netcom.ClientLoggingIn += new EventHandler<OverrideEventArgs>(netcom_ClientLoggingIn);
+        netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+        netcom.ClientLoggingOut += new EventHandler<OverrideEventArgs>(netcom_ClientLoggingOut);
+        netcom.ClientLoggedOut += new EventHandler(netcom_ClientLoggedOut);
+    }
+
+    private void RemoveNetcomEvents()
+    {
+        netcom.ClientLoggingIn -= new EventHandler<OverrideEventArgs>(netcom_ClientLoggingIn);
+        netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+        netcom.ClientLoggingOut -= new EventHandler<OverrideEventArgs>(netcom_ClientLoggingOut);
+        netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
     }
 
     private void cb_LoginFailed()
@@ -174,7 +195,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
             Debug.LogError("loggin button but username and password are not defined!");
             return;
         }
-        Global.MainRaindropInstance.connectTo(Username,Password);
+        globalRef.MainRaindropInstance.connectTo(Username,Password);
         
     }
     
@@ -184,7 +205,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
         Debug.Log("logout btn");
 
         // Logout of simulator
-        Global.MainRaindropInstance.Client.Network.Logout();
+        globalRef.MainRaindropInstance.Client.Network.Logout();
     }
 
     #endregion

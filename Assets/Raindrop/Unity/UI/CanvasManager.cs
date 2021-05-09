@@ -11,6 +11,8 @@ public class CanvasManager : Singleton<CanvasManager>
     //CanvasIdentifier lastActiveCanvas;
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
 
+    public Global Globalref;
+
 
     protected override void Awake()
     {
@@ -20,7 +22,7 @@ public class CanvasManager : Singleton<CanvasManager>
         pushCanvas(CanvasType.Login);
 
         //canvas manager (attached to the UI GO) should register with the globals. so that the globals can acess them
-        Global.RaindropVM.registerWithRaindropClient(this);
+        //Globalref.RaindropVM.registerWithRaindropClient(this);
 
     }
     public void pushCanvas(CanvasType _type)
@@ -52,10 +54,15 @@ public class CanvasManager : Singleton<CanvasManager>
         var lastActiveCanvas = activeCanvasStack.Peek();
         if (lastActiveCanvas != null)
         {
-            lastActiveCanvas.gameObject.SetActive(false);
+            lastActiveCanvas.gameObject.SetActive(false); //this lince causes error, as the function was called from the login thread!
             activeCanvasStack.Pop();
         }
 
 
+    }
+
+    internal void pushModal()
+    {
+        throw new NotImplementedException();
     }
 }
