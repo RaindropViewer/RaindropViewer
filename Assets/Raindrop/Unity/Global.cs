@@ -14,7 +14,7 @@ public class Global : MonoBehaviour
     //this static-new is like a globally accessible instance without a singleton! :)
     public RaindropInstance MainRaindropInstance;
     //this one manages the viewmodels and the stacking of UI modals.
-    public RaindropViewModel RaindropVM;
+    //public MonoViewModel RaindropVM;
 
 
     public string app_data_Path { get; private set; }
@@ -35,7 +35,7 @@ public class Global : MonoBehaviour
         MainRaindropInstance = RaindropInstance.GlobalInstance; 
         //RaindropInstance.GlobalInstance.setAppDataDir(app_data_Path);
 
-        RaindropVM = new RaindropViewModel(MainRaindropInstance);
+        //RaindropVM = new MonoViewModel(MainRaindropInstance);
     }
 
 }

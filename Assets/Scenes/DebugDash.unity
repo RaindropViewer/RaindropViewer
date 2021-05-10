@@ -1035,9 +1035,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09b7e9011827e984fb71ed88b07d1f0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modalReference: {fileID: 432150339}
-  modal_message: 
-  modal_title: 
 --- !u!114 &432150342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1128,7 +1125,6 @@ GameObject:
   - component: {fileID: 512934471}
   - component: {fileID: 512934470}
   - component: {fileID: 512934469}
-  - component: {fileID: 512934472}
   m_Layer: 5
   m_Name: LoginBtn
   m_TagString: Untagged
@@ -1238,20 +1234,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 512934467}
   m_CullTransparentMesh: 1
---- !u!114 &512934472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 512934467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1360956885, guid: 46db69d45cc2c8f4cbecbd38f79f45ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewModelMethodName: LoginVM.OnLoginBtnClick
-  viewEventName: UnityEngine.UI.Button.onClick
 --- !u!1 &601590702
 GameObject:
   m_ObjectHideFlags: 0
@@ -1264,7 +1246,6 @@ GameObject:
   - component: {fileID: 601590706}
   - component: {fileID: 601590705}
   - component: {fileID: 601590704}
-  - component: {fileID: 601590707}
   m_Layer: 5
   m_Name: LogoutBtn
   m_TagString: Untagged
@@ -1374,20 +1355,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 601590702}
   m_CullTransparentMesh: 1
---- !u!114 &601590707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 601590702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1360956885, guid: 46db69d45cc2c8f4cbecbd38f79f45ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewModelMethodName: LoginVM.OnLogoutBtnClick
-  viewEventName: UnityEngine.UI.Button.onClick
 --- !u!1 &632800669
 GameObject:
   m_ObjectHideFlags: 0
@@ -1400,7 +1367,6 @@ GameObject:
   - component: {fileID: 632800673}
   - component: {fileID: 632800672}
   - component: {fileID: 632800671}
-  - component: {fileID: 632800674}
   m_Layer: 5
   m_Name: PassTextField
   m_TagString: Untagged
@@ -1564,28 +1530,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 632800669}
   m_CullTransparentMesh: 1
---- !u!114 &632800674
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 632800669}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1957390036, guid: 46db69d45cc2c8f4cbecbd38f79f45ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewModelPropertyName: LoginVM.Password
-  viewEventName: TMPro.TMP_InputField.onValueChanged
-  viewPropertyName: TMPro.TMP_InputField.text
-  viewAdapterTypeName: 
-  viewAdapterOptions: {fileID: 0}
-  viewModelAdapterTypeName: 
-  viewModelAdapterOptions: {fileID: 0}
-  exceptionPropertyName: 
-  exceptionAdapterTypeName: 
-  exceptionAdapterOptions: {fileID: 0}
 --- !u!1 &696494505
 GameObject:
   m_ObjectHideFlags: 0
@@ -2438,10 +2382,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 904771127}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5759aa2a69d06bf42bc000d03390227e, type: 3}
+  m_Script: {fileID: 11500000, guid: 97129a199e3f2a74ba6e891d4b1f24f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Globalref: {fileID: 0}
 --- !u!1 &936677284
 GameObject:
   m_ObjectHideFlags: 0
@@ -2737,7 +2680,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6e0c28d5fb230f4e90475005bc6511c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvasType: 1
 --- !u!114 &1090573974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2750,7 +2692,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2eeaa71c61350f46902f312854272c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalRef: {fileID: 0}
+  LoginButton: {fileID: 0}
+  LogoutButton: {fileID: 0}
+  usernameField: {fileID: 0}
+  passwordField: {fileID: 0}
 --- !u!114 &1090573975
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4262,7 +4207,6 @@ GameObject:
   - component: {fileID: 1738246290}
   - component: {fileID: 1738246289}
   - component: {fileID: 1738246288}
-  - component: {fileID: 1738246291}
   m_Layer: 5
   m_Name: UserTextField
   m_TagString: Untagged
@@ -4426,28 +4370,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1738246286}
   m_CullTransparentMesh: 1
---- !u!114 &1738246291
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1738246286}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1957390036, guid: 46db69d45cc2c8f4cbecbd38f79f45ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewModelPropertyName: LoginVM.Username
-  viewEventName: TMPro.TMP_InputField.onValueChanged
-  viewPropertyName: TMPro.TMP_InputField.text
-  viewAdapterTypeName: 
-  viewAdapterOptions: {fileID: 0}
-  viewModelAdapterTypeName: 
-  viewModelAdapterOptions: {fileID: 0}
-  exceptionPropertyName: 
-  exceptionAdapterTypeName: 
-  exceptionAdapterOptions: {fileID: 0}
 --- !u!1 &1747592007
 GameObject:
   m_ObjectHideFlags: 0
@@ -4963,7 +4885,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55c6aede8bf73ca48b10f0d9e2e771f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CanvasManagerRef: {fileID: 904771132}
 --- !u!1 &1889936407
 GameObject:
   m_ObjectHideFlags: 0
@@ -5134,7 +5055,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2eeaa71c61350f46902f312854272c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalRef: {fileID: 0}
+  LoginButton: {fileID: 512934469}
+  LogoutButton: {fileID: 601590704}
+  usernameField: {fileID: 0}
+  passwordField: {fileID: 0}
 --- !u!114 &1910810522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5144,7 +5068,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1910810517}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6e0c28d5fb230f4e90475005bc6511c, type: 3}
+  m_Script: {fileID: 11500000, guid: bde4e90fdce089044b44101b61ebfaac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   canvasType: 0
@@ -5202,9 +5126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09b7e9011827e984fb71ed88b07d1f0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modalReference: {fileID: 1999675307}
-  modal_message: login failed!
-  modal_title: login failed!
 --- !u!114 &1999675310
 MonoBehaviour:
   m_ObjectHideFlags: 0

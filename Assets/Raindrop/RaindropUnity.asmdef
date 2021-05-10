@@ -2,8 +2,7 @@
     "name": "RaindropUnity",
     "rootNamespace": "",
     "references": [
-        "GUID:b6ef318018e211441b43da945a1caf13",
-        "GUID:1364d97af688c264f94c622d729b2059"
+        "GUID:b6ef318018e211441b43da945a1caf13"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

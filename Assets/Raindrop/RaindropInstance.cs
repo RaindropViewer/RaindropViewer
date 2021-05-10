@@ -64,7 +64,7 @@ namespace Raindrop
         private string app_data_dir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
-        private mainUI mainCanvas;
+        private mainUIModel mainCanvas;
 
         // Singleton, there can be only one instance
         private static RaindropInstance globalInstance = null;
@@ -319,7 +319,7 @@ namespace Raindrop
             names = new NameManager(this);
             COF = new CurrentOutfitFolder(this);
 
-            mainCanvas = new mainUI(this);
+            mainCanvas = new mainUIModel(this);
             //mainCanvas.InitializeControls();
 
             //mainCanvas.Load += new EventHandler(mainForm_Load);
@@ -674,7 +674,7 @@ namespace Raindrop
             get { return state; }
         }
 
-        public mainUI MainCanvas
+        public mainUIModel MainCanvas
         {
             get { return mainCanvas; }
         }
