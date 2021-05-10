@@ -14,7 +14,7 @@ namespace Raindrop.Tests
         [Test()]
         public void LoginTest()
         {
-            RaindropClient MainRaindropInstance;
+            //RaindropClient MainRaindropInstance;
 
 
         }

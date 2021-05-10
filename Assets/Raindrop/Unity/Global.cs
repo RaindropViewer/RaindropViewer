@@ -9,19 +9,18 @@ using Raindrop;
 public class Global : MonoBehaviour
 {
     //public GameObject CanvasManagerObject;
-    public CanvasManager CanvasManagerRef;
+    //public CanvasManager CanvasManagerRef;
 
     //this static-new is like a globally accessible instance without a singleton! :)
     public RaindropInstance MainRaindropInstance;
     //this one manages the viewmodels and the stacking of UI modals.
-    public RaindropViewManager RaindropVM;
+    public RaindropViewModel RaindropVM;
 
 
     public string app_data_Path { get; private set; }
 
     private void Awake()
     {
-        CanvasManagerRef= FindObjectOfType<CanvasManager>();
 
         //initialise your 'statics'
 
@@ -36,7 +35,7 @@ public class Global : MonoBehaviour
         MainRaindropInstance = RaindropInstance.GlobalInstance; 
         //RaindropInstance.GlobalInstance.setAppDataDir(app_data_Path);
 
-        RaindropVM = new RaindropViewManager(MainRaindropInstance);
+        RaindropVM = new RaindropViewModel(MainRaindropInstance);
     }
 
 }

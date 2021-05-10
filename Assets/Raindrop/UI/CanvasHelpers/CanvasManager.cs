@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+//helper class that helps to pop, push, stack canvases.
 public class CanvasManager : Singleton<CanvasManager>
 {
     List<CanvasIdentifier> canvasControllerList;

@@ -15,9 +15,9 @@ namespace Raindrop
         Game
     }
 
-    public class RaindropViewManager
+    public class RaindropViewModel
     {
-
+        public RaindropViewControl rvc;
 
 
 
@@ -25,8 +25,9 @@ namespace Raindrop
         public CanvasManager canvasManager;
 
         //manages all child Viewmodels
-        public RaindropViewManager(RaindropInstance instance)
+        public RaindropViewModel(RaindropInstance instance)
         {
+
             //Debug.Log("VM manager setup ok");
 
             //subscribe all events from raindropclient

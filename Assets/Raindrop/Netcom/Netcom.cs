@@ -164,14 +164,20 @@ namespace Raindrop.Netcom
             {
                 loggedIn = true;
                 client.Self.RequestBalance();
-                if (CanSyncInvoke)
-                {
-                    netcomSync.BeginInvoke(new ClientConnectedRaise(OnClientConnected), new object[] { EventArgs.Empty });
-                }
-                else
-                {
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() => {
+                    Logger.DebugLog("netcom callback: Network_LoginProgress.Success");
                     OnClientConnected(EventArgs.Empty);
-                }
+                });
+
+                //if (CanSyncInvoke)
+                //{
+                //    netcomSync.BeginInvoke(new ClientConnectedRaise(OnClientConnected), new object[] { EventArgs.Empty });
+                //}
+                //else
+                //{
+                //    OnClientConnected(EventArgs.Empty);
+                //}
             }
 
             if (e.Status == LoginStatus.Failed)
@@ -181,20 +187,31 @@ namespace Raindrop.Netcom
 
             LoginProgressEventArgs ea = new LoginProgressEventArgs(e.Status, e.Message, string.Empty);
 
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnClientLoginRaise(OnClientLoginStatus), new object[] { e });
-            else
+            UnityMainThreadDispatcher.Instance().Enqueue(() => {
+                Logger.DebugLog("netcom callback: Network_LoginProgress");
                 OnClientLoginStatus(e);
+            });
+
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnClientLoginRaise(OnClientLoginStatus), new object[] { e });
+            //else
+            //    OnClientLoginStatus(e);
         }
 
         void Network_LoggedOut(object sender, LoggedOutEventArgs e)
         {
             loggedIn = false;
 
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnClientLogoutRaise(OnClientLoggedOut), new object[] { EventArgs.Empty });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnClientLogoutRaise(OnClientLoggedOut), new object[] { EventArgs.Empty });
+            //else
+            //    OnClientLoggedOut(EventArgs.Empty);
+
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() => {
+                Logger.DebugLog("netcom callback: Network_LoggedOut");
                 OnClientLoggedOut(EventArgs.Empty);
+            });
         }
 
         void Self_TeleportProgress(object sender, TeleportEventArgs e)
@@ -202,18 +219,30 @@ namespace Raindrop.Netcom
             if (e.Status == TeleportStatus.Finished || e.Status == TeleportStatus.Failed)
                 teleporting = false;
 
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnTeleportStatusRaise(OnTeleportStatusChanged), new object[] { e });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnTeleportStatusRaise(OnTeleportStatusChanged), new object[] { e });
+            //else
+            //    OnTeleportStatusChanged(e);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                Logger.DebugLog("netcom callback: Self_TeleportProgress");
                 OnTeleportStatusChanged(e);
+            });
         }
 
         private void Self_ChatFromSimulator(object sender, ChatEventArgs e)
         {
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnChatRaise(OnChatReceived), new object[] { e });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnChatRaise(OnChatReceived), new object[] { e });
+            //else
+            //    OnChatReceived(e);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                Logger.DebugLog("netcom callback: Self_ChatFromSimulator");
                 OnChatReceived(e);
+            });
         }
 
         void Network_Disconnected(object sender, DisconnectedEventArgs e)
@@ -221,26 +250,45 @@ namespace Raindrop.Netcom
             loggedIn = false;
             instance.MarkEndExecution();
 
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnClientDisconnectRaise(OnClientDisconnected), new object[] { e });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnClientDisconnectRaise(OnClientDisconnected), new object[] { e });
+            //else
+            //    OnClientDisconnected(e);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                Logger.DebugLog("netcom callback: Network_Disconnected");
                 OnClientDisconnected(e);
+               
+            });
         }
 
         void Self_MoneyBalance(object sender, BalanceEventArgs e)
         {
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnMoneyBalanceRaise(OnMoneyBalanceUpdated), new object[] { e });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnMoneyBalanceRaise(OnMoneyBalanceUpdated), new object[] { e });
+            //else
+            //    OnMoneyBalanceUpdated(e);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                Logger.DebugLog("netcom callback: Self_MoneyBalance");
                 OnMoneyBalanceUpdated(e);
+            });
         }
 
         void Self_AlertMessage(object sender, AlertMessageEventArgs e)
         {
-            if (CanSyncInvoke)
-                netcomSync.BeginInvoke(new OnAlertMessageRaise(OnAlertMessageReceived), new object[] { e });
-            else
+            //if (CanSyncInvoke)
+            //    netcomSync.BeginInvoke(new OnAlertMessageRaise(OnAlertMessageReceived), new object[] { e });
+            //else
+            //    OnAlertMessageReceived(e);
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                Logger.DebugLog("netcom callback: Self_AlertMessage");
                 OnAlertMessageReceived(e);
+            });
         }
 
         public void Login()
