@@ -62,8 +62,4 @@ public class CanvasManager : Singleton<CanvasManager>
 
     }
 
-    internal void pushModal()
-    {
-        throw new NotImplementedException();
-    }
 }

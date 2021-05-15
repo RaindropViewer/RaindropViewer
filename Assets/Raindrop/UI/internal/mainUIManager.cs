@@ -8,19 +8,24 @@ using OpenMetaverse;
 using OpenMetaverse.StructuredData;
 using OpenMetaverse.Assets;
 using Raindrop;
-
+using Assets.Raindrop.UI.unity;
 
 namespace Raindrop
 {
-    public class mainUIModel
+    public class mainUIManager
     {
+        //mainUImanager has:
+        //   stackmanager - stores and manages the pops, push of views onto the ui stack.
+        //   loginPresenter - the various presenters for each view.
+
         private RaindropInstance instance;
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
+        private CanvasManager cm { get { return CanvasManager.GetInstance(); } }
         //private RaindropViewControl rdControl;
 
-        public mainUIModel(RaindropInstance raindropInstance)
+        public mainUIManager(RaindropInstance raindropInstance)
         {
             this.instance = raindropInstance;
 
@@ -33,6 +38,10 @@ namespace Raindrop
             RegisterClientEvents(client);
         }
 
+        public Object getCurrentForegroundVM()
+        {
+            throw new NotImplementedException();
+        }
 
         private void RegisterClientEvents(GridClient client)
         {
@@ -58,6 +67,7 @@ namespace Raindrop
         {
             if (e.Status == LoginStatus.Failed)
             {
+                ModalManager.showModal("Login failed.", e.Message);
                 //if (InAutoReconnect)
                 //{
                 //    if (instance.GlobalSettings["auto_reconnect"].AsBoolean() && e.FailReason != "tos")

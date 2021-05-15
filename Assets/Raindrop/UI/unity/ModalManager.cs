@@ -8,5 +8,9 @@ namespace Assets.Raindrop.UI.unity
 {
     class ModalManager
     {
+        internal static void showModal(string v, string message)
+        {
+
+        }
     }
 }

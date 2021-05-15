@@ -7,14 +7,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using System;
-using UnityWeld.Binding;
 using Settings = Raindrop.Settings;
 using UnityEngine.UI;
+using UniRx;
+using TMPro;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
 
-public class LoginVM : MonoBehaviour, INotifyPropertyChanged
+public class LoginVM : MonoBehaviour
 {
 
     private RaindropInstance instance;
@@ -22,19 +23,21 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
     #region references to UI elements
     public Button LoginButton;
-    public Button LogoutButton;
-    public InputField usernameField;
-    public InputField passwordField;
+    public TMP_InputField usernameField;
+    public TMP_InputField passwordField;
+    public Dropdown gridSelectionDropdown;
+    public Toggle TOSCheckbox;
+    public Toggle RememberCheckbox;
+
+    public GameObject LoginStatusModal;
     #endregion
 
-    #region state
+    #region internal representations 
 
     private string username;
     private string password;
     private readonly string INIT_USERNAME = "username";
     private readonly string INIT_PASSWORD = "password";
-
-    private string login_msg;
 
     
     public string Username
@@ -45,6 +48,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
         }
         set
         {
+            Debug.Log("username changed!");
             if (username == value)
             {
                 return; // No change.
@@ -52,7 +56,6 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
             username = value;
 
-            OnPropertyChanged(nameof(Username));
         }
     }
 
@@ -71,40 +74,26 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
             password = value;
 
-            OnPropertyChanged(nameof(Password));
         }
     }
 
-    public string Login_msg
+    public ReactiveProperty<string> Login_msg { get; private set; }
+    
+    private string[] gridsList = new string[]
     {
-        get
-        {
-            return login_msg;
-        }
-        set
-        {
-            if (login_msg == value)
-            {
-                return; // No change.
-            }
-
-            login_msg = value;
-
-            OnPropertyChanged(nameof(Login_msg));
-        }
-    }
-
-    private string[] options = new string[]
-    {
-        "Options-TODO",
+        "Grid 1",
         "Option-B",
         "Option-C",
         "Option-F"
     };
 
-    private string selectedItem = "Options-TODO";
+    private string selectedItem = "Grid 1";
+
     private object lblLoginStatus;
+    private string login_msg;
+
     private bool btnLoginEnabled;
+    
     private bool cbTOStrue = true;
     private bool cbRememberBool;
 
@@ -126,32 +115,35 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
             selectedItem = value;
 
-            OnPropertyChanged(nameof(SelectedItem));
         }
     }
 
 
-    public string[] Options
-    {
-        get
-        {
-            return options;
-        }
-    }
+    //public string[] Options
+    //{
+    //    get
+    //    {
+    //        return options;
+    //    }
+    //}
 
 
 
 
     #region behavior
-    /// <summary>
-    /// Event to raise when a property's value has changed.
-    /// </summary>
-    public event PropertyChangedEventHandler PropertyChanged;
 
     // Use this for initialization
     void Start()
     {
-        initialise();
+        initialiseFields();
+
+        LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick()); //when clicked, runs this method.
+        usernameField.onValueChanged.AsObservable().Subscribe(_ => Username = _); //change username property.
+        passwordField.onValueChanged.AsObservable().Subscribe(_ => Password = _); //change username property.
+
+        RememberCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbRememberBool = _); //when toggle checkbox, set boolean to the same value as the toggle-state
+        TOSCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbTOStrue= _); //when toggle checkbox, set boolean to the same value as the toggle-state
+        
 
 
     }
@@ -179,27 +171,27 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
         switch (e.Status)
         {
             case LoginStatus.ConnectingToLogin:
-                Login_msg = ("Connecting to login server...");
+                Login_msg.GetType().GetProperty("Value").SetValue(Login_msg, "Connecting to login server...");
                 //lblLoginStatus.ForeColor = Color.Black;
                 break;
 
             case LoginStatus.ConnectingToSim:
-                Login_msg = ("Connecting to region...");
+                Login_msg.Value = ("Connecting to region...");
                 //lblLoginStatus.ForeColor = Color.Black;
                 break;
 
             case LoginStatus.Redirecting:
-                Login_msg = "Redirecting...";
+                Login_msg.Value = "Redirecting...";
                 //lblLoginStatus.ForeColor = Color.Black;
                 break;
 
             case LoginStatus.ReadingResponse:
-                Login_msg = "Reading response...";
+                Login_msg.Value = "Reading response...";
                 //lblLoginStatus.ForeColor = Color.Black;
                 break;
 
             case LoginStatus.Success:
-                Login_msg = "Logged in as " + netcom.LoginOptions.FullName;
+                Login_msg.Value = "Logged in as " + netcom.LoginOptions.FullName;
                 //lblLoginStatus.ForeColor = Color.FromArgb(0, 128, 128, 255);
                 //proLogin.Visible = false;
 
@@ -212,14 +204,14 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
                 //lblLoginStatus.ForeColor = Color.Red;
                 if (e.FailReason == "tos")
                 {
-                    Login_msg = "Must agree to Terms of Service before logging in";
+                    Login_msg.Value = "Must agree to Terms of Service before logging in";
                     //pnlTos.Visible = true;
                     //txtTOS.Text = e.Message.Replace("\n", "\r\n");
                     btnLoginEnabled = false;
                 }
                 else
                 {
-                    Login_msg= e.Message;
+                    Login_msg.Value= e.Message;
                     btnLoginEnabled = true;
                 }
                 //proLogin.Visible = false;
@@ -231,7 +223,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
     public void netcom_ClientLoggedOut(object sender, EventArgs e)
     {
-        Login_msg = "logged out.";
+        Login_msg.Value = "logged out.";
         //pnlLoginPrompt.Visible = true;
         //pnlLoggingIn.Visible = false;
 
@@ -243,7 +235,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
     {
         btnLoginEnabled = false;
 
-        Login_msg = "Logging out...";
+        Login_msg.Value = "Logging out...";
         //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
         //proLogin.Visible = true;
@@ -251,7 +243,7 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
 
     public void netcom_ClientLoggingIn(object sender, OverrideEventArgs e)
     {
-        Login_msg = "Logging in...";
+        Login_msg.Value = "Logging in...";
         //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
         //proLogin.Visible = true;
@@ -274,37 +266,18 @@ public class LoginVM : MonoBehaviour, INotifyPropertyChanged
         Debug.Log("MODAL:\n" + v + "\n" +message);
     }
 
-    //public void cb_LoginCompleted()
-    //{
-    //    string message = "meow";
-    //    showModal("Login success!", message);
-
-    //}
-
-    //private static void showModalLoginSuccess()
-    //{
-
-
-    //}
-
  
 
-    private void initialise()
+    private void initialiseFields()
     {
         //reset user and pw fields
         username = INIT_USERNAME;
         password = INIT_PASSWORD;
 
-    }
+        //modal 
+        Login_msg = new ReactiveProperty<string>("???");
 
-    private void OnPropertyChanged(string propertyName)
-    {
-        if (PropertyChanged != null)
-        {
-            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
-
     
     public void OnLoginBtnClick()
     {
