@@ -59,12 +59,15 @@ namespace Raindrop
 
         private GridClient client;
         private RaindropNetcom netcom;
+        //private Renderer renderer;
 
         private StateManager state;
         private string app_data_dir;
+        private string streaming_assets_dir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
         private mainUIManager mainCanvas;
+        private RaindropUnitySceneRenderer mainWorldRenderer;
 
         // Singleton, there can be only one instance
         private static RaindropInstance globalInstance = null;
@@ -282,6 +285,7 @@ namespace Raindrop
             globalInstance = this;
 
             app_data_dir = Application.persistentDataPath;
+            streaming_assets_dir = Application.streamingAssetsPath;
 
             //if (!System.Diagnostics.Debugger.IsAttached)
             //{
@@ -314,7 +318,8 @@ namespace Raindrop
 
             //rlv = new RLVManager(this);
             gridManager = new GridManager();
-            gridManager.LoadGrids(app_data_dir);
+            Debug.Log(streaming_assets_dir);
+            gridManager.LoadGrids(streaming_assets_dir);
 
             names = new NameManager(this);
             COF = new CurrentOutfitFolder(this);
@@ -651,6 +656,7 @@ namespace Raindrop
             }
             catch (Exception)
             {
+                Logger.DebugLog("unable to create userDir: " + userDir);
                 userDir = System.Environment.CurrentDirectory;
             };
 
@@ -678,6 +684,8 @@ namespace Raindrop
         {
             get { return mainCanvas; }
         }
+
+        public OpenMetaverse.Vector3 cameraLoc { get; internal set; }
 
         //public TabsConsole TabConsole
         //{

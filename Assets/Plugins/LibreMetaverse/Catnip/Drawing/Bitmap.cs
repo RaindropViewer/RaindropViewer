@@ -20,6 +20,12 @@ namespace Catnip.Drawing
             Height = height;
         }
 
+        public Bitmap(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+
         public override int Width { get; internal set; }
         public override int Height { get; internal set; }
         public Catnip.Drawing.Imaging.PixelFormat PixelFormat { get; internal set; }
@@ -29,12 +35,18 @@ namespace Catnip.Drawing
             throw new NotImplementedException();
         }
 
-        internal void UnlockBits(BitmapData bd)
+
+        public void Dispose()
         {
             throw new NotImplementedException();
         }
 
-        internal void Dispose()
+        public void UnlockBits(BitmapData outputData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RotateFlip(object rotate270FlipNone)
         {
             throw new NotImplementedException();
         }

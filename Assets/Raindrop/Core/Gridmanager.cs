@@ -109,7 +109,7 @@ namespace Raindrop
 
             try
             {
-                string sysGridsFile = Path.Combine(Path.GetDirectoryName(datadir), "grids.xml");
+                string sysGridsFile = Path.Combine(datadir, "grids.xml");
                 OSDArray sysGrids = (OSDArray)OSDParser.DeserializeLLSDXml(File.ReadAllText(sysGridsFile));
                 for (int i = 0; i < sysGrids.Count; i++)
                 {

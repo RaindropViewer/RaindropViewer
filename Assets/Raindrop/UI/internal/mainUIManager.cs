@@ -8,22 +8,22 @@ using OpenMetaverse;
 using OpenMetaverse.StructuredData;
 using OpenMetaverse.Assets;
 using Raindrop;
-using Assets.Raindrop.UI.unity;
+using UnityEngine;
 
 namespace Raindrop
 {
     public class mainUIManager
     {
-        //mainUImanager has:
-        //   stackmanager - stores and manages the pops, push of views onto the ui stack.
-        //   loginPresenter - the various presenters for each view.
+        //mainUImanager has dependencies:
+        //   CanvasManager - stores and manages the pops, push of views onto the ui stack.
+        //   ModalManager - pops and shows modals.
 
         private RaindropInstance instance;
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
-        private CanvasManager cm { get { return CanvasManager.GetInstance(); } }
-        //private RaindropViewControl rdControl;
+        public CanvasManager canvasManager { get { return CanvasManager.GetInstance(); } }
+        public ModalManager modalManager { get { return ModalManager.GetInstance(); } }
 
         public mainUIManager(RaindropInstance raindropInstance)
         {
@@ -36,11 +36,21 @@ namespace Raindrop
             instance.Names.NameUpdated += new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
 
             RegisterClientEvents(client);
+
+            initialiseUI();
+
         }
 
-        public Object getCurrentForegroundVM()
+        private void initialiseUI()
         {
-            throw new NotImplementedException();
+            canvasManager.pushCanvas(CanvasType.Login);
+            modalManager.showSimpleModalBoxWithActionBtn("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ", "Accept");
+
+        }
+
+        public GameObject getCurrentForegroundPresenter()
+        {
+            return canvasManager.getForegroundCanvas();
         }
 
         private void RegisterClientEvents(GridClient client)
@@ -67,7 +77,7 @@ namespace Raindrop
         {
             if (e.Status == LoginStatus.Failed)
             {
-                ModalManager.showModal("Login failed.", e.Message);
+                modalManager.showModal("Login failed.", e.Message);
                 //if (InAutoReconnect)
                 //{
                 //    if (instance.GlobalSettings["auto_reconnect"].AsBoolean() && e.FailReason != "tos")
@@ -78,6 +88,7 @@ namespace Raindrop
             }
             else if (e.Status == LoginStatus.Success)
             {
+                modalManager.showModal("Login success!", e.Message);
                 //InAutoReconnect = false;
                 //reconnectToolStripMenuItem.Enabled = false;
                 //loginToolStripMenuItem.Enabled = false;
@@ -94,6 +105,8 @@ namespace Raindrop
 
         private void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
+            modalManager.showSimpleModalBoxWithActionBtn("Logged out", "you have/were logged out", "ok");
+
             //tsb3D.Enabled = tbtnVoice.Enabled = disconnectToolStripMenuItem.Enabled =
             //tbtnGroups.Enabled = tbnObjects.Enabled = tbtnWorld.Enabled = tbnTools.Enabled = tmnuImport.Enabled =
             //    tbtnFriends.Enabled = tbtnInventory.Enabled = tbtnSearch.Enabled = tbtnMap.Enabled = false;
@@ -111,10 +124,14 @@ namespace Raindrop
 
         private void netcom_ClientDisconnected(object sender, DisconnectedEventArgs e)
         {
+            modalManager.showSimpleModalBoxWithActionBtn("Client disconnected", e.Message+ " "+e.Reason.ToString() , "ok");
+
             firstMoneyNotification = true;
 
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
+
+            canvasManager.reinitToLoginScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{

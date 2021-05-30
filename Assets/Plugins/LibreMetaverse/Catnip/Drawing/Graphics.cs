@@ -16,12 +16,12 @@ namespace Catnip.Drawing
             throw new NotImplementedException();
         }
 
-        internal static Graphics FromImage(Bitmap resized)
+        public static Graphics FromImage(Bitmap resized)
         {
             throw new NotImplementedException();
         }
 
-        internal void DrawImage(Bitmap bitmap, int v1, int v2, int width, int height)
+        public void DrawImage(Bitmap bitmap, int v1, int v2, int width, int height)
         {
             throw new NotImplementedException();
         }

@@ -35,10 +35,15 @@ using System.IO;
 using System.Xml;
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
-using System.Drawing;
+//using System.Drawing;
 //using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 using System.ComponentModel;
 using SixLabors.ImageSharp;
+using Color = SixLabors.ImageSharp.Color;
+using Formatting = System.Xml.Formatting;
+//using Font = Catnip.Drawing.Font;
+using Logger = OpenMetaverse.Logger;
 
 namespace Raindrop
 {
@@ -54,7 +59,7 @@ namespace Raindrop
         //{
         //    {"Normal", new FontSetting {
         //        Name = "Normal",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
@@ -84,9 +89,9 @@ namespace Raindrop
         //    }},
         //    {"StartupTitle", new FontSetting {
         //        Name = "StartupTitle",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
-        //        Font = new Font(FontSetting.DefaultFont, FontStyle.Bold),
+        //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"Alert", new FontSetting {
         //        Name = "Alert",
@@ -108,137 +113,137 @@ namespace Raindrop
         //    }},
         //    {"Timestamp", new FontSetting {
         //        Name = "Timestamp",
-        //        ForeColor = SystemColors.GrayText,
+        //        ForeColor = Color.Gray,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"Name", new FontSetting {
         //        Name = "Name",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"Notification", new FontSetting {
         //        Name = "Notification",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"IncomingIM", new FontSetting {
         //        Name = "IncomingIM",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"OutgoingIM", new FontSetting {
         //        Name = "OutgoingIM",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"Emote", new FontSetting {
         //        Name = "Emote",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //    {"Self", new FontSetting {
         //        Name = "Self",
-        //        ForeColor = SystemColors.ControlText,
+        //        ForeColor = Color.Black,
         //        BackColor = Color.Transparent,
         //        Font = FontSetting.DefaultFont,
         //    }},
         //};
 
-        //public class FontSetting
-        //{
-        //    [ScriptIgnoreAttribute]
-        //    public static readonly Font DefaultFont = new Font(FontFamily.GenericSansSerif, 8.0f);
+        public class FontSetting
+        {
+            //[JsonIgnore]
+            //public static readonly Font DefaultFont = new Font(FontFamily.GenericSansSerif, 8.0f);
 
-        //    [ScriptIgnoreAttribute]
-        //    public Font Font;
+            //[JsonIgnore]
+            //public Font Font;
 
-        //    [ScriptIgnoreAttribute]
-        //    public Color ForeColor;
+            [JsonIgnore]
+            public Color ForeColor;
 
-        //    [ScriptIgnoreAttribute]
-        //    public Color BackColor;
+            [JsonIgnore]
+            public Color BackColor;
 
 
-        //    public String Name;
+            public String Name;
 
-        //    public string ForeColorString
-        //    {
-        //        get
-        //        {
-        //            if (ForeColor != null)
-        //            {
-        //                return ColorTranslator.ToHtml(ForeColor);
-        //            }
-        //            else
-        //            {
-        //                return ColorTranslator.ToHtml(SystemColors.ControlText);
-        //            }
-        //        }
-        //        set
-        //        {
-        //            ForeColor = ColorTranslator.FromHtml(value);
-        //        }
-        //    }
+            //public string ForeColorString
+            //{
+            //    get
+            //    {
+            //        if (ForeColor != null)
+            //        {
+            //            return ColorTranslator.ToHtml(ForeColor);
+            //        }
+            //        else
+            //        {
+            //            return ColorTranslator.ToHtml(Color.Black);
+            //        }
+            //    }
+            //    set
+            //    {
+            //        ForeColor = ColorTranslator.FromHtml(value);
+            //    }
+            //}
 
-        //    public string BackColorString
-        //    {
-        //        get
-        //        {
-        //            if (BackColor != null)
-        //            {
-        //                return ColorTranslator.ToHtml(BackColor);
-        //            }
-        //            else
-        //            {
-        //                return ColorTranslator.ToHtml(SystemColors.ControlText);
-        //            }
-        //        }
-        //        set
-        //        {
-        //            BackColor = ColorTranslator.FromHtml(value);
-        //        }
-        //    }
+            //public string BackColorString
+            //{
+            //    get
+            //    {
+            //        if (BackColor != null)
+            //        {
+            //            return ColorTranslator.ToHtml(BackColor);
+            //        }
+            //        else
+            //        {
+            //            return ColorTranslator.ToHtml(Color.Black);
+            //        }
+            //    }
+            //    set
+            //    {
+            //        BackColor = ColorTranslator.FromHtml(value);
+            //    }
+            //}
 
-        //    public string FontString
-        //    {
-        //        get
-        //        {
-        //            if (this.Font != null)
-        //            {
-        //                TypeConverter converter = TypeDescriptor.GetConverter(typeof(Font));
-        //                return converter.ConvertToString(this.Font);
-        //            }
-        //            else
-        //            {
-        //                return null;
-        //            }
-        //        }
-        //        set
-        //        {
-        //            try
-        //            {
-        //                TypeConverter converter = TypeDescriptor.GetConverter(typeof(Font));
-        //                this.Font = converter.ConvertFromString(value) as Font;
-        //            }
-        //            catch (Exception)
-        //            {
-        //                this.Font = DefaultFont;
-        //            }
+            //public string FontString
+            //{
+            //    get
+            //    {
+            //        if (this.Font != null)
+            //        {
+            //            TypeConverter converter = TypeDescriptor.GetConverter(typeof(Font));
+            //            return converter.ConvertToString(this.Font);
+            //        }
+            //        else
+            //        {
+            //            return null;
+            //        }
+            //    }
+            //    set
+            //    {
+            //        try
+            //        {
+            //            TypeConverter converter = TypeDescriptor.GetConverter(typeof(Font));
+            //            this.Font = converter.ConvertFromString(value) as Font;
+            //        }
+            //        catch (Exception)
+            //        {
+            //            this.Font = DefaultFont;
+            //        }
 
-        //        }
-        //    }
+            //    }
+            //}
 
-        //    public override string ToString()
-        //    {
-        //        return Name;
-        //    }
-        //}
+            public override string ToString()
+            {
+                return Name;
+            }
+        }
 
         public Settings(string fileName)
         {

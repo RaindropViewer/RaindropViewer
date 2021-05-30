@@ -6,25 +6,39 @@ using System.Linq;
 using UnityEngine;
 
 //helper class that helps to pop, push, stack canvases.
+//singleton.
+//on awake, it searches children for all canvases.
 public class CanvasManager : Singleton<CanvasManager>
 {
     List<CanvasIdentifier> canvasControllerList;
     //CanvasIdentifier lastActiveCanvas;
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
 
-    public Global Globalref;
-
-
     protected override void Awake()
     {
         base.Awake();
-        canvasControllerList = GetComponentsInChildren<CanvasIdentifier>().ToList();
+        canvasControllerList = FindObjectsOfType<CanvasIdentifier>().ToList();
+        canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+        Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers." );
+
+     
+
+    }
+
+    public void reinitToLoginScreen()
+    {
         canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
         pushCanvas(CanvasType.Login);
+    }
 
-        //canvas manager (attached to the UI GO) should register with the globals. so that the globals can acess them
-        //Globalref.RaindropVM.registerWithRaindropClient(this);
+    public GameObject getForegroundCanvas()
+    {
+        if (activeCanvasStack.Count == 0)
+        {
+            return null;
+        }
 
+        return activeCanvasStack.Peek().gameObject;
     }
     public void pushCanvas(CanvasType _type)
     {

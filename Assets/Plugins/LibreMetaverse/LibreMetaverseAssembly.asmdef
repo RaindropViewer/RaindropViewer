@@ -1,7 +1,9 @@
 {
     "name": "LibreMetaverseAssembly",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:76f8bd3fe0677274192d7e8f6b160b17"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
