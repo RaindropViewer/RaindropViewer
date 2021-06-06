@@ -45,8 +45,9 @@ namespace Raindrop.Netcom
         private string startLocationCustom = string.Empty;
 
         private Grid grid;
-        private string gridCustomLoginUri = string.Empty;
+        private string gridLoginUri = string.Empty;
         private LastExecStatus lastExecEvent = LastExecStatus.Normal;
+        private bool isSaveCredentials;
 
 
         public LoginOptions()
@@ -118,16 +119,21 @@ namespace Raindrop.Netcom
             set { grid = value; }
         }
 
-        public string GridCustomLoginUri
+        public string GridLoginUri
         {
-            get { return gridCustomLoginUri; }
-            set { gridCustomLoginUri = value; }
+            get { return gridLoginUri; }
+            set { gridLoginUri = value; }
         }
 
         public LastExecStatus LastExecEvent
         {
             get { return lastExecEvent; }
             set { lastExecEvent = value; }
+        }
+
+        public bool IsSaveCredentials { 
+            get => isSaveCredentials; 
+            set => isSaveCredentials = value; 
         }
     }
 }

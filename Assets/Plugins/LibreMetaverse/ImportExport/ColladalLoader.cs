@@ -133,7 +133,7 @@ namespace OpenMetaverse.ImportExport
                         bitmap = LoadTGAClass.LoadTGA(fname);
                         break;
                     default:
-                        bitmap = (Bitmap)Image.FromFile(fname);
+                        bitmap = (Bitmap)Bitmap.FromFile(fname);
                         break;
                 }
 

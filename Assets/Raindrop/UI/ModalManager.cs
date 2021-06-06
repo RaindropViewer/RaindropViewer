@@ -51,6 +51,7 @@ public class ModalManager : Singleton<ModalManager>
 
     }
 
+
     private bool isOnMainThread()
     {
         return mainThread.Equals(System.Threading.Thread.CurrentThread);

@@ -44,6 +44,9 @@ namespace Raindrop
         private bool turningRight = false;
         private bool movingForward = false;
         private bool movingBackward = false;
+        private bool movingLeftward = false;
+        private bool movingRightward = false;
+        //private bool modified = false;
 
         public bool TurningLeft
         {
@@ -53,6 +56,7 @@ namespace Raindrop
             }
             set
             {
+                //modified = true;
                 turningLeft = value;
                 if (value)
                 {
@@ -76,6 +80,7 @@ namespace Raindrop
             }
             set
             {
+                //modified = true;
                 turningRight = value;
                 if (value)
                 {
@@ -99,6 +104,7 @@ namespace Raindrop
             }
             set
             {
+                //modified = true;
                 movingForward = value;
                 if (value)
                 {
@@ -121,6 +127,7 @@ namespace Raindrop
             }
             set
             {
+                //modified = true;
                 movingBackward = value;
                 if (value)
                 {
@@ -130,6 +137,54 @@ namespace Raindrop
                 else
                 {
                     client.Self.Movement.AtNeg = false;
+                    client.Self.Movement.SendUpdate(true);
+
+                }
+            }
+        }
+        
+        public bool MovingLeftward
+        {
+            get
+            {
+                return movingLeftward;
+            }
+            set
+            {
+                //modified = true;
+                movingLeftward = value;
+                if (value)
+                {
+                    client.Self.Movement.LeftPos = true;
+                    client.Self.Movement.SendUpdate(true);
+                }
+                else
+                {
+                    client.Self.Movement.LeftPos = false;
+                    client.Self.Movement.SendUpdate(true);
+
+                }
+            }
+        }
+        
+        public bool MovingRight
+        {
+            get
+            {
+                return movingRightward;
+            }
+            set
+            {
+                //modified = true;
+                movingRightward = value;
+                if (value)
+                {
+                    client.Self.Movement.LeftNeg = true;
+                    client.Self.Movement.SendUpdate(true);
+                }
+                else
+                {
+                    client.Self.Movement.LeftNeg= false;
                     client.Self.Movement.SendUpdate(true);
 
                 }

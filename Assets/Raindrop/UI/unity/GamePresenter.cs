@@ -41,7 +41,6 @@ namespace Raindrop.Presenters
         public TMP_Text locationText;
         public MinimapModule minimap;
 
-        public VariableJoystick variableJoystick;
 
         public UnityEngine.Vector2 jsDir;
 
@@ -63,8 +62,7 @@ namespace Raindrop.Presenters
             initialiseFields();
 
             ChatButton.onClick.AsObservable().Subscribe(_ => OnChatBtnClick()); //when clicked, runs this method.
-            MapButton.onClick.AsObservable().Subscribe(_ => OnChatBtnClick()); //when clicked, runs this method.
-
+            MapButton.onClick.AsObservable().Subscribe(_ => OnMapBtnClick()); //when clicked, runs this method.
 
 
 
@@ -73,46 +71,11 @@ namespace Raindrop.Presenters
 
         private void Update()
         {
-            float vert = variableJoystick.Vertical;
-            float horz = variableJoystick.Horizontal;
-
-            float thresh = 0.7f;
-            if (vert > thresh)
+            if (Active == false)
             {
-                instance.Movement.MovingForward = true;
-                instance.Movement.MovingBackward = false;
-
-            }
-            else if (vert < -thresh)
-            {
-                instance.Movement.MovingBackward = true;
-                instance.Movement.MovingForward = false;
-
-            }
-            else
-            {
-                instance.Movement.MovingBackward = false;
-                instance.Movement.MovingForward= false;
-
-            }
-
-            if (horz > thresh)
-            {
-                instance.Movement.TurningRight= true;
-                instance.Movement.TurningLeft = false;
-
-            }
-            else if (horz < -thresh)
-            {
-                instance.Movement.TurningLeft = true;
-                instance.Movement.TurningRight = false;
-
-            }
-            else
-            {
-                instance.Movement.TurningLeft = false;
-                instance.Movement.TurningRight= false;
-
+                //prepare to go back to login screen?
+                //do nothing for now.
+                return;
             }
 
 

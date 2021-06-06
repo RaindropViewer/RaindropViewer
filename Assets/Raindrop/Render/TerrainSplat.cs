@@ -18,18 +18,64 @@
  * along with this program.If not, see<https://www.gnu.org/licenses/>.
  */
 
+
+
+
+//To do the terrain splatting you build an array the size of the heightmap with values [0-3] that map to the four terrain textures. Floating point is used so you can blend between the textures when creating the final output. The array is a combination of the actual height (scaled down to 0-3) and some perlin noise. Heres clean room documentation of the noise generation:
+
+//vec = global_position * 0.20319f;
+//low_freq = perlin_noise2(vec.X * 0.222222, vec.Y * 0.222222) * 6.5;
+//high_freq = perlin_turbulence2(vec.X, vec.Y, 2) * 2.25;
+//noise = (low_freq + high_freq) * 2;
+
+//To build the final values in the array the start height and height range need to be used by bilinearly interpolating between the four corners of each with the current x/y position in the array. It all comes together like:
+
+//value = (height + noise - interpolated_start_height) * 4 / interpolated_height_range;
+
+//That 's all there is to it basically. The rest is an exercise in texture compositing and interpolation. 
+
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 //using System.Drawing;
 //using System.Drawing.Imaging;
-using Catnip.Drawing;
-using Catnip.Drawing.Imaging;
+//using Catnip.Drawing;
+//using Catnip.Drawing.Imaging;
 using System.Threading;
 using OpenMetaverse;
 using OpenMetaverse.Imaging;
+using Unity.Collections;
+using UnityEngine;
+using Color = Catnip.Drawing.Color;
+using Debug = System.Diagnostics.Debug;
+using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop.Rendering
 {
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Pixel
+    {
+
+        #region Data
+        [FieldOffset(0)]
+        public int rgba;
+
+        [FieldOffset(0)]
+        public byte r;
+
+        [FieldOffset(1)]
+        public byte g;
+
+        [FieldOffset(2)]
+        public byte b;
+
+        [FieldOffset(3)]
+        public byte a;
+        #endregion
+    }
+
+
     public static class TerrainSplat
     {
         #region Constants
@@ -48,7 +94,7 @@ namespace Raindrop.Rendering
             ROCK_DETAIL
         };
 
-        private static readonly Catnip.Drawing.Color[] DEFAULT_TERRAIN_COLOR = new Color[]
+        private static readonly Color[] DEFAULT_TERRAIN_COLOR = new Color[]
         {
             Color.FromArgb(255, 164, 136, 117),
             Color.FromArgb(255, 65, 87, 47),
@@ -72,14 +118,14 @@ namespace Raindrop.Rendering
         /// <returns>A composited 256x256 RGB texture ready for rendering</returns>
         /// <remarks>Based on the algorithm described at http://opensimulator.org/wiki/Terrain_Splatting
         /// </remarks>
-        public static Bitmap Splat(RaindropInstance instance, float[,] heightmap, UUID[] textureIDs, float[] startHeights, float[] heightRanges)
+        public static Texture2D Splat(RaindropInstance instance, float[,] heightmap, UUID[] textureIDs, float[] startHeights, float[] heightRanges)
         {
             Debug.Assert(textureIDs.Length == 4);
             Debug.Assert(startHeights.Length == 4);
             Debug.Assert(heightRanges.Length == 4);
             int outputSize = 2048;
 
-            Bitmap[] detailTexture = new Bitmap[4];
+            Texture2D[] detailTexture = new Texture2D[4];
 
             // Swap empty terrain textureIDs with default IDs
             for (int i = 0; i < textureIDs.Length; i++)
@@ -107,16 +153,19 @@ namespace Raindrop.Rendering
                 if (detailTexture[i] == null)
                 {
                     // Create a solid color texture for this layer
-                    detailTexture[i] = new Bitmap(outputSize, outputSize, PixelFormat.Format24bppRgb);
-                    using (Graphics gfx = Graphics.FromImage(detailTexture[i]))
-                    {
-                        using (SolidBrush brush = new SolidBrush(DEFAULT_TERRAIN_COLOR[i]))
-                            gfx.FillRectangle(brush, 0, 0, outputSize, outputSize);
-                    }
+                    detailTexture[i] = new Texture2D(outputSize, outputSize);
+
+                    fillcolor(detailTexture[i], DEFAULT_TERRAIN_COLOR[i]);
+                    //detailTexture[i].fillColor(DEFAULT_TERRAIN_COLOR[i]);
+                    //using (Graphics gfx = Graphics.FromImage(detailTexture[i]))
+                    //{
+                    //    using (SolidBrush brush = new SolidBrush(DEFAULT_TERRAIN_COLOR[i]))
+                    //        gfx.FillRectangle(brush, 0, 0, outputSize, outputSize);
+                    //}
                 }
-                else if (detailTexture[i].Width != outputSize || detailTexture[i].Height != outputSize)
+                else if (detailTexture[i].width != outputSize || detailTexture[i].height != outputSize)
                 {
-                    detailTexture[i] = ResizeBitmap(detailTexture[i], 256, 256);
+                    detailTexture[i] = ResizeTexture2D(detailTexture[i], 256, 256);
                 }
             }
 
@@ -178,195 +227,235 @@ namespace Raindrop.Rendering
             #endregion Layer Map
 
             #region Texture Compositing
-            Bitmap output = new Bitmap(outputSize, outputSize, PixelFormat.Format24bppRgb);
-            BitmapData outputData = output.LockBits(new Rectangle(0, 0, outputSize, outputSize), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-
+            //Texture2D output = new Texture2D(outputSize, outputSize, PixelFormat.Format24bppRgb);
+            Texture2D output = new Texture2D(outputSize, outputSize);
+            //Texture2DData outputData = output.LockBits(new Rectangle(0, 0, outputSize, outputSize), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+            NativeArray<Pixel> outputData = output.GetRawTextureData<Pixel>();
+            Pixel outputDataScan0 = outputData[0];
             unsafe
             {
                 // Get handles to all of the texture data arrays
-                BitmapData[] datas = new BitmapData[]
+                //Texture2DData[] datas = new Texture2DData[]
+                NativeArray<Pixel>[] datas = new NativeArray<Pixel>[]
                 {
-                    detailTexture[0].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[0].PixelFormat),
-                    detailTexture[1].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[1].PixelFormat),
-                    detailTexture[2].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[2].PixelFormat),
-                    detailTexture[3].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[3].PixelFormat)
+                    detailTexture[0].GetRawTextureData<Pixel>(),
+                    detailTexture[1].GetRawTextureData<Pixel>(),
+                    detailTexture[2].GetRawTextureData<Pixel>(),
+                    detailTexture[3].GetRawTextureData<Pixel>(),
+
+                    //detailTexture[0].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[0].PixelFormat),
+                    //    detailTexture[1].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[1].PixelFormat),
+                    //    detailTexture[2].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[2].PixelFormat),
+                    //    detailTexture[3].LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.ReadOnly, detailTexture[3].PixelFormat)
                 };
 
                 int[] comps = new int[]
                 {
-                    (datas[0].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
-                    (datas[1].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
-                    (datas[2].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
-                    (datas[3].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3
+                    4,
+                    4,
+                    4,
+                    4 //lmao wtf 
+
+                    //(datas[0].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
+                    //(datas[1].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
+                    //(datas[2].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3,
+                    //(datas[3].PixelFormat == PixelFormat.Format32bppArgb) ? 4 : 3
                 };
 
-                int[] strides = new int[]
-                {
-                    datas[0].Stride,
-                    datas[1].Stride,
-                    datas[2].Stride,
-                    datas[3].Stride
-                };
+                //int[] strides = new int[] //stride, aka scan-width (in bytes)
+                //{
+                //    datas[0].Stride,
+                //    datas[1].Stride,
+                //    datas[2].Stride,
+                //    datas[3].Stride
+                //};
 
-                IntPtr[] scans = new IntPtr[]
-                {
-                    datas[0].Scan0,
-                    datas[1].Scan0,
-                    datas[2].Scan0,
-                    datas[3].Scan0
-                };
+                //IntPtr[] scans = new IntPtr[] //memoryAddr of the BMPs
+                //{
+                //    datas[0].Scan0,
+                //    datas[1].Scan0,
+                //    datas[2].Scan0,
+                //    datas[3].Scan0
+                //};
 
                 int ratio = outputSize / RegionSize;
 
+                //TODO terrain texture interpolating
                 for (int y = 0; y < outputSize; y++)
                 {
                     for (int x = 0; x < outputSize; x++)
                     {
-                        float layer = layermap[(y / ratio) * RegionSize + x / ratio];
-                        float layerx = layermap[(y / ratio) * RegionSize + Math.Min(outputSize - 1, (x + 1)) / ratio];
-                        float layerxx = layermap[(y / ratio) * RegionSize + Math.Max(0, (x - 1)) / ratio];
-                        float layery = layermap[Math.Min(outputSize - 1, (y + 1)) / ratio * RegionSize + x / ratio];
-                        float layeryy = layermap[(Math.Max(0, (y - 1)) / ratio) * RegionSize + x / ratio];
+                        float layer = layermap[(y / ratio) * RegionSize + x / ratio]; //grabs layermap value at x,y on the 2dgrid
+                        float layerx = layermap[(y / ratio) * RegionSize + Math.Min(outputSize - 1, (x + 1)) / ratio]; //at x+1,y
+                        float layerxx = layermap[(y / ratio) * RegionSize + Math.Max(0, (x - 1)) / ratio]; //at x-1,y
+                        float layery = layermap[Math.Min(outputSize - 1, (y + 1)) / ratio * RegionSize + x / ratio]; //at x,y+1
+                        float layeryy = layermap[(Math.Max(0, (y - 1)) / ratio) * RegionSize + x / ratio]; //at x,y-1
 
                         // Select two textures
-                        int l0 = (int)Math.Floor(layer);
-                        int l1 = Math.Min(l0 + 1, 3);
+                        int l0 = (int)Math.Floor(layer); //lowest texture-layer for the current point in layermap
+                        int l1 = Math.Min(l0 + 1, 3);  //next-lowest texture-layer for the current point in layermap
 
-                        byte* ptrA = (byte*)scans[l0] + (y % 256) * strides[l0] + (x % 256) * comps[l0];
-                        byte* ptrB = (byte*)scans[l1] + (y % 256) * strides[l1] + (x % 256) * comps[l1];
-                        byte* ptrO = (byte*)outputData.Scan0 + y * outputData.Stride + x * 3;
+                        //todo: placeholder here.
+                        outputData[(y / ratio) * RegionSize + x / ratio] = datas[l0][(y / ratio) * RegionSize + x / ratio];
 
-                        float aB = *(ptrA + 0);
-                        float aG = *(ptrA + 1);
-                        float aR = *(ptrA + 2);
+                        //        Pixel* ptrA = (Pixel*)scans[l0] + (y % 256) * strides[l0] + (x % 256) * comps[l0];
+                        //        Pixel* ptrB = (Pixel*)scans[l1] + (y % 256) * strides[l1] + (x % 256) * comps[l1];
+                        //        Pixel* ptrO = (Pixel*)outputData.Scan0 + y * outputData.Stride + x * 3;
 
-                        int lX = (int)Math.Floor(layerx);
-                        byte* ptrX = (byte*)scans[lX] + (y % 256) * strides[lX] + (x % 256) * comps[lX];
-                        int lXX = (int)Math.Floor(layerxx);
-                        byte* ptrXX = (byte*)scans[lXX] + (y % 256) * strides[lXX] + (x % 256) * comps[lXX];
-                        int lY = (int)Math.Floor(layery);
-                        byte* ptrY = (byte*)scans[lY] + (y % 256) * strides[lY] + (x % 256) * comps[lY];
-                        int lYY = (int)Math.Floor(layeryy);
-                        byte* ptrYY = (byte*)scans[lYY] + (y % 256) * strides[lYY] + (x % 256) * comps[lYY];
+                        //        byte aB = *byte (ptrA + 0);
+                        //        float aG = *(ptrA + 1);
+                        //        float aR = *(ptrA + 2);
 
-                        float bB = *(ptrB + 0);
-                        float bG = *(ptrB + 1);
-                        float bR = *(ptrB + 2);
+                        //        int lX = (int)Math.Floor(layerx);
+                        //        byte* ptrX = (byte*)scans[lX] + (y % 256) * strides[lX] + (x % 256) * comps[lX];
+                        //        int lXX = (int)Math.Floor(layerxx);
+                        //        byte* ptrXX = (byte*)scans[lXX] + (y % 256) * strides[lXX] + (x % 256) * comps[lXX];
+                        //        int lY = (int)Math.Floor(layery);
+                        //        byte* ptrY = (byte*)scans[lY] + (y % 256) * strides[lY] + (x % 256) * comps[lY];
+                        //        int lYY = (int)Math.Floor(layeryy);
+                        //        byte* ptrYY = (byte*)scans[lYY] + (y % 256) * strides[lYY] + (x % 256) * comps[lYY];
 
-                        float layerDiff = layer - l0;
-                        float xlayerDiff = layerx - layer;
-                        float xxlayerDiff = layerxx - layer;
-                        float ylayerDiff = layery - layer;
-                        float yylayerDiff = layeryy - layer;
-                        // Interpolate between the two selected textures
-                        *(ptrO + 0) = (byte)Math.Floor(aB + layerDiff * (bB - aB) + 
-                            xlayerDiff * (*ptrX - aB) + 
-                            xxlayerDiff * (*(ptrXX) - aB) + 
-                            ylayerDiff * (*ptrY - aB) + 
-                            yylayerDiff * (*(ptrYY) - aB));
-                        *(ptrO + 1) = (byte)Math.Floor(aG + layerDiff * (bG - aG) + 
-                            xlayerDiff * (*(ptrX + 1) - aG) +
-                            xxlayerDiff * (*(ptrXX + 1) - aG) + 
-                            ylayerDiff * (*(ptrY + 1) - aG) +
-                            yylayerDiff * (*(ptrYY + 1) - aG));
-                        *(ptrO + 2) = (byte)Math.Floor(aR + layerDiff * (bR - aR) +
-                            xlayerDiff * (*(ptrX + 2) - aR) + 
-                            xxlayerDiff * (*(ptrXX + 2) - aR) +
-                            ylayerDiff * (*(ptrY + 2) - aR) + 
-                            yylayerDiff * (*(ptrYY + 2) - aR));
+                        //        float bB = *(ptrB + 0);
+                        //        float bG = *(ptrB + 1);
+                        //        float bR = *(ptrB + 2);
+
+                        //        float layerDiff = layer - l0;
+                        //        float xlayerDiff = layerx - layer;
+                        //        float xxlayerDiff = layerxx - layer;
+                        //        float ylayerDiff = layery - layer;
+                        //        float yylayerDiff = layeryy - layer;
+                        //        // Interpolate between the two selected textures
+                        //        *(ptrO + 0) = (byte)Math.Floor(aB + layerDiff * (bB - aB) +
+                        //            xlayerDiff * (*ptrX - aB) +
+                        //            xxlayerDiff * (*(ptrXX) - aB) +
+                        //            ylayerDiff * (*ptrY - aB) +
+                        //            yylayerDiff * (*(ptrYY) - aB));
+                        //        *(ptrO + 1) = (byte)Math.Floor(aG + layerDiff * (bG - aG) +
+                        //            xlayerDiff * (*(ptrX + 1) - aG) +
+                        //            xxlayerDiff * (*(ptrXX + 1) - aG) +
+                        //            ylayerDiff * (*(ptrY + 1) - aG) +
+                        //            yylayerDiff * (*(ptrYY + 1) - aG));
+                        //        *(ptrO + 2) = (byte)Math.Floor(aR + layerDiff * (bR - aR) +
+                        //            xlayerDiff * (*(ptrX + 2) - aR) +
+                        //            xxlayerDiff * (*(ptrXX + 2) - aR) +
+                        //            ylayerDiff * (*(ptrY + 2) - aR) +
+                        //            yylayerDiff * (*(ptrYY + 2) - aR));
                     }
                 }
 
-                for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 4; i++)
                 {
-                    detailTexture[i].UnlockBits(datas[i]);
-                    detailTexture[i].Dispose();
+                    //seems like we dont need to dispose mem
+                    //https://docs.unity3d.com/ScriptReference/Texture2D.GetRawTextureData.html
+                    //detailTexture[i].UnlockBits(datas[i]);
+                    //detailTexture[i].Dispose();
                 }
             }
 
             layermap = null;
-            output.UnlockBits(outputData);
+            //output.UnlockBits(outputData);
 
-            output.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            //output.RotateFlip(RotateFlipType.Rotate270FlipNone); //why rotate?
 
             #endregion Texture Compositing
-
+            //output = outputData;
+            output.LoadRawTextureData(outputData);
             return output;
         }
 
-        private static TextureDownloadCallback TextureDownloadCallback(Bitmap[] detailTexture, int i, AutoResetEvent textureDone)
+        private static void fillcolor(Texture2D tex2, Color color)
+        {
+            //var fillColor : Color = Color(1, 0.0, 0.0);
+            var fillColorArray = tex2.GetPixels();
+
+            for (var i = 0; i < fillColorArray.Length; ++i)
+            {
+                fillColorArray[i] = color;
+            }
+
+            tex2.SetPixels(fillColorArray);
+
+            tex2.Apply();
+
+        }
+
+        private static TextureDownloadCallback TextureDownloadCallback(Texture2D[] detailTexture, int i, AutoResetEvent textureDone)
         {
             return (state, assetTexture) =>
             {
                 if (state == TextureRequestState.Finished && assetTexture?.AssetData != null)
                 {
-                    Image img;
+                    Texture2D img;
                     ManagedImage mi;
                     OpenJPEG.DecodeToImage(assetTexture.AssetData, out mi, out img);
-                    detailTexture[i] = (Bitmap)img;
+                    detailTexture[i] = (Texture2D)img;
                 }
                 textureDone.Set();
             };
         }
 
-        public static Bitmap ResizeBitmap(Bitmap b, int nWidth, int nHeight)
+        public static Texture2D ResizeTexture2D(Texture2D b, int nWidth, int nHeight)
         {
-            Bitmap result = new Bitmap(nWidth, nHeight);
-            using (Graphics g = Graphics.FromImage((Image)result))
-            {
-                g.DrawImage(b, 0, 0, nWidth, nHeight);
-            }
-            b.Dispose();
-            return result;
+            //Texture2D newTex = new Texture2D(nWidth, nHeight);
+
+            //Texture2D result = new Texture2D(nWidth, nHeight);
+            //using (Graphics g = Graphics.FromImage((Image)result))
+            //{
+            //    g.DrawImage(b, 0, 0, nWidth, nHeight);
+            //}
+            //b.Dispose();
+            b.Resize(nWidth,nHeight);
+            //UnityEngine.Object.Destroy(b);
+            return b;
         }
 
-        public static Bitmap TileBitmap(Bitmap b, int tiles)
-        {
-            Bitmap result = new Bitmap(b.Width * tiles, b.Width * tiles);
-            using (Graphics g = Graphics.FromImage((Image)result))
-            {
-                for (int x = 0; x < tiles; x++)
-                {
-                    for (int y = 0; y < tiles; y++)
-                    {
-                        g.DrawImage(b, x * 256, y * 256, x * 256 + 256, y * 256 + 256);
-                    }
-                }
-            }
-            b.Dispose();
-            return result;
-        }
+        //public static Texture2D TileTexture2D(Texture2D b, int tiles)
+        //{
+        //    Texture2D result = new Texture2D(b.Width * tiles, b.Width * tiles);
+        //    using (Graphics g = Graphics.FromImage((Image)result))
+        //    {
+        //        for (int x = 0; x < tiles; x++)
+        //        {
+        //            for (int y = 0; y < tiles; y++)
+        //            {
+        //                g.DrawImage(b, x * 256, y * 256, x * 256 + 256, y * 256 + 256);
+        //            }
+        //        }
+        //    }
+        //    b.Dispose();
+        //    return result;
+        //}
 
-        public static Bitmap SplatSimple(float[,] heightmap)
-        {
-            const float BASE_HSV_H = 93f / 360f;
-            const float BASE_HSV_S = 44f / 100f;
-            const float BASE_HSV_V = 34f / 100f;
+        //public static Texture2D SplatSimple(float[,] heightmap)
+        //{
+        //    const float BASE_HSV_H = 93f / 360f;
+        //    const float BASE_HSV_S = 44f / 100f;
+        //    const float BASE_HSV_V = 34f / 100f;
 
-            Bitmap img = new Bitmap(256, 256);
-            BitmapData bitmapData = img.LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+        //    Texture2D img = new Texture2D(256, 256);
+        //    Texture2DData texture2DData = img.LockBits(new Rectangle(0, 0, 256, 256), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
 
-            unsafe
-            {
-                for (int y = 255; y >= 0; y--)
-                {
-                    for (int x = 0; x < 256; x++)
-                    {
-                        float normHeight = heightmap[x, y] / 255f;
-                        normHeight = Utils.Clamp(normHeight, BASE_HSV_V, 1.0f);
+        //    unsafe
+        //    {
+        //        for (int y = 255; y >= 0; y--)
+        //        {
+        //            for (int x = 0; x < 256; x++)
+        //            {
+        //                float normHeight = heightmap[x, y] / 255f;
+        //                normHeight = Utils.Clamp(normHeight, BASE_HSV_V, 1.0f);
 
-                        Color4 color = Color4.FromHSV(BASE_HSV_H, BASE_HSV_S, normHeight);
+        //                Color4 color = Color4.FromHSV(BASE_HSV_H, BASE_HSV_S, normHeight);
 
-                        byte* ptr = (byte*)bitmapData.Scan0 + y * bitmapData.Stride + x * 3;
-                        *(ptr + 0) = (byte)(color.B * 255f);
-                        *(ptr + 1) = (byte)(color.G * 255f);
-                        *(ptr + 2) = (byte)(color.R * 255f);
-                    }
-                }
-            }
+        //                byte* ptr = (byte*)texture2DData.Scan0 + y * texture2DData.Stride + x * 3;
+        //                *(ptr + 0) = (byte)(color.B * 255f);
+        //                *(ptr + 1) = (byte)(color.G * 255f);
+        //                *(ptr + 2) = (byte)(color.R * 255f);
+        //            }
+        //        }
+        //    }
 
-            img.UnlockBits(bitmapData);
-            return img;
-        }
+        //    img.UnlockBits(Texture2DData);
+        //    return img;
+        //}
     }
 }

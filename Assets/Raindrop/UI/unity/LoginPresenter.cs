@@ -11,15 +11,24 @@ using Settings = Raindrop.Settings;
 using UnityEngine.UI;
 using UniRx;
 using TMPro;
+using static Raindrop.LoginUtils;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
 namespace Raindrop.Presenters
 {
+    //the main logic(presenter) for the login=panel.
+    //it saves and loads (on init) the last known user.
+    //it handles loggin in, inaddition to showing login messages 
+    //We are to revert to this UI whenever the user is disconnected. (on disconnect)
+
+    //custom URL is not supported.
+    //grid selection is supported.
+
+    //not support custom input into dropboxes yet.
 
     public class LoginPresenter : MonoBehaviour
     {
-
         private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
@@ -27,12 +36,17 @@ namespace Raindrop.Presenters
         public Button LoginButton;
         public TMP_InputField usernameField;
         public TMP_InputField passwordField;
-        public Dropdown gridDropdown;
+        //public Dropdown gridDropdown;
         public Toggle TOSCheckbox;
         public Toggle RememberCheckbox;
 
-        public ModalManager ModalMgr;
         public Modal loginStatusModal;
+
+        //extragrid seclections
+        public GameObject GridDropdownGO; //required.
+        public GenericDropdown genericDropdown;
+        //public TMP_InputField customURL;
+        //public Toggle customURLCheckbox;
         #endregion
 
         #region internal representations 
@@ -41,7 +55,7 @@ namespace Raindrop.Presenters
         private string password;
         private readonly string INIT_USERNAME = "username";
         private readonly string INIT_PASSWORD = "password";
-
+        private Settings s;
 
         public string Username
         {
@@ -55,9 +69,9 @@ namespace Raindrop.Presenters
 
         public ReactiveProperty<string> Login_msg { get; private set; }
 
-        private List<string> gridDropdownOptions = new List<string> //type is grid
-        {
-        };
+        //private List<string> gridDropdownOptions = new List<string> //type is grid
+        //{
+        //};
 
         private int gridSelectedItem;
 
@@ -67,8 +81,11 @@ namespace Raindrop.Presenters
         private bool btnLoginEnabled;
 
         private bool cbTOStrue = true;
+        private bool cbCustomURL = false;
         private bool cbRememberBool;
-        private string[] options;
+        private DropdownMenuWithEntry usernameDropdownMenuWithEntry;
+        private GameObject UserDropdownMenu;
+
 
         #endregion
 
@@ -77,7 +94,9 @@ namespace Raindrop.Presenters
         // Use this for initialization
         void Start()
         {
-            initialiseFields();
+            //GridDropdownGO = this.gameObject.GetComponent<GenericDropdown>().gameObject;
+            genericDropdown = GridDropdownGO.GetComponent<GenericDropdown>();
+            //GridDropdownView.DropdownSelectionChanged += GenericDropdown_DropdownSelectionChanged;
 
             LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick()); //when clicked, runs this method.
             usernameField.onValueChanged.AsObservable().Subscribe(_ => Username = _); //change username property.
@@ -86,12 +105,21 @@ namespace Raindrop.Presenters
             RememberCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbRememberBool = _); //when toggle checkbox, set boolean to the same value as the toggle-state
             TOSCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbTOStrue = _); //when toggle checkbox, set boolean to the same value as the toggle-state
 
-            gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
+            //gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
+            //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
 
+            //DropdownMenuWithEntry = UserDropdownMenu.GetComponent<DropdownMenuWithEntry>();
 
             AddNetcomEvents();
+
+
         }
 
+        private void GenericDropdown_DropdownSelectionChanged()
+        {
+
+            throw new NotImplementedException();
+        }
 
         private void AddNetcomEvents()
         {
@@ -116,21 +144,25 @@ namespace Raindrop.Presenters
             {
                 case LoginStatus.ConnectingToLogin:
                     Login_msg.GetType().GetProperty("Value").SetValue(Login_msg, "Connecting to login server...");
+                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ConnectingToSim:
                     Login_msg.Value = ("Connecting to region...");
+                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.Redirecting:
                     Login_msg.Value = "Redirecting...";
+                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ReadingResponse:
                     Login_msg.Value = "Reading response...";
+                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
@@ -140,23 +172,27 @@ namespace Raindrop.Presenters
                     //proLogin.Visible = false;
 
                     //btnLogin.Text = "Logout";
-                    btnLoginEnabled = true;
+                    btnLoginEnabled = false;
                     instance.Client.Groups.RequestCurrentGroups();
+
+                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...","Logged in !", "yay!");
                     break;
 
-                case LoginStatus.Failed:
+                case LoginStatus.Failed: 
                     //lblLoginStatus.ForeColor = Color.Red;
                     if (e.FailReason == "tos")
                     {
                         Login_msg.Value = "Must agree to Terms of Service before logging in";
+                        instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed",Login_msg.Value, "ok");
                         //pnlTos.Visible = true;
                         //txtTOS.Text = e.Message.Replace("\n", "\r\n");
-                        btnLoginEnabled = false;
+                        btnLoginEnabled = true;
                     }
                     else
                     {
                         Login_msg.Value = e.Message;
-                        btnLoginEnabled = true;
+                        instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed", Login_msg.Value, "ok");
+                        btnLoginEnabled = false;
                     }
                     //proLogin.Visible = false;
 
@@ -168,6 +204,7 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
             Login_msg.Value = "logged out.";
+            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //pnlLoginPrompt.Visible = true;
             //pnlLoggingIn.Visible = false;
 
@@ -180,6 +217,7 @@ namespace Raindrop.Presenters
             btnLoginEnabled = false;
 
             Login_msg.Value = "Logging out...";
+            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;
@@ -188,6 +226,7 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggingIn(object sender, OverrideEventArgs e)
         {
             Login_msg.Value = "Logging in...";
+            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;
@@ -196,19 +235,7 @@ namespace Raindrop.Presenters
 
             btnLoginEnabled = false;
         }
-
-
-        private void cb_LoginFailed()
-        {
-            string message = "meow";
-            showModal("Login failed.", message);
-        }
-
-        private void showModal(string v, string message)
-        {
-            instance.MainCanvas.modalManager.showModal("v", message);
-        }
-
+          
 
 
         private void initialiseFields()
@@ -232,17 +259,17 @@ namespace Raindrop.Presenters
             // Initilize grid dropdown
             int gridIx = -1;
 
+            //GridDropdownGO.clear();
+            //GridDropdownGO.set(instance.GridManger.Grids);
+            //gridDropdown.ClearOptions();
+            //for (int i = 0; i < instance.GridManger.Count; i++)
+            //{
+            //    //gridList.Add(instance.GridManger[i]);
+            //    gridDropdownOptions.Add(instance.GridManger[i].ToString());
+            //    //Debug.Log(instance.GridManger[i].ToString());
+            //}
+            //GridDropdownGO.Add("Custom");
 
-            gridDropdown.ClearOptions();
-            for (int i = 0; i < instance.GridManger.Count; i++)
-            {
-                //gridList.Add(instance.GridManger[i]);
-                gridDropdownOptions.Add(instance.GridManger[i].ToString());
-                //Debug.Log(instance.GridManger[i].ToString());
-            }
-            gridDropdownOptions.Add("Custom");
-
-            gridDropdown.AddOptions(gridDropdownOptions);
 
             //if (gridIx != -1)
             //{
@@ -251,13 +278,9 @@ namespace Raindrop.Presenters
 
 
             Settings s = instance.GlobalSettings;
-            RememberCheckbox.isOn = s["remember_login"];
+            RememberCheckbox.isOn = LoginUtils.getRememberFromSettings(s);
 
-            // Setup login name
-            string savedUsername;
-
-            savedUsername = s["username"];
-
+            string savedUsername = s["username"];
             usernameField.text = (savedUsername);
 
             try
@@ -270,6 +293,7 @@ namespace Raindrop.Presenters
                         SavedLogin sl = SavedLogin.FromOSD(savedLogins[loginKey]);
                         Debug.Log("username cache: " + sl.ToString());
                         //cbxUsername.Items.Add(sl);
+                        //usernameDropdownMenuWithEntry.Items.Add(sl);
                     }
                 }
             }
@@ -301,6 +325,7 @@ namespace Raindrop.Presenters
             //        cbxLocation.SelectedIndex = s["login_location_type"].AsInteger();
             //        cbxLocation.Text = s["login_location"].AsString();
             //    }
+            //}
             //}
             //else
             //{
@@ -440,7 +465,7 @@ namespace Raindrop.Presenters
             //}
             //else
             //{
-            netcom.LoginOptions.Grid = instance.GridManger.Grids[gridSelectedItem];
+            //netcom.LoginOptions.Grid = instance.GridManger.Grids[gridSelectedItem];
             //}
 
             if (netcom.LoginOptions.Grid.Platform != "SecondLife")
@@ -455,78 +480,10 @@ namespace Raindrop.Presenters
                 instance.Client.Settings.HTTP_INVENTORY = true;
             }
 
+            var temp = netcom.LoginOptions;
+
             netcom.Login();
-            SaveConfig();
-        }
-
-
-        private void SaveConfig()
-        {
-            Settings s = instance.GlobalSettings;
-            SavedLogin sl = new SavedLogin();
-
-            string username = Username;
-
-            //if (cbxUsername.SelectedIndex > 0 && cbxUsername.SelectedItem is SavedLogin)
-            //{
-            //    username = ((SavedLogin)cbxUsername.SelectedItem).Username;
-            //}
-
-            //if (cbxGrid.SelectedIndex == cbxGrid.Items.Count - 1) // custom login uri
-            //{
-            //    sl.GridID = "custom_login_uri";
-            //    sl.CustomURI = txtCustomLoginUri.Text;
-            //}
-            //else
-            //{
-            //    sl.GridID = (cbxGrid.SelectedItem as Grid).ID;
-            //    sl.CustomURI = string.Empty;
-            //}
-
-            string savedLoginsKey = string.Format("{0}%{1}", username, sl.GridID);
-
-            if (!(s["saved_logins"] is OSDMap))
-            {
-                s["saved_logins"] = new OSDMap();
-            }
-
-            if (cbRememberBool)
-            {
-
-                sl.Username = s["username"] = username;
-
-                if (LoginOptions.IsPasswordMD5(Password))
-                {
-                    sl.Password = Password;
-                    s["password"] = Password;
-                }
-                else
-                {
-                    sl.Password = Utils.MD5(Password);
-                    s["password"] = Utils.MD5(Password);
-                }
-                //if (cbxLocation.SelectedIndex == -1)
-                //{
-                //    sl.CustomStartLocation = cbxLocation.Text;
-                //}
-                //else
-                //{
-                //    sl.CustomStartLocation = string.Empty;
-                //}
-                //sl.StartLocationType = cbxLocation.SelectedIndex;
-                ((OSDMap)s["saved_logins"])[savedLoginsKey] = sl.ToOSD();
-            }
-            else if (((OSDMap)s["saved_logins"]).ContainsKey(savedLoginsKey))
-            {
-                ((OSDMap)s["saved_logins"]).Remove(savedLoginsKey);
-            }
-
-            //s["login_location_type"] = OSD.FromInteger(cbxLocation.SelectedIndex);
-            //s["login_location"] = OSD.FromString(cbxLocation.Text);
-
-            //s["login_grid"] = OSD.FromInteger(cbxGrid.SelectedIndex);
-            //s["login_uri"] = OSD.FromString(txtCustomLoginUri.Text);
-            //s["remember_login"] = cbRemember.Checked;
+            LoginUtils.SaveConfig(netcom.LoginOptions, instance.GlobalSettings);
         }
 
 
@@ -539,68 +496,7 @@ namespace Raindrop.Presenters
 
 
 
-        public class SavedLogin
-        {
-            public string Username;
-            public string Password;
-            public string GridID;
-            public string CustomURI;
-            public int StartLocationType;
-            public string CustomStartLocation;
-
-            public OSDMap ToOSD()
-            {
-                OSDMap ret = new OSDMap(4);
-                ret["username"] = Username;
-                ret["password"] = Password;
-                ret["grid"] = GridID;
-                ret["custom_url"] = CustomURI;
-                ret["location_type"] = StartLocationType;
-                ret["custom_location"] = CustomStartLocation;
-                return ret;
-            }
-
-            public static SavedLogin FromOSD(OSD data)
-            {
-                if (!(data is OSDMap)) return null;
-                OSDMap map = (OSDMap)data;
-                SavedLogin ret = new SavedLogin();
-                ret.Username = map["username"];
-                ret.Password = map["password"];
-                ret.GridID = map["grid"];
-                ret.CustomURI = map["custom_url"];
-                if (map.ContainsKey("location_type"))
-                {
-                    ret.StartLocationType = map["location_type"];
-                }
-                else
-                {
-                    ret.StartLocationType = 1;
-                }
-                ret.CustomStartLocation = map["custom_location"];
-                return ret;
-            }
-
-            public override string ToString()
-            {
-                RaindropInstance instance = RaindropInstance.GlobalInstance;
-                string gridName;
-                if (GridID == "custom_login_uri")
-                {
-                    gridName = "Custom Login URI";
-                }
-                else if (instance.GridManger.KeyExists(GridID))
-                {
-                    gridName = instance.GridManger[GridID].Name;
-                }
-                else
-                {
-                    gridName = GridID;
-                }
-                return string.Format("{0} -- {1}", Username, gridName);
-            }
-
-        }
+        
     }
 
 }

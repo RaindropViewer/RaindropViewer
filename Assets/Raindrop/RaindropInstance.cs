@@ -67,7 +67,7 @@ namespace Raindrop
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
         private mainUIManager mainCanvas;
-        private RaindropUnitySceneRenderer mainWorldRenderer;
+        //private RaindropUnitySceneRenderer mainWorldRenderer;
 
         // Singleton, there can be only one instance
         private static RaindropInstance globalInstance = null;
@@ -107,6 +107,7 @@ namespace Raindrop
 
         /// <summary>
         /// Grid client's user dir for settings and logs
+        /// ala the path combined with the account's full name
         /// </summary>
         public string ClientDir
         {
@@ -612,6 +613,7 @@ namespace Raindrop
             return fileName;
         }
 
+        //obtains the relevant filepath/name.
         public string ChatFileName(string session)
         {
             string fileName = session;
@@ -624,6 +626,7 @@ namespace Raindrop
             return Path.Combine(ClientDir, fileName);
         }
 
+        //this method will log all messages to the relevant file.
         public void LogClientMessage(string sessioName, string message)
         {
             if (globalSettings["disable_chat_im_log"]) return;

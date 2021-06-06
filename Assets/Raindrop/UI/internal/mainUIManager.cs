@@ -17,6 +17,7 @@ namespace Raindrop
         //mainUImanager has dependencies:
         //   CanvasManager - stores and manages the pops, push of views onto the ui stack.
         //   ModalManager - pops and shows modals.
+        //  LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
 
         private RaindropInstance instance;
         private RaindropNetcom netcom { get { return instance.Netcom; } }
@@ -43,7 +44,7 @@ namespace Raindrop
 
         private void initialiseUI()
         {
-            canvasManager.pushCanvas(CanvasType.Login);
+            canvasManager.pushCanvas(CanvasType.Welcome);
             modalManager.showSimpleModalBoxWithActionBtn("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ", "Accept");
 
         }
@@ -131,7 +132,7 @@ namespace Raindrop
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
 
-            canvasManager.reinitToLoginScreen();
+            canvasManager.resetToLoginScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{

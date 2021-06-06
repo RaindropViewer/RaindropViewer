@@ -15,6 +15,12 @@ namespace Catnip.Drawing.Imaging
         public int Width { get; internal set; }
         public int Height { get; internal set; }
         public PixelFormat PixelFormat { get; internal set; }
+
+        public BitmapData()
+        {
+
+        }
+
     }
 
     //https://docs.microsoft.com/en-us/dotnet/api/system.drawing.imaging.pixelformat?view=net-5.0

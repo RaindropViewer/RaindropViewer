@@ -31,6 +31,7 @@ using System.Runtime.InteropServices;
 //using Rectangle = System.Drawing.Rectangle;
 using Catnip.Drawing;
 using Catnip.Drawing.Imaging;
+using UnityEngine;
 
 namespace OpenMetaverse.Imaging
 {
@@ -248,7 +249,7 @@ namespace OpenMetaverse.Imaging
         /// <param name="managedImage">ManagedImage object to decode to</param>
         /// <param name="image">Image object to decode to</param>
         /// <returns>True if the decode succeeds, otherwise false</returns>
-        public static bool DecodeToImage(byte[] encoded, out ManagedImage managedImage, out Image image)
+        public static bool DecodeToImage(byte[] encoded, out ManagedImage managedImage, out Texture2D image)
         {
             managedImage = null;
             image = null;
@@ -257,7 +258,7 @@ namespace OpenMetaverse.Imaging
             {
                 try
                 {
-                    image = managedImage.ExportBitmap();
+                    image = managedImage.ExportTex2D();
                     return true;
                 }
                 catch (Exception ex)

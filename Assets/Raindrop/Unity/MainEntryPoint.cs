@@ -22,7 +22,7 @@ public class MainEntryPoint : MonoBehaviour
     private void Awake()
     {
 
-        MainRaindropInstance = RaindropInstance.GlobalInstance; 
+        MainRaindropInstance = RaindropInstance.GlobalInstance;
     }
 
 }

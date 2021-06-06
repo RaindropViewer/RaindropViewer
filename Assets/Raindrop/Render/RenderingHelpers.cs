@@ -32,311 +32,311 @@ using OpenMetaverse.Rendering;
 
 namespace Raindrop.Rendering
 {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Color4b
-    {
-        public byte R;
-        public byte G;
-        public byte B;
-        public byte A;
-    }
+    //[StructLayout(LayoutKind.Sequential)]
+    //public struct Color4b
+    //{
+    //    public byte R;
+    //    public byte G;
+    //    public byte B;
+    //    public byte A;
+    //}
 
-    [StructLayout(LayoutKind.Explicit)]
-    public struct ColorVertex
-    {
-        [FieldOffset(0)]
-        public Vertex Vertex;
-        [FieldOffset(32)]
-        public Color4b Color;
-        public static int Size = 36;
-    }
+    //[StructLayout(LayoutKind.Explicit)]
+    //public struct ColorVertex
+    //{
+    //    [FieldOffset(0)]
+    //    public Vertex Vertex;
+    //    [FieldOffset(32)]
+    //    public Color4b Color;
+    //    public static int Size = 36;
+    //}
 
-    public class TextureInfo
-    {
-        public Image Texture;
-        public int TexturePointer;
-        public bool HasAlpha;
-        public bool FullAlpha;
-        public bool IsMask;
-        public bool IsInvisible;
-        public UUID TextureID;
-        public bool FetchFailed;
-    }
+    //public class TextureInfo
+    //{
+    //    public Image Texture;
+    //    public int TexturePointer;
+    //    public bool HasAlpha;
+    //    public bool FullAlpha;
+    //    public bool IsMask;
+    //    public bool IsInvisible;
+    //    public UUID TextureID;
+    //    public bool FetchFailed;
+    //}
 
-    public class TextureLoadItem
-    {
-        public FaceData Data;
-        public Primitive Prim;
-        public Primitive.TextureEntryFace TeFace;
-        public byte[] TextureData = null;
-        public byte[] TGAData = null;
-        public bool LoadAssetFromCache = false;
-        public ImageType ImageType = ImageType.Normal;
-        public string BakeName = string.Empty;
-        public UUID AvatarID = UUID.Zero;
-    }
+    //public class TextureLoadItem
+    //{
+    //    public FaceData Data;
+    //    public Primitive Prim;
+    //    public Primitive.TextureEntryFace TeFace;
+    //    public byte[] TextureData = null;
+    //    public byte[] TGAData = null;
+    //    public bool LoadAssetFromCache = false;
+    //    public ImageType ImageType = ImageType.Normal;
+    //    public string BakeName = string.Empty;
+    //    public UUID AvatarID = UUID.Zero;
+    //}
 
-    public enum RenderPass
-    {
-        Picking,
-        Simple,
-        Alpha,
-        Invisible
-    }
+    //public enum RenderPass
+    //{
+    //    Picking,
+    //    Simple,
+    //    Alpha,
+    //    Invisible
+    //}
 
-    public enum SceneObjectType
-    {
-        None,
-        Primitive,
-        Avatar,
-    }
+    //public enum SceneObjectType
+    //{
+    //    None,
+    //    Primitive,
+    //    Avatar,
+    //}
 
-    /// <summary>
-    /// Base class for all scene objects
-    /// </summary>
-    public abstract class SceneObject : IComparable, IDisposable
-    {
-        #region Public fields
-        /// <summary>Interpolated local position of the object</summary>
-        public Vector3 InterpolatedPosition;
-        /// <summary>Interpolated local rotation of the object</summary>
-        public Quaternion InterpolatedRotation;
-        /// <summary>Rendered position of the object in the region</summary>
-        public Vector3 RenderPosition;
-        /// <summary>Rendered rotationm of the object in the region</summary>
-        public Quaternion RenderRotation;
-        /// <summary>Per frame calculated square of the distance from camera</summary>
-        public float DistanceSquared;
-        /// <summary>Bounding volume of the object</summary>
-        public BoundingVolume BoundingVolume;
-        /// <summary>Was the sim position and distance from camera calculated during this frame</summary>
-        public bool PositionCalculated;
-        /// <summary>Scene object type</summary>
-        public SceneObjectType Type = SceneObjectType.None;
-        /// <summary>Libomv primitive</summary>
-        public virtual Primitive BasePrim { get; set; }
-        /// <summary>Were initial initialization tasks done</summary>
-        public bool Initialized;
-        /// <summary>Is this object disposed</summary>
-        public bool IsDisposed = false;
-        public int AlphaQueryID = -1;
-        public int SimpleQueryID = -1;
-        public bool HasAlphaFaces;
-        public bool HasSimpleFaces;
-        public bool HasInvisibleFaces;
+    ///// <summary>
+    ///// Base class for all scene objects
+    ///// </summary>
+    //public abstract class SceneObject : IComparable, IDisposable
+    //{
+    //    #region Public fields
+    //    /// <summary>Interpolated local position of the object</summary>
+    //    public Vector3 InterpolatedPosition;
+    //    /// <summary>Interpolated local rotation of the object</summary>
+    //    public Quaternion InterpolatedRotation;
+    //    /// <summary>Rendered position of the object in the region</summary>
+    //    public Vector3 RenderPosition;
+    //    /// <summary>Rendered rotationm of the object in the region</summary>
+    //    public Quaternion RenderRotation;
+    //    /// <summary>Per frame calculated square of the distance from camera</summary>
+    //    public float DistanceSquared;
+    //    /// <summary>Bounding volume of the object</summary>
+    //    public BoundingVolume BoundingVolume;
+    //    /// <summary>Was the sim position and distance from camera calculated during this frame</summary>
+    //    public bool PositionCalculated;
+    //    /// <summary>Scene object type</summary>
+    //    public SceneObjectType Type = SceneObjectType.None;
+    //    /// <summary>Libomv primitive</summary>
+    //    public virtual Primitive BasePrim { get; set; }
+    //    /// <summary>Were initial initialization tasks done</summary>
+    //    public bool Initialized;
+    //    /// <summary>Is this object disposed</summary>
+    //    public bool IsDisposed = false;
+    //    public int AlphaQueryID = -1;
+    //    public int SimpleQueryID = -1;
+    //    public bool HasAlphaFaces;
+    //    public bool HasSimpleFaces;
+    //    public bool HasInvisibleFaces;
 
-        #endregion Public fields
+    //    #endregion Public fields
 
-        uint previousParent = uint.MaxValue;
+    //    uint previousParent = uint.MaxValue;
 
-        /// <summary>
-        /// Cleanup resources used
-        /// </summary>
-        public virtual void Dispose()
-        {
-            IsDisposed = true;
-        }
+    //    /// <summary>
+    //    /// Cleanup resources used
+    //    /// </summary>
+    //    public virtual void Dispose()
+    //    {
+    //        IsDisposed = true;
+    //    }
 
-        /// <summary>
-        /// Task performed the fist time object is set for rendering
-        /// </summary>
-        public virtual void Initialize()
-        {
-            RenderPosition = InterpolatedPosition = BasePrim.Position;
-            RenderRotation = InterpolatedRotation = BasePrim.Rotation;
-            Initialized = true;
-        }
+    //    /// <summary>
+    //    /// Task performed the fist time object is set for rendering
+    //    /// </summary>
+    //    public virtual void Initialize()
+    //    {
+    //        RenderPosition = InterpolatedPosition = BasePrim.Position;
+    //        RenderRotation = InterpolatedRotation = BasePrim.Rotation;
+    //        Initialized = true;
+    //    }
 
-        /// <summary>
-        /// Perform per frame tasks
-        /// </summary>
-        /// <param name="time">Time since the last call (last frame time in seconds)</param>
-        public virtual void Step(float time)
-        {
-            if (BasePrim == null) return;
+    //    /// <summary>
+    //    /// Perform per frame tasks
+    //    /// </summary>
+    //    /// <param name="time">Time since the last call (last frame time in seconds)</param>
+    //    public virtual void Step(float time)
+    //    {
+    //        if (BasePrim == null) return;
 
-            // Don't interpolate when parent changes (sit/stand link/unlink)
-            if (previousParent != BasePrim.ParentID)
-            {
-                previousParent = BasePrim.ParentID;
-                InterpolatedPosition = BasePrim.Position;
-                InterpolatedRotation = BasePrim.Rotation;
-                return;
-            }
+    //        // Don't interpolate when parent changes (sit/stand link/unlink)
+    //        if (previousParent != BasePrim.ParentID)
+    //        {
+    //            previousParent = BasePrim.ParentID;
+    //            InterpolatedPosition = BasePrim.Position;
+    //            InterpolatedRotation = BasePrim.Rotation;
+    //            return;
+    //        }
 
-            // Linear velocity and acceleration
-            if (BasePrim.Velocity != Vector3.Zero)
-            {
-                BasePrim.Position = InterpolatedPosition = BasePrim.Position + BasePrim.Velocity * time
-                    * 0.98f * RaindropInstance.GlobalInstance.Client.Network.CurrentSim.Stats.Dilation;
-                BasePrim.Velocity += BasePrim.Acceleration * time;
-            }
-            else if (InterpolatedPosition != BasePrim.Position)
-            {
-                InterpolatedPosition = RHelp.Smoothed1stOrder(InterpolatedPosition, BasePrim.Position, time);
-            }
+    //        // Linear velocity and acceleration
+    //        if (BasePrim.Velocity != Vector3.Zero)
+    //        {
+    //            BasePrim.Position = InterpolatedPosition = BasePrim.Position + BasePrim.Velocity * time
+    //                * 0.98f * RaindropInstance.GlobalInstance.Client.Network.CurrentSim.Stats.Dilation;
+    //            BasePrim.Velocity += BasePrim.Acceleration * time;
+    //        }
+    //        else if (InterpolatedPosition != BasePrim.Position)
+    //        {
+    //            InterpolatedPosition = RHelp.Smoothed1stOrder(InterpolatedPosition, BasePrim.Position, time);
+    //        }
 
-            // Angular velocity (target omega)
-            if (BasePrim.AngularVelocity != Vector3.Zero)
-            {
-                Vector3 angVel = BasePrim.AngularVelocity;
-                float angle = time * angVel.Length();
-                Quaternion dQ = Quaternion.CreateFromAxisAngle(angVel, angle);
-                InterpolatedRotation = dQ * InterpolatedRotation;
-            }
-            else if (InterpolatedRotation != BasePrim.Rotation && !(this is RenderAvatar))
-            {
-                InterpolatedRotation = Quaternion.Slerp(InterpolatedRotation, BasePrim.Rotation, time * 10f);
-                if (1f - Math.Abs(Quaternion.Dot(InterpolatedRotation, BasePrim.Rotation)) < 0.0001)
-                    InterpolatedRotation = BasePrim.Rotation;
-            }
-            else
-            {
-                InterpolatedRotation = BasePrim.Rotation;
-            }
-        }
+    //        // Angular velocity (target omega)
+    //        if (BasePrim.AngularVelocity != Vector3.Zero)
+    //        {
+    //            Vector3 angVel = BasePrim.AngularVelocity;
+    //            float angle = time * angVel.Length();
+    //            Quaternion dQ = Quaternion.CreateFromAxisAngle(angVel, angle);
+    //            InterpolatedRotation = dQ * InterpolatedRotation;
+    //        }
+    //        else if (InterpolatedRotation != BasePrim.Rotation && !(this is RenderAvatar))
+    //        {
+    //            InterpolatedRotation = Quaternion.Slerp(InterpolatedRotation, BasePrim.Rotation, time * 10f);
+    //            if (1f - Math.Abs(Quaternion.Dot(InterpolatedRotation, BasePrim.Rotation)) < 0.0001)
+    //                InterpolatedRotation = BasePrim.Rotation;
+    //        }
+    //        else
+    //        {
+    //            InterpolatedRotation = BasePrim.Rotation;
+    //        }
+    //    }
 
-        /// <summary>
-        /// Render scene object
-        /// </summary>
-        /// <param name="pass">Which pass are we currently in</param>
-        /// <param name="pickingID">ID used to identify which object was picked</param>
-        /// <param name="scene">Main scene renderer</param>
-        /// <param name="time">Time it took to render the last frame</param>
-        public virtual void Render(RenderPass pass, int pickingID, SceneWindow scene, float time)
-        {
-        }
+    //    /// <summary>
+    //    /// Render scene object
+    //    /// </summary>
+    //    /// <param name="pass">Which pass are we currently in</param>
+    //    /// <param name="pickingID">ID used to identify which object was picked</param>
+    //    /// <param name="scene">Main scene renderer</param>
+    //    /// <param name="time">Time it took to render the last frame</param>
+    //    public virtual void Render(RenderPass pass, int pickingID, SceneWindow scene, float time)
+    //    {
+    //    }
 
-        /// <summary>
-        /// Implementation of the IComparable interface
-        /// used for sorting by distance
-        /// </summary>
-        /// <param name="other">Object we are comparing to</param>
-        /// <returns>Result of the comparison</returns>
-        public virtual int CompareTo(object other)
-        {
-            SceneObject o = (SceneObject)other;
-            if (DistanceSquared < o.DistanceSquared)
-                return -1;
-            if (DistanceSquared > o.DistanceSquared)
-                return 1;
-            return 0;
-        }
+    //    /// <summary>
+    //    /// Implementation of the IComparable interface
+    //    /// used for sorting by distance
+    //    /// </summary>
+    //    /// <param name="other">Object we are comparing to</param>
+    //    /// <returns>Result of the comparison</returns>
+    //    public virtual int CompareTo(object other)
+    //    {
+    //        SceneObject o = (SceneObject)other;
+    //        if (DistanceSquared < o.DistanceSquared)
+    //            return -1;
+    //        if (DistanceSquared > o.DistanceSquared)
+    //            return 1;
+    //        return 0;
+    //    }
 
-        #region Occlusion queries
-        public void StartQuery(RenderPass pass)
-        {
-            if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    #region Occlusion queries
+    //    public void StartQuery(RenderPass pass)
+    //    {
+    //        if (!RenderSettings.OcclusionCullingEnabled) return;
 
-            if (pass == RenderPass.Simple)
-            {
-                StartSimpleQuery();
-            }
-            else if (pass == RenderPass.Alpha)
-            {
-                StartAlphaQuery();
-            }
-        }
+    //        if (pass == RenderPass.Simple)
+    //        {
+    //            StartSimpleQuery();
+    //        }
+    //        else if (pass == RenderPass.Alpha)
+    //        {
+    //            StartAlphaQuery();
+    //        }
+    //    }
 
-        public void EndQuery(RenderPass pass)
-        {
-            if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    public void EndQuery(RenderPass pass)
+    //    {
+    //        if (!RenderSettings.OcclusionCullingEnabled) return;
 
-            if (pass == RenderPass.Simple)
-            {
-                EndSimpleQuery();
-            }
-            else if (pass == RenderPass.Alpha)
-            {
-                EndAlphaQuery();
-            }
-        }
+    //        if (pass == RenderPass.Simple)
+    //        {
+    //            EndSimpleQuery();
+    //        }
+    //        else if (pass == RenderPass.Alpha)
+    //        {
+    //            EndAlphaQuery();
+    //        }
+    //    }
 
-        //public void StartAlphaQuery()
-        //{
-        //    if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    //public void StartAlphaQuery()
+    //    //{
+    //    //    if (!RenderSettings.OcclusionCullingEnabled) return;
 
-        //    if (AlphaQueryID == -1)
-        //    {
-        //        Compat.GenQueries(out AlphaQueryID);
-        //    }
-        //    if (AlphaQueryID > 0)
-        //    {
-        //        Compat.BeginQuery(QueryTarget.SamplesPassed, AlphaQueryID);
-        //    }
-        //}
+    //    //    if (AlphaQueryID == -1)
+    //    //    {
+    //    //        Compat.GenQueries(out AlphaQueryID);
+    //    //    }
+    //    //    if (AlphaQueryID > 0)
+    //    //    {
+    //    //        Compat.BeginQuery(QueryTarget.SamplesPassed, AlphaQueryID);
+    //    //    }
+    //    //}
 
-        //public void EndAlphaQuery()
-        //{
-        //    if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    //public void EndAlphaQuery()
+    //    //{
+    //    //    if (!RenderSettings.OcclusionCullingEnabled) return;
 
-        //    if (AlphaQueryID > 0)
-        //    {
-        //        Compat.EndQuery(QueryTarget.SamplesPassed);
-        //    }
-        //}
+    //    //    if (AlphaQueryID > 0)
+    //    //    {
+    //    //        Compat.EndQuery(QueryTarget.SamplesPassed);
+    //    //    }
+    //    //}
 
-        //public void StartSimpleQuery()
-        //{
-        //    if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    //public void StartSimpleQuery()
+    //    //{
+    //    //    if (!RenderSettings.OcclusionCullingEnabled) return;
 
-        //    if (SimpleQueryID == -1)
-        //    {
-        //        Compat.GenQueries(out SimpleQueryID);
-        //    }
-        //    if (SimpleQueryID > 0)
-        //    {
-        //        Compat.BeginQuery(QueryTarget.SamplesPassed, SimpleQueryID);
-        //    }
-        //}
+    //    //    if (SimpleQueryID == -1)
+    //    //    {
+    //    //        Compat.GenQueries(out SimpleQueryID);
+    //    //    }
+    //    //    if (SimpleQueryID > 0)
+    //    //    {
+    //    //        Compat.BeginQuery(QueryTarget.SamplesPassed, SimpleQueryID);
+    //    //    }
+    //    //}
 
-        //public void EndSimpleQuery()
-        //{
-        //    if (!RenderSettings.OcclusionCullingEnabled) return;
+    //    //public void EndSimpleQuery()
+    //    //{
+    //    //    if (!RenderSettings.OcclusionCullingEnabled) return;
 
-        //    if (SimpleQueryID > 0)
-        //    {
-        //        Compat.EndQuery(QueryTarget.SamplesPassed);
-        //    }
-        //}
+    //    //    if (SimpleQueryID > 0)
+    //    //    {
+    //    //        Compat.EndQuery(QueryTarget.SamplesPassed);
+    //    //    }
+    //    //}
 
-        //public bool Occluded()
-        //{
-        //    if (!RenderSettings.OcclusionCullingEnabled) return false;
+    //    //public bool Occluded()
+    //    //{
+    //    //    if (!RenderSettings.OcclusionCullingEnabled) return false;
 
-        //    if (HasInvisibleFaces) return false;
+    //    //    if (HasInvisibleFaces) return false;
 
-        //    if ((SimpleQueryID == -1 && AlphaQueryID == -1))
-        //    {
-        //        return false;
-        //    }
+    //    //    if ((SimpleQueryID == -1 && AlphaQueryID == -1))
+    //    //    {
+    //    //        return false;
+    //    //    }
 
-        //    if ((!HasAlphaFaces && !HasSimpleFaces)) return true;
+    //    //    if ((!HasAlphaFaces && !HasSimpleFaces)) return true;
 
-        //    int samples = 1;
-        //    if (HasSimpleFaces && SimpleQueryID > 0)
-        //    {
-        //        Compat.GetQueryObject(SimpleQueryID, GetQueryObjectParam.QueryResult, out samples);
-        //    }
-        //    if (HasSimpleFaces && samples > 0)
-        //    {
-        //        return false;
-        //    }
+    //    //    int samples = 1;
+    //    //    if (HasSimpleFaces && SimpleQueryID > 0)
+    //    //    {
+    //    //        Compat.GetQueryObject(SimpleQueryID, GetQueryObjectParam.QueryResult, out samples);
+    //    //    }
+    //    //    if (HasSimpleFaces && samples > 0)
+    //    //    {
+    //    //        return false;
+    //    //    }
 
-        //    samples = 1;
-        //    if (HasAlphaFaces && AlphaQueryID > 0)
-        //    {
-        //        Compat.GetQueryObject(AlphaQueryID, GetQueryObjectParam.QueryResult, out samples);
-        //    }
-        //    if (HasAlphaFaces && samples > 0)
-        //    {
-        //        return false;
-        //    }
+    //    //    samples = 1;
+    //    //    if (HasAlphaFaces && AlphaQueryID > 0)
+    //    //    {
+    //    //        Compat.GetQueryObject(AlphaQueryID, GetQueryObjectParam.QueryResult, out samples);
+    //    //    }
+    //    //    if (HasAlphaFaces && samples > 0)
+    //    //    {
+    //    //        return false;
+    //    //    }
 
-        //    return true;
-        //}
-        #endregion Occlusion queries
-    }
+    //    //    return true;
+    //    //}
+    //    #endregion Occlusion queries
+    //}
 
     public static class RHelp
     {
@@ -388,7 +388,7 @@ namespace Raindrop.Rendering
             return new UnityEngine.Vector3(v.X, v.Z, v.Y);
         }
 
-        public static UnityEngine.Vector4 TKVector3(Vector4 v)
+        public static UnityEngine.Vector4 TKVector4(Vector4 v)
         {
             return new UnityEngine.Vector4(v.X, v.Y, v.Z, v.W);
         }
@@ -890,7 +890,7 @@ namespace Raindrop.Rendering
                             #region Vertex Normal
 
                             // HACK: Sometimes normals are getting set to <NaN,NaN,NaN>
-                            if (!Single.IsNaN(vertex.Normal.X) && 
+                            if (!Single.IsNaN(vertex.Normal.X) &&
                                 !Single.IsNaN(vertex.Normal.Y) &&
                                 !Single.IsNaN(vertex.Normal.Z))
                             {

@@ -25,7 +25,7 @@ public class CanvasManager : Singleton<CanvasManager>
 
     }
 
-    public void reinitToLoginScreen()
+    public void resetToLoginScreen()
     {
         canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
         pushCanvas(CanvasType.Login);

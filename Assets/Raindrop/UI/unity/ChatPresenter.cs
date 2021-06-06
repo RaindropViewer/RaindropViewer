@@ -34,8 +34,10 @@ namespace Raindrop.Presenters
         private int chatPointer;
 
         private List<ChatLogPresenter> listOfChatLogs;
+        private ChatLogPresenter selectedChatLog;
 
         public readonly Dictionary<UUID, ulong> agentSimHandle = new Dictionary<UUID, ulong>();
+        private static readonly string LOCALCHATTITLE = "Local Chat";
 
         public ChatTextManager ChatManager { get; private set; }
         bool Active => instance.Client.Network.Connected;
@@ -57,6 +59,7 @@ namespace Raindrop.Presenters
 
         private List<string> chatTitles= new List<string>
         {
+            LOCALCHATTITLE
         };
         private string msgtext;
 
@@ -69,14 +72,22 @@ namespace Raindrop.Presenters
         void Start()
         {
 
-            var chatGO = ChatBox.gameObject.GetComponent<ITextLikeGameObject>();
             CloseButton.onClick.AsObservable().Subscribe(_ => OnCloseBtnClick()); //when clicked, runs this method.
             SendButton.onClick.AsObservable().Subscribe(_ => OnSendBtnClick()); //change username property.
             ChatInputField.onValueChanged.AsObservable().Subscribe(_ => OnInputChanged(_)); //change username property.
 
 
-            ChatManager = new ChatTextManager(instance, new RichTextBoxPrinter(ChatBox.gameObject));
+            var chatGO = (IPrintableMonobehavior) ChatBox.gameObject.GetComponent<ITextLikeGameObject>();
+            ChatManager = new ChatTextManager(instance, new TextBoxPrinter(chatGO));
 
+            RegisterClientEvents(client);
+        }
+
+        private void OnDestroy()
+        {
+
+
+            UnregisterClientEvents(client);
         }
 
         private void OnInputChanged(string _)
@@ -87,6 +98,9 @@ namespace Raindrop.Presenters
 
         private void OnSendBtnClick()
         {
+            if (selectedChatLog == null)
+                return;
+
             ProcessChatInput(msgtext,ChatType.Normal);
             return;
         }
@@ -111,7 +125,16 @@ namespace Raindrop.Presenters
             client.Network.SimDisconnected -= new EventHandler<SimDisconnectedEventArgs>(Network_SimDisconnected);
         }
 
+        //adds a tab for this particular IM session
+        public void AddIMTab(UUID target, UUID session, string targetName)
+        {
+            //IMTabWindow imTab = new IMTabWindow(instance, target, session, targetName);
 
+            //GroupButtons.Add(new IMTextManager(instance,??,IMTextManagerType.Agent,));
+            //imTab.SelectIMInput();
+
+            //return imTab;
+        }
 
         void Self_TeleportProgress(object sender, TeleportEventArgs e)
         {

@@ -17,20 +17,18 @@ namespace Raindrop.Presenters
     public class MinimapModule:MonoBehaviour
     {
         [SerializeField]
-        private Image Image;
-        private Texture2D my_img;
+        private Image Image;        //the unity ui component
+        private Texture2D map_tex;   //the unity engine texture.
 
         private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
-        private bool isWorking = false;
 
-        private UnityEngine.Vector3 referenceToCameraPosition;
+        //private UnityEngine.Vector3 referenceToCameraPosition;
         private UnityEngine.Vector3 referenceToAvatarPosition;
-        private UnityEngine.Vector3 referenceToSimPositionGlobal;
+        //private UnityEngine.Vector3 referenceToSimPositionGlobal;
         public Button MiniMapButton;
-        private readonly int DEFAULT_RES = 500;
 
         MinimapModule()
         {
@@ -42,6 +40,13 @@ namespace Raindrop.Presenters
 
 
         }
+        private void Update()
+        {
+            //set the camera to follow the avi.
+
+
+        }
+
 
         private void OnMinimapClick()
         {
@@ -52,23 +57,25 @@ namespace Raindrop.Presenters
 
         private void Network_OnCurrentSimChanged(object sender, SimChangedEventArgs e)
         {
-            isWorking = true;
-
             if (client.Network.Connected) return;
 
             GridRegion region;
             if (client.Grid.GetGridRegion(client.Network.CurrentSim.Name, GridLayerType.Objects, out region))
             {
-                SetMapLayer(my_img);
+                Texture2D _new_MapLayer = null; // LOL! its unity texture btw.
 
-                var _MapImageID = region.MapImageID;
+                UUID _MapImageID = region.MapImageID;
                 ManagedImage nullImage;
 
                 client.Assets.RequestImage(_MapImageID, ImageType.Baked,
                     delegate (TextureRequestState state, AssetTexture asset)
                     {
                         if (state == TextureRequestState.Finished)
-                            OpenJPEG.DecodeToImage(asset.AssetData, out nullImage, out _MapLayer);
+                        {
+                            OpenJPEG.DecodeToImage(asset.AssetData, out nullImage, out _new_MapLayer); //this call interally calls to another function 'DecodeToImage(byte[] encoded, out ManagedImage managedImage)'
+
+                            SetMapLayer(_new_MapLayer );
+                        }
                         else
                             Debug.LogWarning("minimap failed to DL texture.");
                     });
@@ -76,11 +83,14 @@ namespace Raindrop.Presenters
 
         }
 
-        private void SetMapLayer(Texture2D my_img)
+        private void SetMapLayer(Texture2D new_texture )
         {
-            my_img = new Texture2D(DEFAULT_RES, DEFAULT_RES);
+            Destroy(map_tex); //delete the tex2d that is no longer (?) used.
+
+            map_tex = new_texture;
             //throw new NotImplementedException();
         }
+
 
 
     }

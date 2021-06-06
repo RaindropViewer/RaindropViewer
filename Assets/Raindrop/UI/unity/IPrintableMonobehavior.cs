@@ -14,5 +14,9 @@ namespace Raindrop
         string Content { get; set; }
         Color ForeColor { get; set; }
         Color BackColor { get; set; }
+        string Text { get; set; }
+
+        void AppendText(string v);
+        void Clear();
     }
 }

@@ -24,14 +24,14 @@ using UnityEngine;
 
 namespace Raindrop
 {
-    public class RichTextBoxPrinter : ITextLikeGameObject
+    public class TextBoxPrinter : ITextPrinter
     {
         private IPrintableMonobehavior rtb;
         private static readonly string urlRegexString = @"(https?://[^ \r\n]+)|(\[secondlife://[^ \]\r\n]* ?(?:[^\]\r\n]*)])|(secondlife://[^ \r\n]*)";
         Regex urlRegex;
         private SlUriParser uriParser;
 
-        public RichTextBoxPrinter(IPrintableMonobehavior textBox)
+        public TextBoxPrinter(IPrintableMonobehavior textBox)
         {
             rtb = textBox;
 
@@ -73,9 +73,9 @@ namespace Raindrop
             for (linePartIndex = 0; linePartIndex < lineParts.Length - 1; linePartIndex += 2)
             {
                 rtb.AppendText(lineParts[linePartIndex]);
-                Color c = ForeColor;
+                //Color c = ForeColor;
                 rtb.InsertLink(uriParser.GetLinkName(lineParts[linePartIndex + 1]), lineParts[linePartIndex + 1]);
-                ForeColor = c;
+                //ForeColor = c;
             }
             if (linePartIndex != lineParts.Length)
             {
@@ -113,11 +113,8 @@ namespace Raindrop
             //    rtb.Invoke(new MethodInvoker(() => PrintTextLine(text, color)));
             //    return;
             //}
-
-            Color c = ForeColor;
-            ForeColor = color;
-            PrintTextLine(text);
-            ForeColor = c;
+             
+            PrintTextLine(text); 
         }
 
         public void ClearText()
@@ -129,24 +126,6 @@ namespace Raindrop
         {
             get => rtb.Text;
             set => rtb.Text = value;
-        }
-
-        public Color ForeColor
-        {
-            get => rtb.SelectionColor;
-            set => rtb.SelectionColor = value;
-        }
-
-        public Color BackColor
-        {
-            get => rtb.SelectionBackColor;
-            set => rtb.SelectionBackColor = value;
-        }
-
-        public Font Font
-        {
-            get => rtb.SelectionFont;
-            set => rtb.SelectionFont = value;
         }
 
         #endregion

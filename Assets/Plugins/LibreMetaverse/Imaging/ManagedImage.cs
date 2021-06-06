@@ -29,6 +29,7 @@ using System;
 //using System.Drawing.Imaging;
 using Catnip.Drawing;
 using Catnip.Drawing.Imaging;
+using UnityEngine;
 
 namespace OpenMetaverse.Imaging
 {
@@ -386,7 +387,7 @@ namespace OpenMetaverse.Imaging
         /// origin, suitable for feeding directly into OpenGL
         /// </summary>
         /// <returns>A byte array containing raw texture data</returns>
-        public Bitmap ExportBitmap()
+        public Texture2D ExportTex2D()
         {
             byte[] raw = new byte[Width * Height * 4];
 
@@ -427,19 +428,40 @@ namespace OpenMetaverse.Imaging
                 }
             }
 
-            Bitmap b = new Bitmap(
-                        Width,
-                        Height,
-                        PixelFormat.Format32bppArgb);
+            Texture2D b = new Texture2D(Width, Height);
+            b.hideFlags = HideFlags.HideAndDontSave; //this helps us delete this texture later?
 
-            BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-                ImageLockMode.WriteOnly,
-                PixelFormat.Format32bppArgb);
+            var mip0Data = b.GetPixelData<Color32>(1);
 
-            System.Runtime.InteropServices.Marshal.Copy(raw, 0, bd.Scan0, Width * Height * 4);
+            if (mip0Data.Length != Width * Height)
+            {
+                Debug.LogError("mip0 data size (of texture) not match the data size of array!");
+                
+            } 
 
-            b.UnlockBits(bd);
+            for (int i = 0; i < mip0Data.Length; i++)
+            {
+                var blue = raw[i * 4 + 0];
+                var green = raw[i * 4 + 1];
+                var red = raw[i * 4 + 2];
+                var alpha = raw[i * 4 + 3];
+                mip0Data[i] = new Color32(red, green, blue, alpha);
+            }
 
+            //Bitmap b = new Bitmap(
+            //            Width,
+            //            Height,
+            //            PixelFormat.Format32bppArgb);
+
+            //BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+            //    ImageLockMode.WriteOnly,
+            //    PixelFormat.Format32bppArgb);
+
+            //System.Runtime.InteropServices.Marshal.Copy(raw, 0, bd.Scan0, Width * Height * 4);
+
+            //b.UnlockBits(bd);
+
+            b.Apply(false);
             return b;
         }
 

@@ -33,8 +33,5 @@ namespace Raindrop
         void ClearText();
 
         string Content { get; set; }
-        Color ForeColor { get; set; }
-        Color BackColor { get; set; }
-        Font Font { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 
+using SixLabors.ImageSharp;
 using System;
 /**
 * Radegast Metaverse Client
@@ -24,12 +25,54 @@ namespace Raindrop
 {
     public class PrintableTextUI : UnityEngine.MonoBehaviour, IPrintableMonobehavior
     {
+        public string Text => throw new NotImplementedException();
+
+        string IPrintableMonobehavior.Content { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        Color IPrintableMonobehavior.ForeColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        Color IPrintableMonobehavior.BackColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        string IPrintableMonobehavior.Text { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public void AppendText(string v)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Clear()
         {
             throw new NotImplementedException();
         }
 
         internal void InsertLink(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.ClearText()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.InsertLink(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.InsertLink(string text, string hyperlink)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.PrintText(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.PrintTextLine(string text)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IPrintableMonobehavior.PrintTextLine(string text, Color color)
         {
             throw new NotImplementedException();
         }

@@ -29,6 +29,7 @@ using System;
 //using System.Drawing.Imaging;
 using Catnip.Drawing;
 using Catnip.Drawing.Imaging;
+using UnityEngine;
 
 namespace OpenMetaverse.Imaging
 {
