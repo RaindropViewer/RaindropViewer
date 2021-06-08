@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Raindrop
 {
-    public class mainUIManager
+    public class UIManager
     {
         //mainUImanager has dependencies:
         //   CanvasManager - stores and manages the pops, push of views onto the ui stack.
@@ -26,7 +26,7 @@ namespace Raindrop
         public CanvasManager canvasManager { get { return CanvasManager.GetInstance(); } }
         public ModalManager modalManager { get { return ModalManager.GetInstance(); } }
 
-        public mainUIManager(RaindropInstance raindropInstance)
+        public UIManager(RaindropInstance raindropInstance)
         {
             this.instance = raindropInstance;
 
@@ -78,7 +78,7 @@ namespace Raindrop
         {
             if (e.Status == LoginStatus.Failed)
             {
-                modalManager.showModal("Login failed.", e.Message);
+                modalManager.setVisibleGenericModal("Login failed.", e.Message, true);
                 //if (InAutoReconnect)
                 //{
                 //    if (instance.GlobalSettings["auto_reconnect"].AsBoolean() && e.FailReason != "tos")
@@ -89,7 +89,7 @@ namespace Raindrop
             }
             else if (e.Status == LoginStatus.Success)
             {
-                modalManager.showModal("Login success!", e.Message);
+                modalManager.setVisibleGenericModal("Login success!", e.Message, true);
                 //InAutoReconnect = false;
                 //reconnectToolStripMenuItem.Enabled = false;
                 //loginToolStripMenuItem.Enabled = false;

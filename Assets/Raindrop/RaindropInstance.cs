@@ -66,7 +66,7 @@ namespace Raindrop
         private string streaming_assets_dir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
-        private mainUIManager mainCanvas;
+        private UIManager ui_manager;
         //private RaindropUnitySceneRenderer mainWorldRenderer;
 
         // Singleton, there can be only one instance
@@ -325,7 +325,7 @@ namespace Raindrop
             names = new NameManager(this);
             COF = new CurrentOutfitFolder(this);
 
-            mainCanvas = new mainUIManager(this);
+            ui_manager = new UIManager(this);
             //mainCanvas.InitializeControls();
 
             //mainCanvas.Load += new EventHandler(mainForm_Load);
@@ -349,6 +349,7 @@ namespace Raindrop
 
             client.Settings.USE_ASSET_CACHE = true;
             client.Settings.ASSET_CACHE_DIR = Path.Combine(userDir, "cache");
+            Debug.Log("Userdir:" + userDir);
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
@@ -663,6 +664,8 @@ namespace Raindrop
                 userDir = System.Environment.CurrentDirectory;
             };
 
+            Debug.Log("Userdir:" + userDir);
+
             globalLogFile = Path.Combine(userDir, PROGRAMNAME + ".log");
             globalSettings = new Settings(Path.Combine(userDir, "settings.xml"));
             //frmSettings.InitSettigs(globalSettings, monoRuntime);
@@ -683,9 +686,9 @@ namespace Raindrop
             get { return state; }
         }
 
-        public mainUIManager MainCanvas
+        public UIManager UI
         {
-            get { return mainCanvas; }
+            get { return ui_manager; }
         }
 
         public OpenMetaverse.Vector3 cameraLoc { get; internal set; }

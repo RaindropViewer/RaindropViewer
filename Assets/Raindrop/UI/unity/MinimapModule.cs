@@ -51,7 +51,7 @@ namespace Raindrop.Presenters
         private void OnMinimapClick()
         {
             //what happend when minimap is clicked?
-            instance.MainCanvas.canvasManager.pushCanvas(CanvasType.Map);
+            instance.UI.canvasManager.pushCanvas(CanvasType.Map);
             Debug.Log("clicked minimap");
         }
 

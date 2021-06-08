@@ -7,13 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Raindrop
 {
     class LoginUtils
     {
-        // this function saves content of loginoptions to globalsettings file.
-        public static void SaveConfig(LoginOptions loginoptions, Raindrop.Settings globalSettings)
+        // this function appends (and saves) content of loginoptions to globalsettings file.
+        //it is called when the user clicks the login button.
+        public static void SaveConfig(LoginOptions loginoptions, Raindrop.Settings globalSettings, bool isSaveCredentials)
         {
             Raindrop.Settings s = globalSettings;
             SavedLogin sl = new SavedLogin();
@@ -21,6 +23,7 @@ namespace Raindrop
             string username = loginoptions.FirstName + " " + loginoptions.LastName;
             string Password = loginoptions.Password;
 
+            //checks if the username selected is a dropdown option. this means you use the username from the settings instead of the text box.
             //if (cbxUsername.SelectedIndex > 0 && cbxUsername.SelectedItem is SavedLogin)
             //{
             //    username = ((SavedLogin)cbxUsername.SelectedItem).Username;
@@ -44,9 +47,9 @@ namespace Raindrop
                 s["saved_logins"] = new OSDMap();
             }
 
-            if (loginoptions.IsSaveCredentials)
+            if (isSaveCredentials)
             {
-
+                Debug.Log("Saving user cred");
                 sl.Username = s["username"] = username;
 
                 if (LoginOptions.IsPasswordMD5(Password))
@@ -59,6 +62,9 @@ namespace Raindrop
                     sl.Password = Utils.MD5(Password);
                     s["password"] = Utils.MD5(Password);
                 }
+
+                //apparently the startlocation is also part of saveCredentials?
+
                 //if (cbxLocation.SelectedIndex == -1)
                 //{
                 //    sl.CustomStartLocation = cbxLocation.Text;
@@ -80,7 +86,7 @@ namespace Raindrop
 
             //s["login_grid"] = OSD.FromInteger(gridmgr.);  //note: this was removed as this was literally a magic number (int) that corresponds to the position of the dropbox selection.
             s["login_uri"] = OSD.FromString(loginoptions.GridLoginUri);
-            s["remember_login"] = OSD.FromBoolean (loginoptions.IsSaveCredentials);
+            s["remember_login"] = isSaveCredentials; //OSD.FromBoolean (loginoptions.IsSaveCredentials);
         }
 
         public class SavedLogin
@@ -167,6 +173,8 @@ namespace Raindrop
             settings["remember_login"] = isRemember;
 
         }
+
+
 
     }
 }

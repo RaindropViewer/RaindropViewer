@@ -107,7 +107,7 @@ namespace Raindrop.Presenters
 
         private void OnCloseBtnClick()
         {
-            instance.MainCanvas.canvasManager.popCanvas();
+            instance.UI.canvasManager.popCanvas();
 
         }
 

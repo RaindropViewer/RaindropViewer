@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class modalPresenter : MonoBehaviour
 {
 
-    public Text titletext;
+    public TMP_Text titletext;
     public TMP_Text contenttext;
     public TMP_Text actionText;
     public GameObject modal;
@@ -29,9 +29,9 @@ public class modalPresenter : MonoBehaviour
         {
             BackgroundButton.onClick.AsObservable().Subscribe(_ => closeModal()); //when clicked, runs this method.
         }
-        if (titletext.GetComponent<Text>() == null)
+        if (titletext.GetComponent<TMP_Text>() == null)
         {
-            Debug.LogError("titletext.GetComponent<Text>() failed");
+            Debug.LogError("titletext.GetComponent<TMP_Text>() failed");
         }
         if (contenttext.GetComponent<TMP_Text>() == null)
         {
@@ -43,7 +43,7 @@ public class modalPresenter : MonoBehaviour
     //sets the textual contents of the ui
     public void setModal(string title, string content, string ActionText)
     {
-        titletext.GetComponent<Text>().text = title;
+        titletext.GetComponent<TMP_Text>().text = title;
         contenttext.GetComponent<TMP_Text>().text = content;
         if (actionText != null)
         {

@@ -40,6 +40,43 @@ public class CanvasManager : Singleton<CanvasManager>
 
         return activeCanvasStack.Peek().gameObject;
     }
+    public CanvasType getCanvasTypeFromString(string _type)
+    {
+        foreach(CanvasIdentifier _ in canvasControllerList)
+        {
+            var thecanvastype = _.canvasType;
+            if (_type == thecanvastype.ToString())
+            {
+                return thecanvastype;
+            }
+            
+        }
+
+        return CanvasType.UNKNOWN;
+         
+    }
+    public void pushCanvas(string _type)
+    {
+        pushCanvas(_type, false);
+    }
+
+    //isPopCurrentActiveCanvas true will pop the current top canvas and then push the new desired one.
+    public void pushCanvas(string _type, bool isPopCurrentActiveCanvas)
+    {
+        CanvasType theCanvasType = getCanvasTypeFromString(_type);
+        if (theCanvasType ==CanvasType.UNKNOWN)
+        {
+            Debug.LogError("unable to get the canvas of identifer: "+ _type);
+        }
+
+        if (isPopCurrentActiveCanvas)
+        {
+            popCanvas();
+        }
+        pushCanvas(theCanvasType);
+    }
+
+
     public void pushCanvas(CanvasType _type)
     {
         if (activeCanvasStack.Count() != 0)

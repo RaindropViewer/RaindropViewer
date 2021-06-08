@@ -131,9 +131,9 @@ namespace Raindrop.Netcom
             set { lastExecEvent = value; }
         }
 
-        public bool IsSaveCredentials { 
-            get => isSaveCredentials; 
-            set => isSaveCredentials = value; 
-        }
+        //public bool IsSaveCredentials { 
+        //    get => isSaveCredentials; 
+        //    set => isSaveCredentials = value; 
+        //}
     }
 }

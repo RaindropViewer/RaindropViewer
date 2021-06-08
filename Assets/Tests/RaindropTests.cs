@@ -39,7 +39,7 @@ namespace Raindrop.Tests
 
             //get viewmodel to login.
             //getCurrentForeground gives us the loginVM, which we then call onloginbtnclick from.
-            GameObject temp = (GameObject)instance.MainCanvas.getCurrentForegroundPresenter();
+            GameObject temp = (GameObject)instance.UI.getCurrentForegroundPresenter();
             if (temp == null)
             {
 

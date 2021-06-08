@@ -30,6 +30,7 @@ using System.Net;
 using OpenMetaverse;
 using OpenMetaverse.Packets;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace OpenMetaverse.Tests
 {
@@ -67,8 +68,12 @@ namespace OpenMetaverse.Tests
             Console.Write($"Logging in {fullusername}...");
             // Connect to the grid
             string startLoc = NetworkManager.StartLocation("Hooper", 179, 18, 32);
+            //changed:
+            Debug.Log("startLoc : " + startLoc);
             Assert.IsTrue(Client.Network.Login(username[0], username[1], password, "Unit Test Framework", startLoc,
                 "contact@openmetaverse.co"), "Client failed to login, reason: " + Client.Network.LoginMessage);
+            //changed:
+            Debug.Log("login message: " + Client.Network.LoginMessage);
             Console.WriteLine("Done");
 
             Assert.IsTrue(Client.Network.Connected, "Client is not connected to the grid");

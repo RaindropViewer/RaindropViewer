@@ -40,19 +40,19 @@ namespace Raindrop.Presenters
         public Toggle TOSCheckbox;
         public Toggle RememberCheckbox;
 
-        public Modal loginStatusModal;
+        //public Modal loginStatusModal;
 
         //extragrid seclections
-        public GameObject GridDropdownGO; //required.
-        public GenericDropdown genericDropdown;
+        //public GameObject GridDropdownGO; //required.
+        //public GenericDropdown genericDropdown;
         //public TMP_InputField customURL;
         //public Toggle customURLCheckbox;
         #endregion
 
         #region internal representations 
 
-        private string username;
-        private string password;
+        //private string Username;
+        //private string Password;
         private readonly string INIT_USERNAME = "username";
         private readonly string INIT_PASSWORD = "password";
         private Settings s;
@@ -68,6 +68,9 @@ namespace Raindrop.Presenters
         }
 
         public ReactiveProperty<string> Login_msg { get; private set; }
+        private ReactiveProperty<bool> btnLoginEnabled;
+
+        public string uninitialised = "(unknown)";
 
         //private List<string> gridDropdownOptions = new List<string> //type is grid
         //{
@@ -76,15 +79,14 @@ namespace Raindrop.Presenters
         private int gridSelectedItem;
 
         private object lblLoginStatus;
-        private string login_msg;
+        //private string login_msg;
 
-        private bool btnLoginEnabled;
 
         private bool cbTOStrue = true;
         private bool cbCustomURL = false;
         private bool cbRememberBool;
-        private DropdownMenuWithEntry usernameDropdownMenuWithEntry;
-        private GameObject UserDropdownMenu;
+        //private DropdownMenuWithEntry usernameDropdownMenuWithEntry;
+        //private GameObject UserDropdownMenu;
 
 
         #endregion
@@ -94,31 +96,45 @@ namespace Raindrop.Presenters
         // Use this for initialization
         void Start()
         {
+            //1 load deafult UI fields.
+            initialiseFields();
+
+            //2 load various loginInformation from the settings.
+            InitializeConfig();
+
+
             //GridDropdownGO = this.gameObject.GetComponent<GenericDropdown>().gameObject;
-            genericDropdown = GridDropdownGO.GetComponent<GenericDropdown>();
+            //genericDropdown = GridDropdownGO.GetComponent<GenericDropdown>();
             //GridDropdownView.DropdownSelectionChanged += GenericDropdown_DropdownSelectionChanged;
 
+            //3 hookup reactive UIs.
             LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick()); //when clicked, runs this method.
+
+            btnLoginEnabled = new ReactiveProperty<bool>(true);
+            btnLoginEnabled.AsObservable().Subscribe(_ => LoginButton.gameObject.SetActive(_)); //update the login button availabilty according to this boolean.
+            
             usernameField.onValueChanged.AsObservable().Subscribe(_ => Username = _); //change username property.
-            passwordField.onValueChanged.AsObservable().Subscribe(_ => Password = _); //change username property.
+            passwordField.onValueChanged.AsObservable().Subscribe(_ => Password = _);
 
             RememberCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbRememberBool = _); //when toggle checkbox, set boolean to the same value as the toggle-state
             TOSCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbTOStrue = _); //when toggle checkbox, set boolean to the same value as the toggle-state
+
+            Login_msg.AsObservable().Where(_ => ! _.Equals(uninitialised)).Subscribe(_ => UpdateModalText(_)); //no bug?
 
             //gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
             //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
 
             //DropdownMenuWithEntry = UserDropdownMenu.GetComponent<DropdownMenuWithEntry>();
 
+            //4subscribe to events.
             AddNetcomEvents();
 
 
         }
 
-        private void GenericDropdown_DropdownSelectionChanged()
+        private void UpdateModalText(string _)
         {
-
-            throw new NotImplementedException();
+            instance.UI.modalManager.setVisibleLoggingInModal(_);
         }
 
         private void AddNetcomEvents()
@@ -144,25 +160,25 @@ namespace Raindrop.Presenters
             {
                 case LoginStatus.ConnectingToLogin:
                     Login_msg.GetType().GetProperty("Value").SetValue(Login_msg, "Connecting to login server...");
-                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
+                    instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ConnectingToSim:
                     Login_msg.Value = ("Connecting to region...");
-                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
+                    instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.Redirecting:
                     Login_msg.Value = "Redirecting...";
-                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
+                    instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ReadingResponse:
                     Login_msg.Value = "Reading response...";
-                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "cancel");
+                    instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
@@ -172,10 +188,13 @@ namespace Raindrop.Presenters
                     //proLogin.Visible = false;
 
                     //btnLogin.Text = "Logout";
-                    btnLoginEnabled = false;
+                    btnLoginEnabled.Value = false;
                     instance.Client.Groups.RequestCurrentGroups();
 
-                    instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...","Logged in !", "yay!");
+                    instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...","Logged in !", "yay!");
+                    instance.UI.canvasManager.pushCanvas("Game", true); //refactor needed: better way to schedule push and pop as we are facing some issues here.
+                    instance.UI.canvasManager.popCanvas();
+                    LoginButton.interactable = true;
                     break;
 
                 case LoginStatus.Failed: 
@@ -183,16 +202,18 @@ namespace Raindrop.Presenters
                     if (e.FailReason == "tos")
                     {
                         Login_msg.Value = "Must agree to Terms of Service before logging in";
-                        instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed",Login_msg.Value, "ok");
+                        instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed",Login_msg.Value, "ok");
                         //pnlTos.Visible = true;
                         //txtTOS.Text = e.Message.Replace("\n", "\r\n");
-                        btnLoginEnabled = true;
+                        btnLoginEnabled.Value = true;
+                        LoginButton.interactable = true;
                     }
                     else
                     {
                         Login_msg.Value = e.Message;
-                        instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed", Login_msg.Value, "ok");
-                        btnLoginEnabled = false;
+                        instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed", Login_msg.Value, "ok");
+                        btnLoginEnabled.Value = true;
+                        LoginButton.interactable = true;
                     }
                     //proLogin.Visible = false;
 
@@ -204,7 +225,7 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
             Login_msg.Value = "logged out.";
-            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //pnlLoginPrompt.Visible = true;
             //pnlLoggingIn.Visible = false;
 
@@ -214,10 +235,10 @@ namespace Raindrop.Presenters
 
         public void netcom_ClientLoggingOut(object sender, OverrideEventArgs e)
         {
-            btnLoginEnabled = false;
+            btnLoginEnabled.Value = false;
 
             Login_msg.Value = "Logging out...";
-            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;
@@ -226,14 +247,14 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggingIn(object sender, OverrideEventArgs e)
         {
             Login_msg.Value = "Logging in...";
-            instance.MainCanvas.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            instance.UI.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;
             //pnlLoggingIn.Visible = true;
             //pnlLoginPrompt.Visible = false;
 
-            btnLoginEnabled = false;
+            btnLoginEnabled.Value = false;
         }
           
 
@@ -241,14 +262,13 @@ namespace Raindrop.Presenters
         private void initialiseFields()
         {
             //reset user and pw fields
-            username = INIT_USERNAME;
-            password = INIT_PASSWORD;
+            Username = INIT_USERNAME;
+            Password = INIT_PASSWORD;
 
             //modal 
-            Login_msg = new ReactiveProperty<string>("???");
+            Login_msg = new ReactiveProperty<string>(uninitialised);
 
             //grids selector
-            InitializeConfig();
             //location selector
 
         }
@@ -257,7 +277,7 @@ namespace Raindrop.Presenters
         private void InitializeConfig()
         {
             // Initilize grid dropdown
-            int gridIx = -1;
+            //int gridIx = -1;
 
             //GridDropdownGO.clear();
             //GridDropdownGO.set(instance.GridManger.Grids);
@@ -283,6 +303,7 @@ namespace Raindrop.Presenters
             string savedUsername = s["username"];
             usernameField.text = (savedUsername);
 
+            //try to get saved username
             try
             {
                 if (s["saved_logins"] is OSDMap)
@@ -308,7 +329,7 @@ namespace Raindrop.Presenters
 
             // Fill in saved password or use one specified on the command line
             passwordField.text = s["password"].AsString();
-            Debug.Log("pass cache: " + passwordField.text);
+            Debug.Log("password cache: " + passwordField.text);
 
             // Setup login location either from the last used or
             // override from the command line
@@ -379,7 +400,7 @@ namespace Raindrop.Presenters
         {
             LoginButton.interactable = false;
             //sanity 
-            if (username == INIT_USERNAME || password == INIT_PASSWORD)
+            if (Username == INIT_USERNAME || Password == INIT_PASSWORD)
             {
                 Debug.LogError("Either username and password is not defined!");
 
@@ -409,6 +430,8 @@ namespace Raindrop.Presenters
 
         private void BeginLogin()
         {
+            
+
             string username = Username;
 
             //if (Username.SelectedIndex > 0 && cbxUsername.SelectedItem is SavedLogin)
@@ -436,21 +459,24 @@ namespace Raindrop.Presenters
             netcom.LoginOptions.Version = "Version"; // Version
             netcom.AgreeToTos = cbTOStrue;
 
-            //switch (cbxLocation.SelectedIndex)
-            //{
-            //    case -1: //Custom
-            //        netcom.LoginOptions.StartLocation = StartLocationType.Custom;
-            //        netcom.LoginOptions.StartLocationCustom = cbxLocation.Text;
-            //        break;
+            //placeholder
+            switch (1)
+            {
+                case -1: //Custom
+                    netcom.LoginOptions.StartLocation = StartLocationType.Custom;
+                    netcom.LoginOptions.StartLocationCustom = "placeholder text";
+                    break;
 
-            //    case 0: //Home
-            //        netcom.LoginOptions.StartLocation = StartLocationType.Home;
-            //        break;
+                case 0: //Home
+                    netcom.LoginOptions.StartLocation = StartLocationType.Home;
+                    break;
 
-            //    case 1: //Last
-            //        netcom.LoginOptions.StartLocation = StartLocationType.Last;
-            //        break;
-            //}
+                case 1: //Last
+                    netcom.LoginOptions.StartLocation = StartLocationType.Last;
+                    break;
+            }
+
+            //netcom.LoginOptions.IsSaveCredentials = cbRememberBool;
 
             //if (cbxGrid.SelectedIndex == cbxGrid.Items.Count - 1) // custom login uri
             //{
@@ -468,6 +494,9 @@ namespace Raindrop.Presenters
             //netcom.LoginOptions.Grid = instance.GridManger.Grids[gridSelectedItem];
             //}
 
+            //placeholder to select SL as grid.
+            netcom.LoginOptions.Grid = instance.GridManger.Grids[0]; //0 means sl i think
+
             if (netcom.LoginOptions.Grid.Platform != "SecondLife")
             {
                 instance.Client.Settings.MULTIPLE_SIMS = true;
@@ -483,7 +512,7 @@ namespace Raindrop.Presenters
             var temp = netcom.LoginOptions;
 
             netcom.Login();
-            LoginUtils.SaveConfig(netcom.LoginOptions, instance.GlobalSettings);
+            LoginUtils.SaveConfig(netcom.LoginOptions, instance.GlobalSettings, cbRememberBool);
         }
 
 
