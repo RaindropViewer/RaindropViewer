@@ -33,12 +33,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
 using System.IO;
 using OpenMetaverse.StructuredData;
 using LibreMetaverse.PrimMesher;
 using OMV = OpenMetaverse;
 using OMVR = OpenMetaverse.Rendering;
+using Catnip.Drawing;
 
 namespace OpenMetaverse.Rendering
 {

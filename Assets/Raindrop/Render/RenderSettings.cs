@@ -45,7 +45,7 @@ namespace Raindrop.Rendering
         /// <summary>Should we try to make sure that large prims that are > our draw distance are in view when we are standing on them</summary>
         public static bool HeavierDistanceChecking = true;
         /// <summary>Minimum time between rebuilding terrain mesh and texture</summary>
-        public static float MinimumTimeBetweenTerrainUpdated = 15f;
+        public static float MinimumTimeBetweenTerrainUpdated = 1000f;
         /// <summary>Are textures that don't have dimensions that are powers of two supported</summary>
         public static bool TextureNonPowerOfTwoSupported;
 

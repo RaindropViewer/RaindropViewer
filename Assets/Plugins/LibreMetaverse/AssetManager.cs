@@ -1088,6 +1088,8 @@ namespace OpenMetaverse
 
         public void RequestUploadBakedTexture(byte[] textureData, BakedTextureUploadedCallback callback)
         {
+            Logger.DebugLog("RequestUploadBakedTexture");
+
             CapsClient request = null;
             if(Client.Network.CurrentSim.Caps != null) {
                 request = Client.Network.CurrentSim.Caps.CreateCapsClient("UploadBakedTexture");

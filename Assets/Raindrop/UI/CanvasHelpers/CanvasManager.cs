@@ -57,11 +57,11 @@ public class CanvasManager : Singleton<CanvasManager>
     }
     public void pushCanvas(string _type)
     {
-        pushCanvas(_type, false);
+        pushCanvasWithOrWithoutPop(_type, false);
     }
 
     //isPopCurrentActiveCanvas true will pop the current top canvas and then push the new desired one.
-    public void pushCanvas(string _type, bool isPopCurrentActiveCanvas)
+    public void pushCanvasWithOrWithoutPop(string _type, bool isPopCurrentActiveCanvas)
     {
         CanvasType theCanvasType = getCanvasTypeFromString(_type);
         if (theCanvasType ==CanvasType.UNKNOWN)

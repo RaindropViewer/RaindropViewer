@@ -29,7 +29,7 @@ namespace Catnip.Drawing
         //
         // Summary:
         //     Red component of the color.
-        public float r;
+        public int r;
         //
         // Summary:
         //     Green component of the color.

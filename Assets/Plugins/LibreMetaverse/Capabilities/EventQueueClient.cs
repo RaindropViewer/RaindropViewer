@@ -91,7 +91,7 @@ namespace OpenMetaverse.Http
             _Running = true;
             _Request = request;
 
-            Logger.DebugLog("Capabilities event queue connected");
+            Logger.DebugLog("Capabilities event queue connected " + request.RequestUri.ToString());
 
             // The event queue is starting up for the first time
             if (OnConnected != null)

@@ -27,8 +27,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
+using SixLabors;
 using System.IO;
+using Catnip.Drawing;
+using UnityEngine;
+
+//using Image = Catnip.Drawing.Image;
+
 
 namespace LibreMetaverse.PrimMesher
 {
@@ -52,9 +58,18 @@ namespace LibreMetaverse.PrimMesher
 
         public SculptMesh(string fileName, int sculptType, int lod, int viewerMode, int mirror, int invert)
         {
-            var bitmap = (Bitmap) Image.FromFile(fileName);
-            _SculptMesh(bitmap, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
-            bitmap.Dispose();
+            //var bitmap = (Bitmap) Image.FromFile(fileName);
+            var myreader = new BMPLoader();
+            BMPImage myimg = myreader.LoadBMP(fileName);
+            Texture2D tex = myimg.ToTexture2D();
+            Bitmap fakebmp = new Bitmap(tex);
+
+            _SculptMesh(fakebmp, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
+            //bitmap.Dispose();
+
+            fakebmp.delete();
+
+
         }
 
         /// <summary>
@@ -189,13 +204,13 @@ namespace LibreMetaverse.PrimMesher
             uvs = new List<UVCoord>(sm.uvs);
         }
 
-        public SculptMesh SculptMeshFromFile(string fileName, SculptType sculptType, int lod, bool viewerMode)
-        {
-            var bitmap = (Bitmap) Image.FromFile(fileName);
-            var sculptMesh = new SculptMesh(bitmap, sculptType, lod, viewerMode);
-            bitmap.Dispose();
-            return sculptMesh;
-        }
+        //public SculptMesh SculptMeshFromFile(string fileName, SculptType sculptType, int lod, bool viewerMode)
+        //{
+        //    var bitmap = (Bitmap) Image.FromFile(fileName);
+        //    var sculptMesh = new SculptMesh(bitmap, sculptType, lod, viewerMode);
+        //    bitmap.Dispose();
+        //    return sculptMesh;
+        //}
 
         /// <summary>
         ///     converts a bitmap to a list of lists of coords, while scaling the image.
@@ -207,90 +222,90 @@ namespace LibreMetaverse.PrimMesher
         /// <param name="scale"></param>
         /// <param name="mirror"></param>
         /// <returns></returns>
-        private List<List<Coord>> bitmap2Coords(Bitmap bitmap, int scale, bool mirror)
-        {
-            var numRows = bitmap.Height / scale;
-            var numCols = bitmap.Width / scale;
-            var rows = new List<List<Coord>>(numRows);
+        //private List<List<Coord>> bitmap2Coords(Bitmap bitmap, int scale, bool mirror)
+        //{
+        //    var numRows = bitmap.Height / scale;
+        //    var numCols = bitmap.Width / scale;
+        //    var rows = new List<List<Coord>>(numRows);
 
-            var pixScale = 1.0f / (scale * scale);
-            pixScale /= 255;
+        //    var pixScale = 1.0f / (scale * scale);
+        //    pixScale /= 255;
 
-            int imageX, imageY = 0;
+        //    int imageX, imageY = 0;
 
-            int rowNdx, colNdx;
+        //    int rowNdx, colNdx;
 
-            for (rowNdx = 0; rowNdx < numRows; rowNdx++)
-            {
-                var row = new List<Coord>(numCols);
-                for (colNdx = 0; colNdx < numCols; colNdx++)
-                {
-                    imageX = colNdx * scale;
-                    var imageYStart = rowNdx * scale;
-                    var imageYEnd = imageYStart + scale;
-                    var imageXEnd = imageX + scale;
-                    var rSum = 0.0f;
-                    var gSum = 0.0f;
-                    var bSum = 0.0f;
-                    for (; imageX < imageXEnd; imageX++)
-                    for (imageY = imageYStart; imageY < imageYEnd; imageY++)
-                    {
-                        var c = bitmap.GetPixel(imageX, imageY);
-                        if (c.A != 255)
-                        {
-                            bitmap.SetPixel(imageX, imageY, Color.FromArgb(255, c.R, c.G, c.B));
-                            c = bitmap.GetPixel(imageX, imageY);
-                        }
-                        rSum += c.R;
-                        gSum += c.G;
-                        bSum += c.B;
-                    }
-                    row.Add(mirror
-                        ? new Coord(-(rSum * pixScale - 0.5f), gSum * pixScale - 0.5f, bSum * pixScale - 0.5f)
-                        : new Coord(rSum * pixScale - 0.5f, gSum * pixScale - 0.5f, bSum * pixScale - 0.5f));
-                }
-                rows.Add(row);
-            }
-            return rows;
-        }
+        //    for (rowNdx = 0; rowNdx < numRows; rowNdx++)
+        //    {
+        //        var row = new List<Coord>(numCols);
+        //        for (colNdx = 0; colNdx < numCols; colNdx++)
+        //        {
+        //            imageX = colNdx * scale;
+        //            var imageYStart = rowNdx * scale;
+        //            var imageYEnd = imageYStart + scale;
+        //            var imageXEnd = imageX + scale;
+        //            var rSum = 0.0f;
+        //            var gSum = 0.0f;
+        //            var bSum = 0.0f;
+        //            for (; imageX < imageXEnd; imageX++)
+        //            for (imageY = imageYStart; imageY < imageYEnd; imageY++)
+        //            {
+        //                var c = bitmap.GetPixel(imageX, imageY);
+        //                if (c.A != 255)
+        //                {
+        //                    bitmap.SetPixel(imageX, imageY, Color.FromArgb(255, c.R, c.G, c.B));
+        //                    c = bitmap.GetPixel(imageX, imageY);
+        //                }
+        //                rSum += c.R;
+        //                gSum += c.G;
+        //                bSum += c.B;
+        //            }
+        //            row.Add(mirror
+        //                ? new Coord(-(rSum * pixScale - 0.5f), gSum * pixScale - 0.5f, bSum * pixScale - 0.5f)
+        //                : new Coord(rSum * pixScale - 0.5f, gSum * pixScale - 0.5f, bSum * pixScale - 0.5f));
+        //        }
+        //        rows.Add(row);
+        //    }
+        //    return rows;
+        //}
 
-        private List<List<Coord>> bitmap2CoordsSampled(Bitmap bitmap, int scale, bool mirror)
-        {
-            var numRows = bitmap.Height / scale;
-            var numCols = bitmap.Width / scale;
-            var rows = new List<List<Coord>>(numRows);
+        //private List<List<Coord>> bitmap2CoordsSampled(Bitmap bitmap, int scale, bool mirror)
+        //{
+        //    var numRows = bitmap.Height / scale;
+        //    var numCols = bitmap.Width / scale;
+        //    var rows = new List<List<Coord>>(numRows);
 
-            var pixScale = 1.0f / 256.0f;
+        //    var pixScale = 1.0f / 256.0f;
 
-            int imageX, imageY = 0;
+        //    int imageX, imageY = 0;
 
-            int rowNdx, colNdx;
+        //    int rowNdx, colNdx;
 
-            for (rowNdx = 0; rowNdx <= numRows; rowNdx++)
-            {
-                var row = new List<Coord>(numCols);
-                imageY = rowNdx * scale;
-                if (rowNdx == numRows) imageY--;
-                for (colNdx = 0; colNdx <= numCols; colNdx++)
-                {
-                    imageX = colNdx * scale;
-                    if (colNdx == numCols) imageX--;
+        //    for (rowNdx = 0; rowNdx <= numRows; rowNdx++)
+        //    {
+        //        var row = new List<Coord>(numCols);
+        //        imageY = rowNdx * scale;
+        //        if (rowNdx == numRows) imageY--;
+        //        for (colNdx = 0; colNdx <= numCols; colNdx++)
+        //        {
+        //            imageX = colNdx * scale;
+        //            if (colNdx == numCols) imageX--;
 
-                    var c = bitmap.GetPixel(imageX, imageY);
-                    if (c.A != 255)
-                    {
-                        bitmap.SetPixel(imageX, imageY, Color.FromArgb(255, c.R, c.G, c.B));
-                        c = bitmap.GetPixel(imageX, imageY);
-                    }
+        //            var c = bitmap.GetPixel(imageX, imageY);
+        //            if (c.A != 255)
+        //            {
+        //                bitmap.SetPixel(imageX, imageY, Color.FromArgb(255, c.R, c.G, c.B));
+        //                c = bitmap.GetPixel(imageX, imageY);
+        //            }
 
-                    row.Add(mirror
-                        ? new Coord(-(c.R * pixScale - 0.5f), c.G * pixScale - 0.5f, c.B * pixScale - 0.5f)
-                        : new Coord(c.R * pixScale - 0.5f, c.G * pixScale - 0.5f, c.B * pixScale - 0.5f));
-                }
-                rows.Add(row);
-            }
-            return rows;
-        }
+        //            row.Add(mirror
+        //                ? new Coord(-(c.R * pixScale - 0.5f), c.G * pixScale - 0.5f, c.B * pixScale - 0.5f)
+        //                : new Coord(c.R * pixScale - 0.5f, c.G * pixScale - 0.5f, c.B * pixScale - 0.5f));
+        //        }
+        //        rows.Add(row);
+        //    }
+        //    return rows;
+        //}
 
 
         private void _SculptMesh(Bitmap sculptBitmap, SculptType sculptType, int lod, bool viewerMode, bool mirror,

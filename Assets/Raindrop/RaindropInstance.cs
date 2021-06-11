@@ -39,10 +39,11 @@ using Raindrop.Netcom;
 using OpenMetaverse;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
+using ServiceLocatorSample.ServiceLocator;
 
 namespace Raindrop
 {
-    public class RaindropInstance
+    public class RaindropInstance : IGameService
     {
         #region OnRadegastFormCreated
         //Actually this event is never subscribed to!
@@ -66,10 +67,11 @@ namespace Raindrop
         private string streaming_assets_dir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
-        private UIManager ui_manager;
+        //private UIManager ui_manager;
         //private RaindropUnitySceneRenderer mainWorldRenderer;
 
         // Singleton, there can be only one instance
+
         private static RaindropInstance globalInstance = null;
         public static RaindropInstance GlobalInstance
         {
@@ -325,7 +327,7 @@ namespace Raindrop
             names = new NameManager(this);
             COF = new CurrentOutfitFolder(this);
 
-            ui_manager = new UIManager(this);
+            //ui_manager = new UIManager(this);
             //mainCanvas.InitializeControls();
 
             //mainCanvas.Load += new EventHandler(mainForm_Load);
@@ -686,10 +688,10 @@ namespace Raindrop
             get { return state; }
         }
 
-        public UIManager UI
-        {
-            get { return ui_manager; }
-        }
+        //public UIManager UI
+        //{
+        //    get { return ui_manager; }
+        //}
 
         public OpenMetaverse.Vector3 cameraLoc { get; internal set; }
 

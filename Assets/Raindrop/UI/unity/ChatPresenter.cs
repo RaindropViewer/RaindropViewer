@@ -107,7 +107,8 @@ namespace Raindrop.Presenters
 
         private void OnCloseBtnClick()
         {
-            instance.UI.canvasManager.popCanvas();
+            var uimanager = ServiceLocatorSample.ServiceLocator.ServiceLocator.Current.Get<UIManager>();
+            uimanager.canvasManager.popCanvas();
 
         }
 

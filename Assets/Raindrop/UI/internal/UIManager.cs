@@ -9,12 +9,13 @@ using OpenMetaverse.StructuredData;
 using OpenMetaverse.Assets;
 using Raindrop;
 using UnityEngine;
+using ServiceLocatorSample.ServiceLocator;
 
 namespace Raindrop
 {
-    public class UIManager
+    public class UIManager : IGameService
     {
-        //mainUImanager has dependencies:
+        //mainUImanager has responsibilities:
         //   CanvasManager - stores and manages the pops, push of views onto the ui stack.
         //   ModalManager - pops and shows modals.
         //  LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
@@ -23,12 +24,14 @@ namespace Raindrop
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
+        //public CanvasManager canvasManager { get { return CanvasManager.GetInstance(); } }
         public CanvasManager canvasManager { get { return CanvasManager.GetInstance(); } }
         public ModalManager modalManager { get { return ModalManager.GetInstance(); } }
 
-        public UIManager(RaindropInstance raindropInstance)
+        //This was the old contructor used when UIManager was being created(constructed) in RaindropInstance
+        public UIManager(/*RaindropInstance raindropInstance*/)
         {
-            this.instance = raindropInstance;
+            this.instance = RaindropInstance.GlobalInstance;
 
             // Callbacks
             netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
@@ -38,11 +41,32 @@ namespace Raindrop
 
             RegisterClientEvents(client);
 
-            initialiseUI();
+            //canvasManager = new CanvasManager();
+
 
         }
 
-        private void initialiseUI()
+        //private void Awake()
+        //{
+        //    Debug.Log("UIManager woken up");
+
+        //    this.instance = RaindropInstance.GlobalInstance;
+
+        //    // Callbacks
+        //    netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+        //    netcom.ClientLoggedOut += new EventHandler(netcom_ClientLoggedOut);
+        //    netcom.ClientDisconnected += new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
+        //    instance.Names.NameUpdated += new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
+
+        //    RegisterClientEvents(client);
+
+        //    //canvasManager = new CanvasManager();
+
+        //    initialiseUI();
+        //}
+
+
+        public void initialiseUI()
         {
             canvasManager.pushCanvas(CanvasType.Welcome);
             modalManager.showSimpleModalBoxWithActionBtn("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ", "Accept");
@@ -145,6 +169,8 @@ namespace Raindrop
 
         void Self_MoneyBalance(object sender, BalanceEventArgs e)
         {
+            Debug.Log("you have moneybalance of " + e.Balance);
+
             int oldBalance = 0;
             int.TryParse(tlblMoneyBalanceText, out oldBalance);
             int delta = Math.Abs(oldBalance - e.Balance);
@@ -248,6 +274,13 @@ namespace Raindrop
             //    icoNoVoice.Visible = true;
             //else
             //    icoNoVoice.Visible = false;
+        }
+
+        public object GetService(Type serviceType)
+        {
+
+
+            throw new NotImplementedException();
         }
 
         //private void RefreshStatusBar()

@@ -25,10 +25,11 @@
  */
 
 using System;
+using Unity.Collections;
 //using System.Drawing;
 //using System.Drawing.Imaging;
 using Catnip.Drawing;
-using Catnip.Drawing.Imaging;
+//using Catnip.Drawing.Imaging;
 using UnityEngine;
 
 namespace OpenMetaverse.Imaging
@@ -126,14 +127,16 @@ namespace OpenMetaverse.Imaging
         /// 
         /// </summary>
         /// <param name="bitmap"></param>
-        public ManagedImage(Bitmap bitmap)
+        /// 
+        //apparently this method only loads the image (.tga) as a bitmap, then returns it as a managed image. the bitmap is not used. perhaps we can skip this intermediary?
+        public ManagedImage(Bitmap tex)
         {
-            Width = bitmap.Width;
-            Height = bitmap.Height;
+            Width = tex.Width;
+            Height = tex.Height;
 
             int pixelCount = Width * Height;
 
-            if (bitmap.PixelFormat == PixelFormat.Format32bppArgb)
+            if (tex.Format == TextureFormat.ARGB32)   //PixelFormat.Format32bppArgb  --- 32 bits per pixel; 8 bits each are used for the alpha, red, green, and blue 
             {
                 Channels = ImageChannels.Alpha | ImageChannels.Color;
                 Red = new byte[pixelCount];
@@ -141,86 +144,116 @@ namespace OpenMetaverse.Imaging
                 Blue = new byte[pixelCount];
                 Alpha = new byte[pixelCount];
 
-                BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                //BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
+                //    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                unsafe
+                //unsafe
+                //{
+                //    byte* pixel = (byte*)bd.Scan0;
+
+                //    for (int i = 0; i < pixelCount; i++)
+                //    {
+                //        // GDI+ gives us BGRA and we need to turn that in to RGBA
+                //        Blue[i] = *(pixel++);
+                //        Green[i] = *(pixel++);
+                //        Red[i] = *(pixel++);
+                //        Alpha[i] = *(pixel++);
+                //    }
+                //}
+
+                //bitmap.UnlockBits(bd);
+
+                for (int i = 0; i < pixelCount; i++)
                 {
-                    byte* pixel = (byte*)bd.Scan0;
+                    Color32 bit = tex.GetPixel(i%Width , i / Width);
+                    Blue[i] = bit.b;
+                    Green[i] = bit.g;
+                    Red[i] = bit.r;
+                    Alpha[i] = bit.a;
 
-                    for (int i = 0; i < pixelCount; i++)
-                    {
-                        // GDI+ gives us BGRA and we need to turn that in to RGBA
-                        Blue[i] = *(pixel++);
-                        Green[i] = *(pixel++);
-                        Red[i] = *(pixel++);
-                        Alpha[i] = *(pixel++);
-                    }
                 }
-
-                bitmap.UnlockBits(bd);
             }
-            else if (bitmap.PixelFormat == PixelFormat.Format16bppGrayScale)
-            {
-                Channels = ImageChannels.Gray;
-                Red = new byte[pixelCount];
+            //else if (tex.format == TextureFormat.Alpha8)  // PixelFormat.Format16bppGrayScale --- 16 bits per pixel. The color information specifies 65536 shades of gray.
+            //{
+            //    Channels = ImageChannels.Gray;
+            //    Red = new byte[pixelCount];
 
-                throw new NotImplementedException("16bpp grayscale image support is incomplete");
-            }
-            else if (bitmap.PixelFormat == PixelFormat.Format24bppRgb)
+            //    throw new NotImplementedException("16bpp grayscale image support is incomplete");
+            //}
+            else if (tex.Format == TextureFormat.RGB24) //== PixelFormat.Format24bppRgb)
             {
                 Channels = ImageChannels.Color;
                 Red = new byte[pixelCount];
                 Green = new byte[pixelCount];
                 Blue = new byte[pixelCount];
 
-                BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                        ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                //BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
+                //        ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
-                unsafe
+                //unsafe
+                //{
+                //    byte* pixel = (byte*)bd.Scan0;
+
+                //    for (int i = 0; i < pixelCount; i++)
+                //    {
+                //        // GDI+ gives us BGR and we need to turn that in to RGB
+                //        Blue[i] = *(pixel++);
+                //        Green[i] = *(pixel++);
+                //        Red[i] = *(pixel++);
+                //    }
+                //}
+
+                //bitmap.UnlockBits(bd);
+
+                for (int i = 0; i < pixelCount; i++)
                 {
-                    byte* pixel = (byte*)bd.Scan0;
+                    int _x = i % Width;
+                    int _y = i / Width;
+                    Color32 bit = tex.GetPixel(i % Width, i / Width);
+                    Blue[i] = bit.b;
+                    Green[i] = bit.g;
+                    Red[i] = bit.r;
 
-                    for (int i = 0; i < pixelCount; i++)
-                    {
-                        // GDI+ gives us BGR and we need to turn that in to RGB
-                        Blue[i] = *(pixel++);
-                        Green[i] = *(pixel++);
-                        Red[i] = *(pixel++);
-                    }
                 }
-
-                bitmap.UnlockBits(bd);
             }
-			else if (bitmap.PixelFormat == PixelFormat.Format32bppRgb)
-			{
+			else if (tex.Format == TextureFormat.RGB24) // PixelFormat.Format32bppRgb) --- The remaining 8 bits are not used.
+            {
 				Channels = ImageChannels.Color;
 				Red = new byte[pixelCount];
 				Green = new byte[pixelCount];
 				Blue = new byte[pixelCount];
 
-				BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
-						ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
+                //BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
+                //		ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
 
-				unsafe
-				{
-					byte* pixel = (byte*)bd.Scan0;
+                //NativeArray<Color32> texture = tex.GetRawTextureData<Color32>();
 
-					for (int i = 0; i < pixelCount; i++)
+    //            unsafe
+				//{
+                    
+                    //byte* pixel = (byte*)bd.Scan0;
+
+                    for (int i = 0; i < pixelCount; i++)
 					{
-						// GDI+ gives us BGR and we need to turn that in to RGB
-						Blue[i] = *(pixel++);
-						Green[i] = *(pixel++);
-						Red[i] = *(pixel++);
-						pixel++;	// Skip over the empty byte where the Alpha info would normally be
+                    // GDI+ gives us BGR and we need to turn that in to RGB
+                        int _x = i % Width;
+                        int _y = i / Width;
+                        Color32 bit = tex.GetPixel(i % Width, i / Width);
+                        Blue[i] = bit.b;
+                        Green[i] = bit.g;
+						Red[i] = bit.r;
+						//Blue[i] = *(pixel++);
+						//Green[i] = *(pixel++);
+						//Red[i] = *(pixel++);
+						//pixel++;	// Skip over the empty byte where the Alpha info would normally be
 					}
-				}
+				//}
 
-				bitmap.UnlockBits(bd);
+				//bitmap.UnlockBits(bd);
 			}
 			else
             {
-                throw new NotSupportedException("Unrecognized pixel format: " + bitmap.PixelFormat.ToString());
+                throw new NotSupportedException("Unrecognized pixel format: " + tex.Format.ToString());
             }
         }
 #endif

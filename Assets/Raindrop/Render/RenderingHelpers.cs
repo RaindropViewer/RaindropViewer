@@ -32,24 +32,24 @@ using OpenMetaverse.Rendering;
 
 namespace Raindrop.Rendering
 {
-    //[StructLayout(LayoutKind.Sequential)]
-    //public struct Color4b
-    //{
-    //    public byte R;
-    //    public byte G;
-    //    public byte B;
-    //    public byte A;
-    //}
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Color4b
+    {
+        public byte R;
+        public byte G;
+        public byte B;
+        public byte A;
+    }
 
-    //[StructLayout(LayoutKind.Explicit)]
-    //public struct ColorVertex
-    //{
-    //    [FieldOffset(0)]
-    //    public Vertex Vertex;
-    //    [FieldOffset(32)]
-    //    public Color4b Color;
-    //    public static int Size = 36;
-    //}
+    [StructLayout(LayoutKind.Explicit)]
+    public struct ColorVertex
+    {
+        [FieldOffset(0)]
+        public Vertex Vertex;
+        [FieldOffset(32)]
+        public Color4b Color;
+        public static int Size = 36;
+    }
 
     //public class TextureInfo
     //{

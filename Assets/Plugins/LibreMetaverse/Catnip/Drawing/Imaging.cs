@@ -9,6 +9,8 @@ namespace Catnip.Drawing.Imaging
     //sealed=restrict the users from inheriting the class.
     public sealed class BitmapData
     {
+
+
         //Gets or sets the address of the first pixel data in the bitmap. This can also be thought of as the first scan line in the bitmap.
         public IntPtr Scan0 { get; set; }
         public int Stride { get; internal set; }

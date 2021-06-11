@@ -46,7 +46,7 @@ namespace OpenMetaverse
         public const string ADITI_LOGIN_SERVER = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi";
 
         /// <summary>The relative directory where external resources are kept</summary>
-        public static string RESOURCE_DIR = "openmetaverse_data";
+        public static string RESOURCE_DIR = "openmetaverse_data"; //in streamingassets folder...
 
         /// <summary>Login server to connect to</summary>
         public string LOGIN_SERVER = AGNI_LOGIN_SERVER;

@@ -73,13 +73,13 @@ public class MapPresenter : MonoBehaviour
 
     public void OnChatBtnClick()
     {
-        instance.UI.canvasManager.pushCanvas(CanvasType.Chat);
+        //instance.UI.canvasManager.pushCanvas(CanvasType.Chat);
 
 
     }
     public void OnMapBtnClick()
     {
-        instance.UI.canvasManager.pushCanvas(CanvasType.Map);
+        //instance.UI.canvasManager.pushCanvas(CanvasType.Map);
 
 
     }

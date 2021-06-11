@@ -39,7 +39,8 @@ namespace Raindrop.Tests
 
             //get viewmodel to login.
             //getCurrentForeground gives us the loginVM, which we then call onloginbtnclick from.
-            GameObject temp = (GameObject)instance.UI.getCurrentForegroundPresenter();
+            var servicer = ServiceLocatorSample.ServiceLocator.ServiceLocator.Current;
+            GameObject temp = (GameObject)servicer.Get<UIManager>().getCurrentForegroundPresenter();
             if (temp == null)
             {
 

@@ -27,8 +27,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
+//using System.Drawing;
+//using System.Drawing.Drawing2D;
+using Catnip.Drawing;
 
 namespace LibreMetaverse.PrimMesher
 {
@@ -71,8 +72,9 @@ namespace LibreMetaverse.PrimMesher
             try
             {
                 if (needsScaling)
-                    bm = ScaleImage(bm, width, height,
-                        InterpolationMode.NearestNeighbor);
+                    bm.resize(width,height);
+                    //bm = ScaleImage(bm, width, height,
+                    //    InterpolationMode.NearestNeighbor);
             }
 
             catch (Exception e)
@@ -101,9 +103,9 @@ namespace LibreMetaverse.PrimMesher
                     {
                         var c = bm.GetPixel(x, y);
 
-                        redBytes[byteNdx] = c.R;
-                        greenBytes[byteNdx] = c.G;
-                        blueBytes[byteNdx] = c.B;
+                        redBytes[byteNdx] = c.r;
+                        greenBytes[byteNdx] = c.g;
+                        blueBytes[byteNdx] = c.b;
 
                         ++byteNdx;
                     }
@@ -114,9 +116,9 @@ namespace LibreMetaverse.PrimMesher
                         var c = bm.GetPixel(x < width ? x * 2 : x * 2 - 1,
                             y < height ? y * 2 : y * 2 - 1);
 
-                        redBytes[byteNdx] = c.R;
-                        greenBytes[byteNdx] = c.G;
-                        blueBytes[byteNdx] = c.B;
+                        redBytes[byteNdx] = c.r;
+                        greenBytes[byteNdx] = c.g;
+                        blueBytes[byteNdx] = c.b;
 
                         ++byteNdx;
                     }
@@ -164,22 +166,22 @@ namespace LibreMetaverse.PrimMesher
             return rows;
         }
 
-        private Bitmap ScaleImage(Bitmap srcImage, int destWidth, int destHeight,
-            InterpolationMode interpMode)
-        {
-            var scaledImage = new Bitmap(srcImage, destWidth, destHeight);
-            scaledImage.SetResolution(96.0f, 96.0f);
+        //private Bitmap ScaleImage(Bitmap srcImage, int destWidth, int destHeight,
+        //    InterpolationMode interpMode)
+        //{
+        //    var scaledImage = new Bitmap(srcImage, destWidth, destHeight);
+        //    scaledImage.SetResolution(96.0f, 96.0f);
 
-            var grPhoto = Graphics.FromImage(scaledImage);
-            grPhoto.InterpolationMode = interpMode;
+        //    var grPhoto = Graphics.FromImage(scaledImage);
+        //    grPhoto.InterpolationMode = interpMode;
 
-            grPhoto.DrawImage(srcImage,
-                new Rectangle(0, 0, destWidth, destHeight),
-                new Rectangle(0, 0, srcImage.Width, srcImage.Height),
-                GraphicsUnit.Pixel);
+        //    grPhoto.DrawImage(srcImage,
+        //        new Rectangle(0, 0, destWidth, destHeight),
+        //        new Rectangle(0, 0, srcImage.Width, srcImage.Height),
+        //        GraphicsUnit.Pixel);
 
-            grPhoto.Dispose();
-            return scaledImage;
-        }
+        //    grPhoto.Dispose();
+        //    return scaledImage;
+        //}
     }
 }

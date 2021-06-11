@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Catnip.Drawing;
 using Catnip.Drawing.Imaging;
 using SixLabors.ImageSharp;
+using Unity.Collections;
 using UnityEngine;
 
 
@@ -37,33 +38,69 @@ namespace Catnip.Drawing
     }
 
 
-    public sealed class Bitmap //: Catnip.Drawing.Image
+    public sealed class Bitmap 
     {
         private Texture2D tex;
-        private TextureFormat texformat;
+        public TextureFormat Format => tex.format;
 
         //Initializes a new instance of the Bitmap class with the specified size and format.
-        public Bitmap(int width, int height, PixelFormat format32bppArgb)
+        public Bitmap(int width, int height, TextureFormat format)
         {
             Width = width;
             Height = height;
-            if (format32bppArgb == PixelFormat.Format32bppArgb)
-            {
-                texformat = TextureFormat.ARGB32;
-            }
+            tex = new Texture2D(width,height,format,false);
         }
+
+
 
         public Bitmap(int width, int height)
         {
             Width = width;
             Height = height;
+            tex = new Texture2D(width,height);
+            
+        }
+        public Bitmap(Texture2D tex)
+        {
+            Width = tex.width;
+            Height = tex.height;
+            this.tex = tex;
 
 
         }
 
+
+        public NativeArray<Color32> getAsNativeArray()
+        {
+            return tex.GetRawTextureData<Color32>();
+        }
+
+        public Bitmap FromFile(string fileName)
+        {
+            var myreader = new BMPLoader();
+            BMPImage myimg = myreader.LoadBMP(fileName);
+            Texture2D tex = myimg.ToTexture2D();
+            Bitmap fakebmp = new Bitmap(tex);
+
+            return fakebmp;
+        }
+        public UnityEngine.Color32 GetPixel(int x, int y)
+        {
+            return tex.GetPixel(x, y);
+        }
+
+        public void resize(int w, int h)
+        {
+            tex.Resize(w, h);
+        }
+
+        public void delete()
+        {
+            GameObject.Destroy(tex);
+        }
+
         public /*override*/ int Width { get; internal set; }
-        public /*override*/ int Height { get; internal set; }
-        public Catnip.Drawing.Imaging.PixelFormat PixelFormat { get; internal set; }
+        public /*override*/ int Height { get; internal set; }  
 
         public BitmapData LockBits(Rectangle rectangle, object readOnly, PixelFormat format32bppArgb)
         {
@@ -72,10 +109,6 @@ namespace Catnip.Drawing
         }
 
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
 
         public void UnlockBits(BitmapData outputData)
         {
@@ -105,13 +138,5 @@ namespace Catnip.Drawing
             tex.Apply();
         }
 
-        public static Bitmap FromFile(string fname)
-        {
-            var fileData = File.ReadAllBytes(fname);
-            var bmp = new Bitmap(5,5);
-            bmp.tex.LoadImage(fileData);
-
-            return bmp;
-        }
     }
 }

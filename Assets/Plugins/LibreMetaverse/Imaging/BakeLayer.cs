@@ -31,6 +31,7 @@ using System.IO;
 //using System.Drawing;
 using OpenMetaverse.Assets;
 using Catnip.Drawing;
+using UnityEngine;
 
 namespace OpenMetaverse.Imaging
 {
@@ -354,7 +355,9 @@ namespace OpenMetaverse.Imaging
                     {
                         if (stream != null)
                         {
-                            bitmap = LoadTGAClass.LoadTGA(stream);
+
+                            var tex = TGALoader.LoadTGA(stream);
+                            bitmap = new Bitmap(tex);
                         }
                     }
                 }

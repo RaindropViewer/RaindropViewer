@@ -8,6 +8,8 @@ using UnityEngine;
 using Raindrop.Rendering;
 using OpenMetaverse;
 using System.Threading;
+using RenderSettings = Raindrop.Rendering.RenderSettings;
+using OpenMetaverse.Rendering;
 
 namespace Raindrop.Unity3D
 {
@@ -15,37 +17,104 @@ namespace Raindrop.Unity3D
     class TerrainMeshUpdater : MonoBehaviour
     {
         private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private GridClient Client { get { return instance.Client; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
-
-
-        public bool Modified = true;
-        float[,] heightTable = new float[256, 256];
-        bool fetchingTerrainTexture = false;
+        //unity DS
         Texture2D terrainImage = null;
         MeshRenderer meshRenderer;
-        bool terrainTextureNeedsUpdate = false;
+        MeshFilter meshFilter;
+        UnityEngine.Mesh terrainMesh;
+
+        UnityEngine.Vector3[] newVertices;
+        UnityEngine.Vector2[] newUV;
+        int[] newTriangles;
+
+
+        bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
+        float[,] heightTable = new float[256, 256];     //heightmap of terrain
+        bool fetchingTerrainTexture = false;            //semaphore for reading terrain tex.
+        bool terrainTextureNeedsUpdate = false;         //does the texture need to be redrawn?
         private OpenMetaverse.Simulator knownCurrentSim;
+        float terrainTimeSinceUpdate = Rendering.RenderSettings.MinimumTimeBetweenTerrainUpdated + 1f; // Update terrain om first run
+        bool terrainInProgress = false;
+        MeshmerizerR renderer;
+        //private float lastTimeItRendered = 0f;
+
+        Simulator sim => instance.Client.Network.CurrentSim;
+
+        Face terrainFace; //seems like a 'face' is the secondlife kind of face (where each prim can have up to 8 faces.)
+        ColorVertex[] terrainVertices;
+        uint[] terrainIndices;
 
         private void Awake()
         {
-            MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            //1 mesh renderer component
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = new UnityEngine.Material(Shader.Find("Standard")); //hopefully this not use reflection.
+
+            //2 mesh filter component (owns the mesh)
+            meshFilter = gameObject.AddComponent<MeshFilter>();
+            
+            //2.1 make terrain mesh of 256*256 at zero height and pass to meshfilter
+            terrainMesh = new UnityEngine.Mesh(); //make the mesh.
+            GetComponent<MeshFilter>().mesh = terrainMesh;         //assign this mesh to the meshfiltercomponent
+
+            //mesh.vertices = newVertices;
+            //mesh.uv = newUV;
+            //mesh.triangles = newTriangles;
+            buildBasicLandMesh();
+
 
         }
 
+        private void Start()
+        {
+
+
+            Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
+
+
+        }
+
+
+        void Terrain_LandPatchReceived(object sender, LandPatchReceivedEventArgs e)
+        {
+            if (e.Simulator.Handle == Client.Network.CurrentSim.Handle)
+            {
+                this.Modified = true;
+            }
+        }
+
+        private void buildBasicLandMesh()
+        {
+
+            int step = 1;
+            for (int x = 0; x < 256; x += step)
+            {
+                for (int y = 0; y < 256; y += step)
+                {
+                    float z = 0;
+                    UnityEngine.Vector3[] newVertices;
+
+                    heightTable[x, y] = z;
+                }
+            }
+        }
+
+
         private void Update()
         {
-            if (! Active)
+            if (! Active) //guard clause: don't continue if disconnected
             {
                 return;
             }
 
-            if (instance.Client.Network.CurrentSim != knownCurrentSim)
+            if (instance.Client.Network.CurrentSim != knownCurrentSim) //different sim now.
             {
                 knownCurrentSim = instance.Client.Network.CurrentSim;
-                resetMesh();
+                ResetTerrain();
             }
 
 
@@ -54,9 +123,117 @@ namespace Raindrop.Unity3D
                 UpdateTerrainTexture();
             }
 
+            render(Time.deltaTime);
+
         }
 
-        private void resetMesh()
+        //this performs re-meshing and re-texturing. ONLY IF MODIFIED and sufficient time elapsed.
+        private void render(float timeSinceLastFrame)
+        {
+            terrainTimeSinceUpdate += timeSinceLastFrame;
+
+            if (sim.Terrain == null)
+            {
+                return;
+            } 
+
+            if (Modified && terrainTimeSinceUpdate > RenderSettings.MinimumTimeBetweenTerrainUpdated)
+            {
+                Debug.Log("Processing new rendering of terrain!");
+
+                if (!terrainInProgress)
+                {
+                    terrainInProgress = true;
+                    ResetTerrain(/*false*/);
+                    UpdateTerrain();
+                }
+            }
+
+            if (terrainTextureNeedsUpdate)
+            {
+                UpdateTerrainTexture();
+            }
+
+
+            if (terrainIndices == null || terrainVertices == null)
+            {
+                Debug.Log("terrain indices is null");
+                return;
+            }
+
+            //set texture to mesh
+
+
+
+            //update / draw new mesh.
+
+
+        }
+        private void UpdateTerrain()
+        {
+            if (sim == null || sim.Terrain == null)
+            {
+                Debug.Log("update terrain failed as the sim or terrain is null");
+                return;
+            }
+
+            Debug.Log("putting into threadpool");
+
+            ThreadPool.QueueUserWorkItem(sync =>
+            {
+                Debug.Log("QueueUserWorkItem");
+                int step = 1;
+
+                for (int x = 0; x < 256; x += step)
+                {
+                    for (int y = 0; y < 256; y += step)
+                    {
+                        float z = 0;
+                        int patchNr = ((int)x / 16) * 16 + (int)y / 16;
+                        if (sim.Terrain[patchNr] != null
+                            && sim.Terrain[patchNr].Data != null)
+                        {
+                            float[] data = sim.Terrain[patchNr].Data;
+                            z = data[(int)x % 16 * 16 + (int)y % 16];
+                        }
+                        heightTable[x, y] = z;
+                    }
+                }
+
+                terrainFace = renderer.TerrainMesh(heightTable, 0f, 255f, 0f, 255f); //generate mesh with heights //the result is a huge struct 'Face'
+
+                Debug.Log("terrainFace geenerated");
+                //generate mesh with colors
+                terrainVertices = new ColorVertex[terrainFace.Vertices.Count];
+                for (int i = 0; i < terrainFace.Vertices.Count; i++) //for each vert in terrainFace, append the vert to terraiVerticies
+                {
+                    byte[] part = Utils.IntToBytes(i);
+                    terrainVertices[i] = new ColorVertex()
+                    {
+                        Vertex = terrainFace.Vertices[i],
+                        Color = new Color4b()
+                        {
+                            R = part[0],
+                            G = part[1],
+                            B = part[2],
+                            A = 253 // terrain picking
+                        }
+                    };
+                }
+                terrainIndices = new uint[terrainFace.Indices.Count];
+                for (int i = 0; i < terrainIndices.Length; i++)
+                {
+                    terrainIndices[i] = terrainFace.Indices[i];
+                }
+                terrainInProgress = false;
+                Modified = false;
+                terrainTextureNeedsUpdate = true;
+                terrainTimeSinceUpdate = 0f;
+            });
+        }
+
+        //delete terrain tex 
+        private void ResetTerrain()
         {
             if (terrainImage != null)
             {
@@ -66,6 +243,9 @@ namespace Raindrop.Unity3D
 
             fetchingTerrainTexture = false;
             Modified = true;
+
+            //temporary
+            //terrainTextureNeedsUpdate = true;
         }
 
 
@@ -84,6 +264,7 @@ namespace Raindrop.Unity3D
 
                     fetchingTerrainTexture = false;
                     terrainTextureNeedsUpdate = false;
+                    meshRenderer.material.mainTexture = terrainImage;
                 });
             }
         }

@@ -32,7 +32,7 @@ namespace Raindrop.Presenters
 
         MinimapModule()
         {
-            MiniMapButton.onClick.AsObservable().Subscribe(_ => OnMinimapClick()); //when clicked, runs this method.
+            //MiniMapButton.onClick.AsObservable().Subscribe(_ => OnMinimapClick()); //when clicked, runs this method.
 
 
 
@@ -47,13 +47,7 @@ namespace Raindrop.Presenters
 
         }
 
-
-        private void OnMinimapClick()
-        {
-            //what happend when minimap is clicked?
-            instance.UI.canvasManager.pushCanvas(CanvasType.Map);
-            Debug.Log("clicked minimap");
-        }
+         
 
         private void Network_OnCurrentSimChanged(object sender, SimChangedEventArgs e)
         {

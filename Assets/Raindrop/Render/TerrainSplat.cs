@@ -46,7 +46,7 @@ using OpenMetaverse;
 using OpenMetaverse.Imaging;
 using Unity.Collections;
 using UnityEngine;
-using Color = Catnip.Drawing.Color;
+//using Color = Catnip.Drawing.Color;
 using Debug = System.Diagnostics.Debug;
 using Vector3 = OpenMetaverse.Vector3;
 
@@ -94,12 +94,12 @@ namespace Raindrop.Rendering
             ROCK_DETAIL
         };
 
-        private static readonly Color[] DEFAULT_TERRAIN_COLOR = new Color[]
+        private static readonly Color32[] DEFAULT_TERRAIN_COLOR = new Color32[]
         {
-            Color.FromArgb(255, 164, 136, 117),
-            Color.FromArgb(255, 65, 87, 47),
-            Color.FromArgb(255, 157, 145, 131),
-            Color.FromArgb(255, 125, 128, 130)
+            new Color32(164, 136, 117, 255),
+            new Color32(65, 87, 47, 255),
+            new Color32(157, 145, 131, 255),
+            new Color32(125, 128, 130, 255)
         };
 
         private static readonly UUID TERRAIN_CACHE_MAGIC = new UUID("2c0c7ef2-56be-4eb8-aacb-76712c535b4b");
@@ -363,7 +363,7 @@ namespace Raindrop.Rendering
             return output;
         }
 
-        private static void fillcolor(Texture2D tex2, Color color)
+        private static void fillcolor(Texture2D tex2, Color32 color)
         {
             //var fillColor : Color = Color(1, 0.0, 0.0);
             var fillColorArray = tex2.GetPixels();

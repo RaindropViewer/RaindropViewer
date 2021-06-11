@@ -275,7 +275,8 @@ namespace OpenMetaverse
 
                 if (_Caps.ContainsKey("EventQueueGet"))
                 {
-                    Logger.DebugLog("Starting event queue for " + Simulator, Simulator.Client);
+                    Logger.DebugLog("Starting event queue for " + Simulator + " with URI: " + _Caps["EventQueueGet"].ToString(), Simulator.Client );
+                    //Logger.DebugLog("Starting event queue for " + Simulator, Simulator.Client);
 
                     _EventQueueCap = new EventQueueClient(_Caps["EventQueueGet"]);
                     _EventQueueCap.OnConnected += EventQueueConnectedHandler;

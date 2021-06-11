@@ -28,6 +28,8 @@ namespace Raindrop.Presenters
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
+        private UIManager uimanager;
+
         bool Active => instance.Client.Network.Connected;
 
 
@@ -64,7 +66,8 @@ namespace Raindrop.Presenters
             ChatButton.onClick.AsObservable().Subscribe(_ => OnChatBtnClick()); //when clicked, runs this method.
             MapButton.onClick.AsObservable().Subscribe(_ => OnMapBtnClick()); //when clicked, runs this method.
 
-
+            //get uimanager service
+            uimanager = ServiceLocatorSample.ServiceLocator.ServiceLocator.Current.Get<UIManager>();
 
         }
 
@@ -92,13 +95,13 @@ namespace Raindrop.Presenters
 
         public void OnChatBtnClick()
         {
-            instance.UI.canvasManager.pushCanvas(CanvasType.Chat);
+            uimanager.canvasManager.pushCanvas(CanvasType.Chat);
 
 
         }
         public void OnMapBtnClick()
         {
-            instance.UI.canvasManager.pushCanvas(CanvasType.Map);
+            uimanager.canvasManager.pushCanvas(CanvasType.Map);
 
 
         }
