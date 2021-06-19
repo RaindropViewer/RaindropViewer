@@ -25,13 +25,15 @@
  */
 
 using System;
+using System.IO;
 using System.Reflection;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
-
-[assembly: XmlConfigurator(Watch = true)]
-
+using log4net.Layout;
+using UnityEngine;
+//[assembly: XmlConfigurator(Watch = true)]
+//[assembly: XmlConfigurator(ConfigFile = "log4net.xml", Watch = true)]
 namespace OpenMetaverse
 {
     /// <summary>
@@ -59,21 +61,43 @@ namespace OpenMetaverse
         /// </summary>
         static Logger()
         {
+            //this causes a freeze up on run :(
+            //XmlConfigurator.Configure(new FileInfo($"{Application.dataPath}/log4net.xml"));
+            //Debug.Log( "trying to read" +  $"{Application.dataPath}/log4net.xml");
+
             LogInstance = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+            Debug.Log("gotten logger");
 
             // If error level reporting isn't enabled we assume no logger is configured and initialize a default
             // ConsoleAppender
+
+            //lets just use the implemetnation as in here:
+            //https://github.com/lkalif/unirad/blob/2f528e25c46aad4281d74f0eea363c171a219a8f/Assets/Core/Logger.cs
             if (!LogInstance.Logger.IsEnabledFor(log4net.Core.Level.Error))
             {
-                IAppender appender = new ConsoleAppender
-                {
-                    Layout = new log4net.Layout.PatternLayout("%timestamp [%thread] %-5level - %message%newline")
-                };
-                BasicConfigurator.Configure(LogManager.GetRepository(Assembly.GetCallingAssembly()), appender);
+                Debug.Log("Logger: Seems like no logger is configured");
+                //IAppender appender = new ConsoleAppender
+                //{
+                //    Layout = new log4net.Layout.PatternLayout("%timestamp [%thread] %-5level - %message%newline")
+                //};
+                //BasicConfigurator.Configure(LogManager.GetRepository(Assembly.GetCallingAssembly()), appender);
 
-                if(Settings.LOG_LEVEL != Helpers.LogLevel.None)
+                //this is the new version, i hope it works.
+                var appender = new UnityDebugAppender();
+                
+                appender.Layout = new PatternLayout("%date{HH:mm:ss} [%level] - %message");
+                //appender.Layout = new PatternLayout("%timestamp [%thread] %-5level - %message%newline");
+                BasicConfigurator.Configure(appender);
+
+
+                if (Settings.LOG_LEVEL != Helpers.LogLevel.None)
                     LogInstance.Info("No log configuration found, defaulting to console logging");
+            } else
+            {
+                Debug.Log("A default logger was created by Logger.cs");
+
             }
+
         }
 
         /// <summary>

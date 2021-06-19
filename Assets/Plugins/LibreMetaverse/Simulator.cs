@@ -1257,8 +1257,8 @@ namespace OpenMetaverse
                 {
                     if (Client.Settings.LOG_RESENDS)
                     {
-                        Logger.DebugLog(String.Format("Resending {2} packet #{0}, {1}ms have passed",
-                            outgoing.SequenceNumber, now - outgoing.TickCount, outgoing.Type), Client);
+                        Logger.DebugLog(String.Format("Resending {2} packet #{0} for the {3}-th time, {1}ms have passed",
+                            outgoing.SequenceNumber, now - outgoing.TickCount, outgoing.Type, outgoing.ResendCount), Client);
                     }
 
                     // The TickCount will be set to the current time when the packet

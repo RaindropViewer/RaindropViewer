@@ -623,6 +623,7 @@ namespace OpenMetaverse
             // Check asset cache first
             if (callback != null && Cache.HasAsset(assetID))
             {
+                Logger.DebugLog("Assetmanager : Cache hit");
                 byte[] data = Cache.GetCachedAssetBytes(assetID);
                 transfer.AssetData = data;
                 transfer.Success = true;
@@ -636,16 +637,28 @@ namespace OpenMetaverse
                 catch (Exception e) { Logger.Log(e.Message, Helpers.LogLevel.Error, Client, e); }
 
                 return;
+            } else
+            {
+                //not in asset cache and not connected. big oopsie :o
+                if (Client.Network.Connected == false)
+                {
+
+                    Logger.Log("Assetmanager : Cache miss and DISCONNECTED!", Helpers.LogLevel.Error);
+                    return;
+                } 
+
             }
 
             // If ViewerAsset capability exists, use that, if not, fallback to UDP (which is obsoleted on Second Life.)
             if (Client.Network.CurrentSim.Caps != null
                 && Client.Network.CurrentSim.Caps.CapabilityURI("ViewerAsset") != null)
             {
+                Logger.DebugLog("Assetmanager : requesting over http");
                 RequestAssetHTTP(assetID, transfer, callback);
             }
             else
             {
+                Logger.DebugLog("Assetmanager : requesting over UDP");
                 RequestAssetUDP(assetID, itemID, taskID, transfer, callback);
             }
 

@@ -32,7 +32,7 @@ namespace Raindrop.Unity3D
         int[] newTriangles;
 
 
-        bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
+        public bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
         float[,] heightTable = new float[256, 256];     //heightmap of terrain
         bool fetchingTerrainTexture = false;            //semaphore for reading terrain tex.
         bool terrainTextureNeedsUpdate = false;         //does the texture need to be redrawn?
@@ -47,6 +47,7 @@ namespace Raindrop.Unity3D
         Face terrainFace; //seems like a 'face' is the secondlife kind of face (where each prim can have up to 8 faces.)
         ColorVertex[] terrainVertices;
         uint[] terrainIndices;
+        private bool lastWorkWasDone = true;
 
         private void Awake()
         {
@@ -132,10 +133,23 @@ namespace Raindrop.Unity3D
         {
             terrainTimeSinceUpdate += timeSinceLastFrame;
 
-            if (sim.Terrain == null)
+            if (lastWorkWasDone == false)
             {
                 return;
-            } 
+            }
+
+            if (sim == null )
+            {
+                //Debug.Log("sim is null");
+                return;
+            }
+            if (sim.Terrain == null)
+            {
+                //Debug.Log("sim.Terrain is null");
+                return;
+            }
+
+            Debug.Log("terrain conditions. both are not null");
 
             if (Modified && terrainTimeSinceUpdate > RenderSettings.MinimumTimeBetweenTerrainUpdated)
             {
@@ -181,6 +195,8 @@ namespace Raindrop.Unity3D
 
             ThreadPool.QueueUserWorkItem(sync =>
             {
+
+                lastWorkWasDone = false;
                 Debug.Log("QueueUserWorkItem");
                 int step = 1;
 
@@ -199,6 +215,7 @@ namespace Raindrop.Unity3D
                         heightTable[x, y] = z;
                     }
                 }
+                Debug.Log("finished terrain height work!");
 
                 terrainFace = renderer.TerrainMesh(heightTable, 0f, 255f, 0f, 255f); //generate mesh with heights //the result is a huge struct 'Face'
 
@@ -229,6 +246,8 @@ namespace Raindrop.Unity3D
                 Modified = false;
                 terrainTextureNeedsUpdate = true;
                 terrainTimeSinceUpdate = 0f;
+
+                lastWorkWasDone = true;
             });
         }
 

@@ -23,14 +23,14 @@ using System;
 */
 namespace Raindrop
 {
-    public class PrintableTextUI : UnityEngine.MonoBehaviour, IPrintableMonobehavior
+    public class PrintableTextUI : UnityEngine.MonoBehaviour, IPrintableTMP_GO
     {
         public string Text => throw new NotImplementedException();
 
-        string IPrintableMonobehavior.Content { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        Color IPrintableMonobehavior.ForeColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        Color IPrintableMonobehavior.BackColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        string IPrintableMonobehavior.Text { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        string IPrintableTMP_GO.Content { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        Color IPrintableTMP_GO.ForeColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        Color IPrintableTMP_GO.BackColor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        string IPrintableTMP_GO.Text { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void AppendText(string v)
         {
@@ -47,32 +47,32 @@ namespace Raindrop
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.ClearText()
+        void IPrintableTMP_GO.ClearText()
         {
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.InsertLink(string text)
+        void IPrintableTMP_GO.InsertLink(string text)
         {
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.InsertLink(string text, string hyperlink)
+        void IPrintableTMP_GO.InsertLink(string text, string hyperlink)
         {
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.PrintText(string text)
+        void IPrintableTMP_GO.PrintText(string text)
         {
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.PrintTextLine(string text)
+        void IPrintableTMP_GO.PrintTextLine(string text)
         {
             throw new NotImplementedException();
         }
 
-        void IPrintableMonobehavior.PrintTextLine(string text, Color color)
+        void IPrintableTMP_GO.PrintTextLine(string text, Color color)
         {
             throw new NotImplementedException();
         }

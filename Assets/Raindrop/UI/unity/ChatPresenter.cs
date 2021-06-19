@@ -13,6 +13,8 @@ using UniRx;
 using TMPro;
 using System.Text.RegularExpressions;
 using Raindrop.Core;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
@@ -29,28 +31,30 @@ namespace Raindrop.Presenters
 
         private GridClient client => instance.Client;
 
-        private Regex chatRegex = new Regex(@"^/(\d+)\s*(.*)", RegexOptions.Compiled);
-        private List<string> chatHistory = new List<string>();
-        private int chatPointer;
+        bool Active => instance.Client.Network.Connected;
 
-        private List<ChatLogPresenter> listOfChatLogs;
-        private ChatLogPresenter selectedChatLog;
+        private ChatManager chatManager;
+
+        //private List<IMPresenter> listOfIMpanels;
+        //private IMPresenter selectedChatLog;
 
         public readonly Dictionary<UUID, ulong> agentSimHandle = new Dictionary<UUID, ulong>();
         private static readonly string LOCALCHATTITLE = "Local Chat";
 
-        public ChatTextManager ChatManager { get; private set; }
-        bool Active => instance.Client.Network.Connected;
+        public int selectedChatIdx = -1; //-1 means public chat
 
 
         #region references to UI elements
         public Button CloseButton;
         public Button SendButton;
-        public List<Button> GroupButtons;
-        public Button SelectedButton;
-        public InputField ChatInputField;
-        public TMP_Text ChatBox;
 
+        public GameObject ChatButtonContainer;
+        public List<GameObject> ChatButtons;
+        public GameObject SelectedButton;
+        public InputField ChatInputField;
+
+        public TMP_Text ChatBox;
+        public TMPTextFieldPrinter tmp_printer;
         #endregion
 
         #region internal representations 
@@ -62,6 +66,7 @@ namespace Raindrop.Presenters
             LOCALCHATTITLE
         };
         private string msgtext;
+        public GameObject buttonPrefab;
 
 
 
@@ -76,11 +81,125 @@ namespace Raindrop.Presenters
             SendButton.onClick.AsObservable().Subscribe(_ => OnSendBtnClick()); //change username property.
             ChatInputField.onValueChanged.AsObservable().Subscribe(_ => OnInputChanged(_)); //change username property.
 
-
-            var chatGO = (IPrintableMonobehavior) ChatBox.gameObject.GetComponent<ITextLikeGameObject>();
-            ChatManager = new ChatTextManager(instance, new TextBoxPrinter(chatGO));
-
             RegisterClientEvents(client);
+
+            tmp_printer = ChatBox.gameObject.AddComponent<TMPTextFieldPrinter>(); 
+            if (!tmp_printer)
+            {
+                OpenMetaverse.Logger.Log("failed to make the tmp_printer component to the tmp textbox.", Helpers.LogLevel.Error);
+            }
+
+            chatManager = new ChatManager(instance);
+
+            startChat(true);
+        }
+
+        //id relative to the list. -1 means local. 0 means others.
+        public void setShowingChat(int id)
+        {
+            if (id == -1)
+            {
+                //print everything in text buffer list.
+                List<ChatBufferItem> x = chatManager.localChatManager.getChatBuffer();
+                runPrinter(tmp_printer, x, 0,20); //print the selected range into the UI
+            }
+
+        }
+
+        public void runPrinter(TMPTextFieldPrinter TextPrinter, List<ChatBufferItem> x, int rangeNew, int rangeOld)
+        {
+            for (int i = rangeNew; i < rangeOld; i++)
+            {
+                ChatBufferItem item = x[i];
+
+                if (/*showTimestamps*/ true)
+                {
+                    //if(fontSettings.ContainsKey("Timestamp"))
+                    //{
+                    //    var fontSetting = fontSettings["Timestamp"];
+                    //    TextPrinter.ForeColor = fontSetting.ForeColor;
+                    //    TextPrinter.BackColor = fontSetting.BackColor;
+                    //    TextPrinter.Font = fontSetting.Font;
+                    //    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                    //}
+                    //else
+                    //{
+                    //TextPrinter.ForeColor = SystemColors.GrayText;
+                    //TextPrinter.BackColor = Color.Transparent;
+                    //TextPrinter.Font = Settings.FontSetting.DefaultFont;
+                    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                    //}
+                }
+
+                //if(fontSettings.ContainsKey("Name"))
+                //{
+                //    var fontSetting = fontSettings["Name"];
+                //    TextPrinter.ForeColor = fontSetting.ForeColor;
+                //    TextPrinter.BackColor = fontSetting.BackColor;
+                //    TextPrinter.Font = fontSetting.Font;
+                //}
+                //else
+                //{
+                //TextPrinter.ForeColor = SystemColors.WindowText;
+                //TextPrinter.BackColor = Color.Transparent;
+                //TextPrinter.Font = Settings.FontSetting.DefaultFont;
+                //}
+
+                if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
+                {
+                    TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
+                }
+                else
+                {
+                    TextPrinter.PrintText(item.From);
+                }
+
+                //if(fontSettings.ContainsKey(item.Style.ToString()))
+                //{
+                //    var fontSetting = fontSettings[item.Style.ToString()];
+                //    TextPrinter.ForeColor = fontSetting.ForeColor;
+                //    TextPrinter.BackColor = fontSetting.BackColor;
+                //    TextPrinter.Font = fontSetting.Font;
+                //}
+                //else
+                //{
+                //    TextPrinter.ForeColor = SystemColors.WindowText;
+                //    TextPrinter.BackColor = Color.Transparent;
+                //    TextPrinter.Font = Settings.FontSetting.DefaultFont;
+                //}
+
+                TextPrinter.PrintTextLine(item.Text);
+            }
+        }
+
+        //adds another chat to the left side
+        public void startChat(bool isSimChat)
+        {
+            if (isSimChat)
+            {
+                //add button and set transforms
+                var chatButton = Instantiate(buttonPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+                ChatButtons.Add(chatButton);
+                SelectedButton = chatButton;
+                chatButton.transform.SetParent(ChatButtonContainer.transform);
+
+                //setup internal lcoalchat manager.
+                
+                //ChatManager = new ChatTextManager(instance, tmp_printer); //you gotta pass the printer, not the gameobject.
+
+            } else
+            {
+                //var chatButton = Instantiate(buttonPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+
+                //ChatButtons.Add(chatButton);
+                //SelectedButton = chatButton;
+                //chatButton.transform.SetParent(ChatButtonContainer.transform);
+
+                ////IM = new ChatTextManager(instance, tmp_printer); //you gotta pass the printer, not the gameobject.
+
+
+            }
+
         }
 
         private void OnDestroy()
@@ -98,10 +217,15 @@ namespace Raindrop.Presenters
 
         private void OnSendBtnClick()
         {
-            if (selectedChatLog == null)
+            if (selectedChatIdx == -1)
+            {//public chat
+                ProcessChatInput(msgtext, ChatType.Normal);
                 return;
+            } else
+            {
+                Debug.LogError("not implemented IM sending yet.");
+            }
 
-            ProcessChatInput(msgtext,ChatType.Normal);
             return;
         }
 
@@ -148,6 +272,7 @@ namespace Raindrop.Presenters
         {
             try
             {
+
                 //if (InvokeRequired)
                 //{
                 //    if (!instance.MonoRuntime || IsHandleCreated)
@@ -182,54 +307,34 @@ namespace Raindrop.Presenters
 
 
 
-        //runs when the send btton is clicked.
+        //process the content of the inputfield to send to the simulator as local chat
         public void ProcessChatInput(string input, ChatType type)
         {
             if (string.IsNullOrEmpty(input)) return;
-            chatHistory.Add(input);
-            chatPointer = chatHistory.Count;
-            ChatManager.TextPrinter.ClearText();
-            //ClearChatInput();
-
-            string msg;
-
-            msg = input.Length >= 1000 ? input.Substring(0, 1000) : input;
-            //msg = msg.Replace(ChatInputBox.NewlineMarker, Environment.NewLine);
-
-            if (instance.GlobalSettings["mu_emotes"].AsBoolean() && msg.StartsWith(":"))
+         
+            //call the ProcessChatInput in the respective manager class.
+            if (/*chatList.getSelected() == "local chat"*/ true)
             {
-                msg = "/me " + msg.Substring(1);
-            }
-
-            int ch = 0;
-            Match m = chatRegex.Match(msg);
-
-            if (m.Groups.Count > 2)
-            {
-                ch = int.Parse(m.Groups[1].Value);
-                msg = m.Groups[2].Value;
-            }
-
-            //if (instance.CommandsManager.IsValidCommand(msg))
-            //{
-            //    instance.CommandsManager.ExecuteCommand(msg);
-            //}
+                chatManager.localChatManager.ProcessChatInput(input, type);
+            } 
             //else
             //{
-                #region RLV
 
-                #endregion
-
-                var processedMessage = GestureManager.Instance.PreProcessChatMessage(msg).Trim();
-                if (!string.IsNullOrEmpty(processedMessage))
-                {
-                    netcom.ChatOut(processedMessage, type, ch);
-                }
+            //    netcom.SendInstantMessage(msg, target, SessionId);
+            //    chatHistory.Add(cbxInput.Text);
+            //    chatPointer = chatHistory.Count;
             //}
+
+             
+            ClearChatInput();
+
 
         }
 
+        private void ClearChatInput()
+        {
+            ChatInputField.text = "";
 
-
+        }
     }
 }

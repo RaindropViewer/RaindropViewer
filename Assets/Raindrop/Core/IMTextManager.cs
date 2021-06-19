@@ -18,6 +18,7 @@
  * along with this program.If not, see<https://www.gnu.org/licenses/>.
  */
 
+using UniRx;
 using System;
 using System.Collections;
 //using System.Drawing;
@@ -46,6 +47,8 @@ namespace Raindrop
         bool AutoResponseSent = false;
         ArrayList textBuffer;
 
+        public ReactiveCollection<object> textBufferReactive;
+
         public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
 
         public IMTextManager(RaindropInstance instance, ITextPrinter textPrinter, IMTextManagerType type, UUID sessionID, string sessionName)
@@ -54,6 +57,7 @@ namespace Raindrop
             this.sessionName = sessionName;
             TextPrinter = textPrinter;
             textBuffer = new ArrayList();
+            textBufferReactive = new ReactiveCollection<object>();
             Type = type;
 
             this.instance = instance;
@@ -92,7 +96,7 @@ namespace Raindrop
             }
             catch (Exception ex)
             {
-                Debug.LogError("Failed to read chat font settings: " + ex.Message);
+                OpenMetaverse.Logger.Log("Failed to read chat font settings: " + ex.Message, Helpers.LogLevel.Error);
 
                 //System.Windows.Forms.MessageBox.Show("Failed to read chat font settings: " + ex.Message);
             }
@@ -118,7 +122,7 @@ namespace Raindrop
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("Failed to read new font settings: " + ex.Message);
+                    OpenMetaverse.Logger.Log("Failed to read new font settings: " + ex.Message , Helpers.LogLevel.Error);
                     //System.Windows.Forms.MessageBox.Show("Failed to read new font settings: " + ex.Message);
                 }
                 ReprintAllText();
@@ -142,6 +146,7 @@ namespace Raindrop
             if (e.SessionID != SessionID) return;
 
             textBuffer.Add(e);
+            textBufferReactive.Add(e);
             ProcessIM(e, true);
         }
 
@@ -158,6 +163,7 @@ namespace Raindrop
             }
 
             textBuffer.Add(e);
+            textBufferReactive.Add(e);
             ProcessIM(e, true);
         }
 
@@ -234,6 +240,7 @@ namespace Raindrop
 
         public void DisplayNotification(string message)
         {
+            notifyObservers("notification", message);
             //if (instance.MainForm.InvokeRequired)
             //{
             //    instance.MainForm.Invoke(new System.Windows.Forms.MethodInvoker(() => DisplayNotification(message)));
@@ -277,6 +284,11 @@ namespace Raindrop
 
             instance.LogClientMessage(sessionName + ".txt", message);
             TextPrinter.PrintTextLine(message);
+        }
+
+        private void notifyObservers(string v, string message)
+        {
+            throw new NotImplementedException();
         }
 
         private void PrintIM(DateTime timestamp, string fromName, UUID fromID, string message, bool isNewMessage)
@@ -491,6 +503,7 @@ namespace Raindrop
         public void ClearInternalBuffer()
         {
             textBuffer.Clear();
+            textBufferReactive.Clear();
         }
 
         public void CleanUp()
@@ -498,10 +511,14 @@ namespace Raindrop
             RemoveNetcomEvents();
 
             textBuffer.Clear();
+            textBufferReactive.Clear();
             textBuffer = null;
+            textBufferReactive.Dispose();
+            textBufferReactive = null;
 
             TextPrinter = null;
         }
+
 
         public ITextPrinter TextPrinter { get; set; } //a reference to a generic text printer (whose job is to print into a tectbox nicely.)
 

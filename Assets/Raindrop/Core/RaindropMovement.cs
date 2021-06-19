@@ -31,6 +31,7 @@
 using System;
 using System.Timers;
 using OpenMetaverse;
+using Debug = UnityEngine.Debug;
 
 namespace Raindrop
 {
@@ -105,6 +106,11 @@ namespace Raindrop
             set
             {
                 //modified = true;
+
+                //obviously you dont send packets if no change...
+                bool nochange = (value == movingForward);
+                if (nochange) { return;  }
+
                 movingForward = value;
                 if (value)
                 {
@@ -128,6 +134,11 @@ namespace Raindrop
             set
             {
                 //modified = true;
+
+                //obviously you dont send packets if no change...
+                bool nochange = (value == movingBackward);
+                if (nochange) { return; }
+
                 movingBackward = value;
                 if (value)
                 {
@@ -152,6 +163,11 @@ namespace Raindrop
             set
             {
                 //modified = true;
+
+                //obviously you dont send packets if no change...
+                bool nochange = (value == movingLeftward);
+                if (nochange) { return; }
+
                 movingLeftward = value;
                 if (value)
                 {
@@ -176,6 +192,11 @@ namespace Raindrop
             set
             {
                 //modified = true;
+
+                //obviously you dont send packets if no change...
+                bool nochange = (value == movingRightward);
+                if (nochange) { return; }
+
                 movingRightward = value;
                 if (value)
                 {
@@ -194,7 +215,7 @@ namespace Raindrop
         public RaindropMovement(RaindropInstance instance)
         {
             this.instance = instance;
-            timer = new System.Timers.Timer(100);
+            timer = new System.Timers.Timer(1000);
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             timer.Enabled = false;
         }
@@ -208,6 +229,8 @@ namespace Raindrop
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            Debug.Log("movement timer ");
+            OpenMetaverse.Logger.DebugLog("movement timer ");
             float delta = (float)timer.Interval / 1000f;
             if (turningLeft)
             {

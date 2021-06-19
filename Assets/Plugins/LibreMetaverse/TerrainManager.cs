@@ -169,6 +169,7 @@ namespace OpenMetaverse
             switch (type)
             {
                 case TerrainPatch.LayerType.Land:
+                    Logger.Log("Got a Land LayerData packet", Helpers.LogLevel.Info, Client);
                     if (m_LandPatchReceivedEvent != null || Client.Settings.STORE_LAND_PATCHES)
                         DecompressLand(e.Simulator, bitpack, header);
                     break;

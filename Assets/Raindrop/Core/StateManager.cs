@@ -509,6 +509,7 @@ namespace Raindrop
 
             if (e.Status == TeleportStatus.Progress)
             {
+                instance.MediaManager.PlayUISound(UISounds.Teleport);
                 client.Self.SphereEffect(client.Self.GlobalPosition, Color4.White, 4f, teleportEffect);
             }
 
@@ -520,6 +521,7 @@ namespace Raindrop
 
             if (e.Status == TeleportStatus.Failed)
             {
+                instance.MediaManager.PlayUISound(UISounds.Error);
                 client.Self.SphereEffect(Vector3d.Zero, Color4.White, 0f, teleportEffect);
             }
         }

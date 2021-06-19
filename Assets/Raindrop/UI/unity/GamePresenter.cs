@@ -29,6 +29,7 @@ namespace Raindrop.Presenters
         private GridClient client { get { return instance.Client; } }
 
         private UIManager uimanager;
+        private Settings s;
 
         bool Active => instance.Client.Network.Connected;
 
@@ -37,14 +38,19 @@ namespace Raindrop.Presenters
         //buttons that open up other canvas.
         public Button ChatButton; 
         public Button MapButton; 
+
+        public Toggle SoundToggle; 
         
         //ui elements that just dock to the screen.
-        public Image MapPane;
         public TMP_Text locationText;
-        public MinimapModule minimap;
+        public TMP_Text usernameText;
+        //public MinimapModule minimap;
 
+
+        //public ReactiveProperty<string> simName;
 
         public UnityEngine.Vector2 jsDir;
+        private float timeSinceLastUpdate;
 
 
         #endregion
@@ -55,6 +61,8 @@ namespace Raindrop.Presenters
 
 
 
+        private System.Threading.Timer configTimer;
+        private const int saveConfigTimeout = 1000;
         #region behavior
 
         // Use this for initialization
@@ -62,15 +70,75 @@ namespace Raindrop.Presenters
         {
 
             initialiseFields();
+            
+            configTimer = new System.Threading.Timer(SaveConfig, null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
 
             ChatButton.onClick.AsObservable().Subscribe(_ => OnChatBtnClick()); //when clicked, runs this method.
             MapButton.onClick.AsObservable().Subscribe(_ => OnMapBtnClick()); //when clicked, runs this method.
+            SoundToggle.OnValueChangedAsObservable().Subscribe(_ => OnToggleSounds(_));
+
+            //simName.AsObservable().Subscribe(_ => UpdateSimLocDisplay(_));
 
             //get uimanager service
             uimanager = ServiceLocatorSample.ServiceLocator.ServiceLocator.Current.Get<UIManager>();
 
+
+
+            client.Network.SimConnected += Network_SimConnected;
+
+            //client.Network.SimChanged += Network_SimChanged;
+            //client.Network.SimConnected += Network_SimConnected;
+
+            //client.Self.SimPosition
         }
 
+        private void Network_SimConnected(object sender, SimConnectedEventArgs e)
+        {
+            //update the user'sname
+            usernameText.text = client.Self.Name;
+
+        }
+
+        private void SaveConfig(object state)
+        {
+
+
+            //s["parcel_audio_url"] = OSD.FromString(txtAudioURL.Text);
+            //s["parcel_audio_vol"] = OSD.FromReal(audioVolume);
+            //s["parcel_audio_play"] = OSD.FromBoolean(cbPlayAudioStream.Checked);
+            //s["parcel_audio_keep_url"] = OSD.FromBoolean(cbKeep.Checked);
+            //s["object_audio_vol"] = OSD.FromReal(instance.MediaManager.ObjectVolume);
+            s["object_audio_enable"] = OSD.FromBoolean(SoundToggle.isOn);
+            //s["ui_audio_vol"] = OSD.FromReal(instance.MediaManager.UIVolume);
+        }
+
+
+
+        private void OnToggleSounds(bool _)
+        {
+            instance.MediaManager.ObjectEnable = _;
+            configTimer.Change(saveConfigTimeout, System.Threading.Timeout.Infinite);
+        }
+
+        private void UpdateSimLocDisplay(string sim, OpenMetaverse.Vector3 pos)
+        {
+            var _x = String.Format("{0:0.00}", pos.X);
+            var _y = String.Format("{0:0.00}", pos.Y);
+            var _z = String.Format("{0:0.00}", pos.Z);
+            locationText.text = sim + " " + _x + " " + _y + " " + _z;
+
+        }
+
+        //private void Network_SimConnected(object sender, SimConnectedEventArgs e)
+        //{
+        //    simName.Value = client.Network.CurrentSim.Name + ;
+
+        //}
+
+        //private void Network_SimChanged(object sender, SimChangedEventArgs e)
+        //{
+        //    simName.Value = e.;
+        //}
 
         private void Update()
         {
@@ -81,7 +149,17 @@ namespace Raindrop.Presenters
                 return;
             }
 
+            var lastFrameTime = Time.deltaTime;
+            timeSinceLastUpdate += lastFrameTime;
 
+
+            if (timeSinceLastUpdate > 2)
+            {
+                //do updates
+                UpdateSimLocDisplay(client.Network.CurrentSim.Name, client.Self.SimPosition); //update the title to the current sim
+
+                timeSinceLastUpdate = 0;
+            }
         }
 
 

@@ -35,7 +35,7 @@ using System.Reflection;
 using System.Threading;
 //using Radegast.Commands;
 using Raindrop.Netcom;
-//using Radegast.Media;
+using Raindrop.Media;
 using OpenMetaverse;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
@@ -84,6 +84,12 @@ namespace Raindrop
                 return globalInstance;
             }
         }
+        
+        // managed the chats that are loaded in memory. (including local chat.)
+        //public ChatManager ChatManger { get { return chatManger; } }
+        //private ChatManager chatManger;
+
+
 
         /// <summary>
         /// Manages retrieving avatar names
@@ -157,11 +163,11 @@ namespace Raindrop
         ///// <summary> Handles loading plugins and scripts</summary>
         //public PluginManager PluginManager { get { return pluginManager; } }
 
-        //private MediaManager mediaManager;
-        ///// <summary>
-        ///// Radegast media manager for playing streams and in world sounds
-        ///// </summary>
-        //public MediaManager MediaManager { get { return mediaManager; } }
+        private MediaManager mediaManager;
+        /// <summary>
+        /// Radegast media manager for playing streams and in world sounds
+        /// </summary>
+        public MediaManager MediaManager { get { return mediaManager; } }
 
 
         //private CommandsManager commandsManager;
@@ -284,17 +290,20 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client0)
         {
+            //Logger.DebugLog("test");
+
             // incase something else calls GlobalInstance while we are loading
             globalInstance = this;
 
             app_data_dir = Application.persistentDataPath;
             streaming_assets_dir = Application.streamingAssetsPath;
 
-            //if (!System.Diagnostics.Debugger.IsAttached)
-            //{
-            //    Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            //    Application.ThreadException += HandleThreadException;
-            //}
+            if (!System.Diagnostics.Debugger.IsAttached)
+            {
+                Debug.LogError("no debugger detected. ");
+                //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+                //Application.ThreadException += HandleThreadException;
+            }
 
             client = client0;
 
@@ -304,13 +313,17 @@ namespace Raindrop
 
             // Are we running mono?
             monoRuntime = Type.GetType("Mono.Runtime") != null;
+            if (monoRuntime)
+            {
+                Logger.Log("Mono runtime is detected", Helpers.LogLevel.Debug);
+            }
 
             //Keyboard = new Keyboard();
             //Application.AddMessageFilter(Keyboard);
 
             netcom = new RaindropNetcom(this);
             state = new StateManager(this);
-            //mediaManager = new MediaManager(this);
+            mediaManager = new MediaManager(this);
             //commandsManager = new CommandsManager(this);
             //ContextActionManager = new ContextActionsManager(this);
             //RegisterContextActions();
@@ -333,6 +346,8 @@ namespace Raindrop
             //mainCanvas.Load += new EventHandler(mainForm_Load);
             //pluginManager = new PluginManager(this);
             //pluginManager.ScanAndLoadPlugins();
+
+            //chatManger = new ChatManager(this);
         }
 
         private void InitializeClient(GridClient client)
@@ -362,7 +377,7 @@ namespace Raindrop
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
 
             client.Self.Movement.AutoResetControls = false;
-            client.Self.Movement.UpdateInterval = 250;
+            client.Self.Movement.UpdateInterval = 2500;
 
             RegisterClientEvents(client);
             SetClientTag();
@@ -391,7 +406,7 @@ namespace Raindrop
         private void RegisterClientEvents(GridClient client)
         {
             //log
-            OpenMetaverse.Logger.OnLogMessage += Logger_OnLogMessage;
+            //OpenMetaverse.Logger.OnLogMessage += Logger_OnLogMessage;
 
             client.Groups.CurrentGroups += new EventHandler<CurrentGroupsEventArgs>(Groups_CurrentGroups);
             client.Groups.GroupLeaveReply += new EventHandler<GroupOperationEventArgs>(Groups_GroupsChanged);
@@ -526,11 +541,11 @@ namespace Raindrop
             //    ContextActionManager.Dispose();
             //    ContextActionManager = null;
             //}
-            //if (mediaManager != null)
-            //{
-            //    mediaManager.Dispose();
-            //    mediaManager = null;
-            //}
+            if (mediaManager != null)
+            {
+                mediaManager.Dispose();
+                mediaManager = null;
+            }
             if (state != null)
             {
                 state.Dispose();
@@ -820,6 +835,7 @@ namespace Raindrop
         #endregion Context Actions
 
 
+        //no longer using this as we have configured log4net :)
         private void Logger_OnLogMessage(object message, Helpers.LogLevel level)
         {
             if (level == Helpers.LogLevel.Debug)

@@ -30,52 +30,53 @@ public class joystickToMovementBackend : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (! Active)
-        {
-            return;
-        }
+        //if (! Active)
+        //{
+        //    return;
+        //}
 
-        float vert = variableJoystick.ScaledValue.y;
-        float horz = variableJoystick.ScaledValue.x;
+        ////do not flood! no setting unless changed.
+        //float vert = variableJoystick.ScaledValue.y;
+        //float horz = variableJoystick.ScaledValue.x;
 
-        float thresh = 0.7f;
-        if (vert > thresh)
-        {
-            instance.Movement.MovingBackward = false;
-            instance.Movement.MovingForward = true;
+        //float thresh = 0.7f;
+        //if (vert > thresh)
+        //{
+        //    instance.Movement.MovingBackward = false;
+        //    instance.Movement.MovingForward = true;
 
-        }
-        else if (vert < -thresh)
-        {
-            instance.Movement.MovingBackward = true;
-            instance.Movement.MovingForward = false;
+        //}
+        //else if (vert < -thresh)
+        //{
+        //    instance.Movement.MovingBackward = true;
+        //    instance.Movement.MovingForward = false;
 
-        }
-        else
-        {
-            instance.Movement.MovingBackward = false;
-            instance.Movement.MovingForward = false;
+        //}
+        //else
+        //{
+        //    instance.Movement.MovingBackward = false;
+        //    instance.Movement.MovingForward = false;
 
-        }
+        //}
 
-        if (horz > thresh)
-        {
-            instance.Movement.TurningLeft = false;
-            instance.Movement.TurningRight = true;
+        //if (horz > thresh)
+        //{
+        //    instance.Movement.TurningLeft = false;
+        //    instance.Movement.TurningRight = true;
 
-        }
-        else if (horz < -thresh)
-        {
-            instance.Movement.TurningLeft = true;
-            instance.Movement.TurningRight = false;
+        //}
+        //else if (horz < -thresh)
+        //{
+        //    instance.Movement.TurningLeft = true;
+        //    instance.Movement.TurningRight = false;
 
-        }
-        else
-        {
-            instance.Movement.TurningLeft = false;
-            instance.Movement.TurningRight = false;
+        //}
+        //else
+        //{
+        //    instance.Movement.TurningLeft = false;
+        //    instance.Movement.TurningRight = false;
 
-        }
+        //}
 
     }
 }

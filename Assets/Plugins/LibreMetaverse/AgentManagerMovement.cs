@@ -656,6 +656,7 @@ namespace OpenMetaverse
                     update.AgentData.Flags = (byte)Flags;
 
                     Client.Network.SendPacket(update, simulator);
+                    Logger.DebugLog("sent packet of agent movement!");
 
                     if (autoResetControls) {
                         ResetControlFlags();

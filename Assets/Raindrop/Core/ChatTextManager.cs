@@ -30,12 +30,18 @@ using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
 using Object = System.Object;
+using System.Text.RegularExpressions;
+using Raindrop.Core;
 
 namespace Raindrop
 {
-    //holds a reference to the textboxUI and prints into it.
+    //used to : holds a reference to the textboxUI and prints into it. //no way man this makes no sense
+
+    //class that functions as model. holds data on the local chat.
     public class ChatTextManager : IDisposable
     {
+        private Regex chatRegex = new Regex(@"^/(\d+)\s*(.*)", RegexOptions.Compiled);
+        private int chatPointer;
 
         public event EventHandler<ChatLineAddedArgs> ChatLineAdded;
 
@@ -44,14 +50,18 @@ namespace Raindrop
         private GridClient client => instance.Client;
 
         private List<ChatBufferItem> textBuffer;
+        public List<ChatBufferItem> getChatBuffer()
+        {
+            return textBuffer;
+        }
 
         private bool showTimestamps;
 
         //public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
 
-        public ChatTextManager(RaindropInstance instance, ITextPrinter textPrinter)
+        public ChatTextManager(RaindropInstance instance)
         {
-            TextPrinter = textPrinter;
+            //TextPrinter = textPrinter;
             textBuffer = new List<ChatBufferItem>();
 
             this.instance = instance;
@@ -139,7 +149,7 @@ namespace Raindrop
 
         private void netcom_AlertMessageReceived(object sender, AlertMessageEventArgs e)
         {
-            if (e.Message.ToLower().Contains("autopilot canceled")) return; //workaround the stupid autopilot alerts
+            //if (e.Message.ToLower().Contains("autopilot canceled")) return; //workaround the stupid autopilot alerts
 
             ChatBufferItem item = new ChatBufferItem(
                 DateTime.Now, "Alert message", UUID.Zero, ": " + e.Message, ChatBufferTextStyle.Alert);
@@ -171,7 +181,6 @@ namespace Raindrop
 
         public void ProcessBufferItem(ChatBufferItem item, bool addToBuffer)
         {
-            ChatLineAdded?.Invoke(this, new ChatLineAddedArgs(item));
 
             lock (SyncChat)
             {
@@ -193,7 +202,7 @@ namespace Raindrop
                         //TextPrinter.ForeColor = SystemColors.GrayText;
                         //TextPrinter.BackColor = Color.Transparent;
                         //TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                        TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                        //TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
                     //}
                 }
 
@@ -213,11 +222,11 @@ namespace Raindrop
 
                 if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
                 {
-                    TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
+                    //TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
                 }
                 else
                 {
-                    TextPrinter.PrintText(item.From);
+                    //TextPrinter.PrintText(item.From);
                 }
 
                 //if(fontSettings.ContainsKey(item.Style.ToString()))
@@ -233,8 +242,54 @@ namespace Raindrop
                 //    TextPrinter.BackColor = Color.Transparent;
                 //    TextPrinter.Font = Settings.FontSetting.DefaultFont;
                 //}
-                TextPrinter.PrintTextLine(item.Text);
+                //TextPrinter.PrintTextLine(item.Text);
             }
+
+            ChatLineAdded?.Invoke(this, new ChatLineAddedArgs(item));
+        }
+
+        //process sending-out of local chat
+        internal void ProcessChatInput(string input, ChatType type)
+        {
+
+            //TextPrinter.ClearText();
+            
+            string msg;
+            msg = input.Length >= 1000 ? input.Substring(0, 1000) : input;
+            //msg = msg.Replace(ChatInputBox.NewlineMarker, Environment.NewLine);
+
+            if (instance.GlobalSettings["mu_emotes"].AsBoolean() && msg.StartsWith(":"))
+            {
+                msg = "/me " + msg.Substring(1);
+            }
+
+            int ch = 0;
+            Match m = chatRegex.Match(msg);
+
+            if (m.Groups.Count > 2)
+            {
+                ch = int.Parse(m.Groups[1].Value);
+                msg = m.Groups[2].Value;
+            }
+
+            //if (instance.CommandsManager.IsValidCommand(msg))
+            //{
+            //    instance.CommandsManager.ExecuteCommand(msg);
+            //}
+            //else
+            //{
+            #region RLV
+
+            #endregion
+
+            var processedMessage = GestureManager.Instance.PreProcessChatMessage(msg).Trim();
+            if (!string.IsNullOrEmpty(processedMessage))
+            {
+                netcom.ChatOut(processedMessage, type, ch);
+            }
+            //}
+
+
         }
 
 
@@ -396,7 +451,7 @@ namespace Raindrop
 
         public void ReprintAllText()
         {
-            TextPrinter.ClearText();
+            //TextPrinter.ClearText();
 
             foreach (ChatBufferItem item in textBuffer)
             {
@@ -409,7 +464,7 @@ namespace Raindrop
             textBuffer.Clear();
         }
 
-        public ITextPrinter TextPrinter { get; set; }
+        //public ITextPrinter TextPrinter { get; set; }
     }
 
     public class ChatLineAddedArgs : EventArgs

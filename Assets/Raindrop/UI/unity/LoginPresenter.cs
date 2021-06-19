@@ -35,27 +35,19 @@ namespace Raindrop.Presenters
         private UIManager uimanager;
 
 
-        #region UI references
+        #region UI elements - the 'view' in MVP
         public Button LoginButton;
         public TMP_InputField usernameField;
         public TMP_InputField passwordField;
-        //public Dropdown gridDropdown;
         public Toggle TOSCheckbox;
         public Toggle RememberCheckbox;
 
-        //public Modal loginStatusModal;
-
-        //extragrid seclections
-        //public GameObject GridDropdownGO; //required.
-        //public GenericDropdown genericDropdown;
-        //public TMP_InputField customURL;
-        //public Toggle customURLCheckbox;
+        public TMP_Dropdown locationDropdown;
+        private LoginLocationDropdown loginLocationDropdown; //wraps the above
         #endregion
 
         #region internal representations 
 
-        //private string Username;
-        //private string Password;
         private readonly string INIT_USERNAME = "username";
         private readonly string INIT_PASSWORD = "password";
         private Settings s;
@@ -75,31 +67,20 @@ namespace Raindrop.Presenters
 
         public string uninitialised = "(unknown)";
 
-        //private List<string> gridDropdownOptions = new List<string> //type is grid
-        //{
-        //};
-
-        private int gridSelectedItem;
-
         private object lblLoginStatus;
-        //private string login_msg;
-
 
         private bool cbTOStrue = true;
-        private bool cbCustomURL = false;
         private bool cbRememberBool;
-        //private DropdownMenuWithEntry usernameDropdownMenuWithEntry;
-        //private GameObject UserDropdownMenu;
-
 
         #endregion
 
         #region init
-
-        // Use this for initialization
+         
         void Start()
         {
-            //1 load deafult UI fields.
+            loginLocationDropdown = new LoginLocationDropdown(locationDropdown);
+
+            //1 load default UI fields.
             initialiseFields();
 
             //2 load various loginInformation from the settings.
@@ -270,43 +251,20 @@ namespace Raindrop.Presenters
             Username = INIT_USERNAME;
             Password = INIT_PASSWORD;
 
-            //modal 
+            //login status message for the modal 
             Login_msg = new ReactiveProperty<string>(uninitialised);
-
-            //grids selector
-            //location selector
-
+            
         }
 
         //make sure you have done the needful before this, such as reading the grid xml file.
         private void InitializeConfig()
         {
-            // Initilize grid dropdown
-            //int gridIx = -1;
-
-            //GridDropdownGO.clear();
-            //GridDropdownGO.set(instance.GridManger.Grids);
-            //gridDropdown.ClearOptions();
-            //for (int i = 0; i < instance.GridManger.Count; i++)
-            //{
-            //    //gridList.Add(instance.GridManger[i]);
-            //    gridDropdownOptions.Add(instance.GridManger[i].ToString());
-            //    //Debug.Log(instance.GridManger[i].ToString());
-            //}
-            //GridDropdownGO.Add("Custom");
-
-
-            //if (gridIx != -1)
-            //{
-            //    cbxGrid.SelectedIndex = gridIx;
-            //}
-
-
             Settings s = instance.GlobalSettings;
             RememberCheckbox.isOn = LoginUtils.getRememberFromSettings(s);
 
             string savedUsername = s["username"];
             usernameField.text = (savedUsername);
+            Username = (savedUsername);
 
             //try to get saved username
             try
@@ -333,77 +291,37 @@ namespace Raindrop.Presenters
             //cbxUsername.SelectedIndex = 0;
 
             // Fill in saved password or use one specified on the command line
-            passwordField.text = s["password"].AsString();
-            Debug.Log("password cache: " + passwordField.text);
+            var pass = s["password"].AsString();
+            passwordField.text = pass;
+            Password = (pass);
+            Debug.Log("password cache (MD5-ed): " + passwordField.text);
 
-            // Setup login location either from the last used or
-            // override from the command line
-            //if (string.IsNullOrEmpty(MainProgram.s_CommandLineOpts.Location))
-            //{
-            //    // Use last location as default
-            //    if (s["login_location_type"].Type == OSDType.Unknown)
-            //    {
-            //        cbxLocation.SelectedIndex = 1;
-            //        s["login_location_type"] = OSD.FromInteger(1);
-            //    }
-            //    else
-            //    {
-            //        cbxLocation.SelectedIndex = s["login_location_type"].AsInteger();
-            //        cbxLocation.Text = s["login_location"].AsString();
-            //    }
-            //}
-            //}
-            //else
-            //{
-            //    switch (MainProgram.s_CommandLineOpts.Location)
-            //    {
-            //        case "home":
-            //            cbxLocation.SelectedIndex = 0;
-            //            break;
+            // Setup login location either from the last used  //home = 0; last = 1
+            //    Use last location as default
+            if (s["login_location_type"].Type == OSDType.Unknown) //if not in cache file?
+            {
+                loginLocationDropdown.select(1);
+                s["login_location_type"] = OSD.FromInteger(1); //default set to last
+            }
+            else
+            {
+                //not supported: custom login locations. onyl support home or last. 
 
-            //        case "last":
-            //            cbxLocation.SelectedIndex = 1;
-            //            break;
-
-            //        default:
-            //            cbxLocation.SelectedIndex = -1;
-            //            cbxLocation.Text = MainProgram.s_CommandLineOpts.Location;
-            //            break;
-            //    }
-            //}
-
-
-            //// Set grid dropdown to last used, or override from command line
-            //if (string.IsNullOrEmpty(MainProgram.s_CommandLineOpts.Grid))
-            //{
-            //    cbxGrid.SelectedIndex = s["login_grid"].AsInteger();
-            //}
-            //else if (gridIx == -1) // --grid specified but not found
-            //{
-            //    MessageBox.Show($"Grid specified with --grid {MainProgram.s_CommandLineOpts.Grid} not found",
-            //        "Grid not found",
-            //        MessageBoxButtons.OK,
-            //        MessageBoxIcon.Warning
-            //        );
-            //}
-
-            //// Restore login uri from settings, or command line
-            //if (string.IsNullOrEmpty(MainProgram.s_CommandLineOpts.LoginUri))
-            //{
-            //    txtCustomLoginUri.Text = s["login_uri"].AsString();
-            //}
-            //else
-            //{
-            //    txtCustomLoginUri.Text = MainProgram.s_CommandLineOpts.LoginUri;
-            //    cbxGrid.SelectedIndex = cbxGrid.Items.Count - 1;
-            //}
-
+                int loginLocationId = s["login_location_type"].AsInteger();
+                loginLocationDropdown.select(loginLocationId);
+                //loginLocationDropdown.select(loginLocationId);
+                //locationDropdown.Text = s["login_location"].AsString();
+            } 
+             
+            //txtCustomLoginUri.Text = s["login_uri"].AsString();
+             
         }
 
 
         public void OnLoginBtnClick()
         {
             LoginButton.interactable = false;
+            instance.MediaManager.PlayUISound(UISounds.Click);
             //sanity 
             if (Username == INIT_USERNAME || Password == INIT_PASSWORD)
             {
@@ -435,14 +353,7 @@ namespace Raindrop.Presenters
 
         private void BeginLogin()
         {
-            
-
             string username = Username;
-
-            //if (Username.SelectedIndex > 0 && cbxUsername.SelectedItem is SavedLogin)
-            //{
-            //    username = ((SavedLogin)cbxUsername.SelectedItem).Username;
-            //}
 
             string[] parts = System.Text.RegularExpressions.Regex.Split(username.Trim(), @"[. ]+");
 
@@ -464,24 +375,24 @@ namespace Raindrop.Presenters
             netcom.LoginOptions.Version = "Version"; // Version
             netcom.AgreeToTos = cbTOStrue;
 
-            //placeholder
-            switch (1)
+            //startlocation parsing
+
+
+            switch (locationDropdown.value)
             {
-                case -1: //Custom
+                case 0: //Custom
                     netcom.LoginOptions.StartLocation = StartLocationType.Custom;
                     netcom.LoginOptions.StartLocationCustom = "placeholder text";
                     break;
 
-                case 0: //Home
+                case 1: //Home
                     netcom.LoginOptions.StartLocation = StartLocationType.Home;
                     break;
 
-                case 1: //Last
+                case 2: //Last
                     netcom.LoginOptions.StartLocation = StartLocationType.Last;
                     break;
             }
-
-            //netcom.LoginOptions.IsSaveCredentials = cbRememberBool;
 
             //if (cbxGrid.SelectedIndex == cbxGrid.Items.Count - 1) // custom login uri
             //{
@@ -504,12 +415,6 @@ namespace Raindrop.Presenters
 
             instance.Client.Settings.CAPS_TIMEOUT = 13*1000; //expect to see the error every 13 seconds now!
 
-            /*
-             * debug section: fuck that caps problem.
-             * 
-             * */
-
-
             //note: setting this ridiculously low yields log: "< >: Login status: Failed: A task was canceled."
 
             if (netcom.LoginOptions.Grid.Platform != "SecondLife")
@@ -527,7 +432,7 @@ namespace Raindrop.Presenters
             var temp = netcom.LoginOptions;
 
             netcom.Login();
-            LoginUtils.SaveConfig(netcom.LoginOptions, instance.GlobalSettings, cbRememberBool);
+            SaveConfig(netcom.LoginOptions, instance.GlobalSettings, cbRememberBool);
         }
 
 
@@ -535,12 +440,86 @@ namespace Raindrop.Presenters
 
 
 
+        // this function appends (and saves) content of loginoptions to globalsettings file.
+        // it is called when the user clicks the login button.
+        public void SaveConfig(LoginOptions loginoptions, Raindrop.Settings globalSettings, bool isSaveCredentials)
+        {
+            Raindrop.Settings s = globalSettings;
+            SavedLogin sl = new SavedLogin();
+
+            string username = loginoptions.FirstName + " " + loginoptions.LastName;
+            string Password = loginoptions.Password;
+
+            //checks if the username selected is a dropdown option. this means you use the username from the settings instead of the text box.
+            //if (cbxUsername.SelectedIndex > 0 && cbxUsername.SelectedItem is SavedLogin)
+            //{
+            //    username = ((SavedLogin)cbxUsername.SelectedItem).Username;
+            //}
+
+            if (loginoptions.GridLoginUri != string.Empty) // custom login uri
+            {
+                sl.GridID = "custom_login_uri";
+                sl.CustomURI = loginoptions.GridLoginUri;
+            }
+            else
+            {
+                sl.GridID = loginoptions.Grid.ID; //GridID;//netcom.LoginOptions.Grid.ID; //(GridDropdownGO.SelectedItem as Grid).ID;
+                sl.CustomURI = string.Empty;
+            }
+
+            string savedLoginsKey = string.Format("{0}%{1}", username, sl.GridID);
+
+            if (!(s["saved_logins"] is OSDMap))
+            {
+                s["saved_logins"] = new OSDMap();
+            }
+
+            if (isSaveCredentials)
+            {
+                OpenMetaverse.Logger.Log("saving user credientials to disk: ", Helpers.LogLevel.Info);
+                sl.Username = s["username"] = username;
+
+                if (LoginOptions.IsPasswordMD5(Password))
+                {
+                    sl.Password = Password;
+                    s["password"] = Password;
+                }
+                else
+                {
+                    sl.Password = Utils.MD5(Password);
+                    s["password"] = Utils.MD5(Password);
+                }
+
+                //apparently the startlocation is also part of saveCredentials?
+
+                //if (cbxLocation.SelectedIndex == -1)
+                //{
+                //    sl.CustomStartLocation = cbxLocation.Text;
+                //}
+                //else
+                //{
+                //    sl.CustomStartLocation = string.Empty;
+                //}
+                //sl.StartLocationType = cbxLocation.SelectedIndex;
+                ((OSDMap)s["saved_logins"])[savedLoginsKey] = sl.ToOSD();   //settings_map["saved_logins"] -> savedloginsmap;  savedloginsmap[savedLoginsKey] ->  set: sl.ToOSD(); where savedLoginsKey is username+gridID
+            }
+            else if (((OSDMap)s["saved_logins"]).ContainsKey(savedLoginsKey))
+            {
+                ((OSDMap)s["saved_logins"]).Remove(savedLoginsKey);
+            }
+
+            s["login_location_type"] = OSD.FromInteger(loginLocationDropdown.selectedId);
+            //s["login_location"] = OSD.FromString(cbxLocation.Text);
+
+            //s["login_grid"] = OSD.FromInteger(gridmgr.);  //note: this was removed as this was literally a magic number (int) that corresponds to the position of the dropbox selection.
+            s["login_uri"] = OSD.FromString(loginoptions.GridLoginUri);
+            s["remember_login"] = isSaveCredentials; //OSD.FromBoolean (loginoptions.IsSaveCredentials);
+        }
 
 
 
 
 
-        
     }
 
 }

@@ -1,6 +1,8 @@
-﻿using Raindrop;
+﻿using log4net.Config;
+using Raindrop;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,19 +19,56 @@ namespace ServiceLocatorSample.ServiceLocator
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Initiailze()
         {
+            //if (!log4net.LogManager.GetRepository().Configured)
+            //{
+            //    // log4net not configured
+            //    foreach (log4net.Util.LogLog message in
+            //             log4net.LogManager.GetRepository()
+            //                    .ConfigurationMessages
+            //                    .Cast < log4net.Util.LogLog())
+            //    {
+            //        // evaluate configuration message
+            //    }
+            //}
+
+            //setup log4net 
+            //XmlConfigurator.Configure(new FileInfo($"{Application.dataPath}/log4net.xml")); //this cause freeze
+            //Debug.Log("xmlconfigurator called.");
+            OpenMetaverse.Logger.Log("Logger.Log is working.", OpenMetaverse.Helpers.LogLevel.Info);
+
             // Initialize default service locator.
             ServiceLocator.Initiailze();
 
             // Register all your services next.
-            ServiceLocator.Current.Register<RaindropInstance>(new RaindropInstance( new OpenMetaverse.GridClient() ));
-            ServiceLocator.Current.Register<UIManager>(new UIManager( ));
-            //ServiceLocator.Current.Register<IMyGameServiceB>(new MyGameServiceB());
-            //ServiceLocator.Current.Register<IMyGameServiceC>(new MyGameServiceC());
+            ServiceLocator.Current.Register<RaindropInstance>(new RaindropInstance(new OpenMetaverse.GridClient()));
+            ServiceLocator.Current.Register<UIManager>(new UIManager());
 
             // Application is ready to start, load your main scene.
-            SceneManager.LoadSceneAsync("UIscene", LoadSceneMode.Additive);
+            Scene[] currentScenes = SceneManager.GetAllScenes();
+            bool loadUI = true;
+            bool load3D = true;
+            foreach(var scene in currentScenes)
+            {
+                if (scene.name == "UIscene")
+                {
+                    loadUI = false;
+                }
+                if (scene.name == "3Dscene")
+                {
+                    load3D = false;
+                }
+            } 
+    
+            if (loadUI)
+                SceneManager.LoadSceneAsync("UIscene", LoadSceneMode.Additive);
+            if (load3D)
+                SceneManager.LoadSceneAsync("3Dscene", LoadSceneMode.Additive);
+
+            Debug.Log("Bootstrap finished!");
 
 
         }
+
+        
     }
 }
