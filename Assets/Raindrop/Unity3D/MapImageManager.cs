@@ -72,6 +72,8 @@ namespace Raindrop.Presenters
 
             if (client.Network.Connected) return;
 
+            Debug.Log("Network_OnCurrentSimChanged");
+
             GridRegion region;
             if (client.Grid.GetGridRegion(client.Network.CurrentSim.Name, GridLayerType.Objects, out region))
             {
@@ -81,6 +83,8 @@ namespace Raindrop.Presenters
                 UUID _MapImageID = region.MapImageID;
                 Vector2Int regionPos = new Vector2Int(region.X,region.Y);
                 ManagedImage nullImage;
+
+                Debug.Log("requesting map image.");
 
                 client.Assets.RequestImage(_MapImageID, ImageType.Baked,
                     delegate (TextureRequestState state, AssetTexture asset)

@@ -67,7 +67,8 @@ namespace Raindrop.Media
 
             ContainerId = objectId;
             Id = soundId;
-            position = FromOMVSpace(worldpos);
+            position = ZeroVector;
+            //position = FromOMVSpace(worldpos);
             volumeSetting = vol;
             loopSound = loop;
 
@@ -80,7 +81,11 @@ namespace Raindrop.Media
                 MODE.OPENMEMORY;   // Use sound data in memory
 
             // Set coordinate space interpretation.
-            if (global)
+            if (true)
+            {
+                mode |= MODE._3D_HEADRELATIVE;
+            }
+            else if (global)
                 mode |= MODE._3D_WORLDRELATIVE;
             else
                 mode |= MODE._3D_HEADRELATIVE;
@@ -89,7 +94,7 @@ namespace Raindrop.Media
                 mode |= MODE.LOOP_NORMAL;
 
             // Fetch the sound data.
-            manager.Instance.Client.Assets.RequestAsset(
+            manager.Instance.Client.Assets.RequestAsset( //sent request for certain sound asset
                 Id,
                 AssetType.Sound,
                 false,
@@ -167,8 +172,9 @@ namespace Raindrop.Media
          */
         void Assets_OnSoundReceived(AssetDownload transfer, Asset asset)
         {
-            if (transfer.Success)
+            if (transfer.Success) //finally got back that sound.
             {
+                Logger.DebugLog("sound asset received.");
                 // If this was a Prefetch, just stop here.
                 if (prefetchOnly)
                 {
@@ -190,6 +196,8 @@ namespace Raindrop.Media
                 {
                     try
                     {
+                        Logger.DebugLog("creating fmod sound using fetched sound asset.");
+
                         // Create an FMOD sound of this Ogg data.
                         FMODExec(system.createSound(
                             data,

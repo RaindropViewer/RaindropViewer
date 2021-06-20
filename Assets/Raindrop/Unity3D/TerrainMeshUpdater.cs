@@ -65,7 +65,7 @@ namespace Raindrop.Unity3D
             //mesh.vertices = newVertices;
             //mesh.uv = newUV;
             //mesh.triangles = newTriangles;
-            buildBasicLandMesh();
+            //buildBasicLandMesh();
 
 
         }
@@ -74,7 +74,7 @@ namespace Raindrop.Unity3D
         {
 
 
-            Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
+            //Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
 
 
         }

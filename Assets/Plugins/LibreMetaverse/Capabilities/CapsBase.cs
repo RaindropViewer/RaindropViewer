@@ -133,8 +133,8 @@ namespace OpenMetaverse.Http
             {
                 Logger.Log(
                     string.Format(
-                        "In CapsBase.SetupRequest() setting conn limit for {0}:{1} to {2}", 
-                        address.Host, address.Port, Settings.MAX_HTTP_CONNECTIONS), 
+                        "In CapsBase.SetupRequest() setting conn limit for {0}:{1} to {2}",
+                        address.Host, address.Port, Settings.MAX_HTTP_CONNECTIONS),
                     Helpers.LogLevel.Debug);
                 request.ServicePoint.ConnectionLimit = Settings.MAX_HTTP_CONNECTIONS;
             }

@@ -90,12 +90,19 @@ namespace Raindrop.Presenters
             //client.Network.SimConnected += Network_SimConnected;
 
             //client.Self.SimPosition
+
+            //set usename
+            usernameText.text = client.Self.Name;
+
         }
 
+        //its too late bro, the UI is started only after connected to sim has occured.
         private void Network_SimConnected(object sender, SimConnectedEventArgs e)
         {
             //update the user'sname
             usernameText.text = client.Self.Name;
+
+            Debug.Log("Network_SimConnected is raised! wow. not expected. as sim connection should have occured far before this event is registered.");
 
         }
 
@@ -116,6 +123,7 @@ namespace Raindrop.Presenters
 
         private void OnToggleSounds(bool _)
         {
+            OpenMetaverse.Logger.DebugLog("sound toggle is on? : " + _);
             instance.MediaManager.ObjectEnable = _;
             configTimer.Change(saveConfigTimeout, System.Threading.Timeout.Infinite);
         }

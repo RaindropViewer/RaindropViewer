@@ -57,10 +57,16 @@ namespace Raindrop
             //subscribe to localchat received event
             //localChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
         }
-         
+
+        public void Dispose()
+        {
+            localChatManager = null;
+        }
 
         private void Network_Disconnected(object sender, OpenMetaverse.DisconnectedEventArgs e)
         {
+            Logger.Log("Network_Disconnected", Helpers.LogLevel.Info);
+
             //wind down chatmanager
             localChatManager.Dispose();
             localChatManager = null;
@@ -69,6 +75,8 @@ namespace Raindrop
         private void Network_SimConnected(object sender, OpenMetaverse.SimConnectedEventArgs e)
         {
             //create local chat.
+            Logger.Log("Simulator Connected", Helpers.LogLevel.Info);
+
             if (localChatManager == null)
                 localChatManager = new ChatTextManager(instance);
             

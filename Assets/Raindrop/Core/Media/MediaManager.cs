@@ -96,23 +96,23 @@ namespace Raindrop.Media
 
         void RegisterClientEvents(GridClient client)
         {
-            client.Sound.SoundTrigger += new EventHandler<SoundTriggerEventArgs>(Sound_SoundTrigger);
-            client.Sound.AttachedSound += new EventHandler<AttachedSoundEventArgs>(Sound_AttachedSound);
-            client.Sound.PreloadSound += new EventHandler<PreloadSoundEventArgs>(Sound_PreloadSound);
-            client.Objects.ObjectUpdate += new EventHandler<PrimEventArgs>(Objects_ObjectUpdate);
-            client.Objects.KillObject += new EventHandler<KillObjectEventArgs>(Objects_KillObject);
-            client.Network.SimChanged += new EventHandler<SimChangedEventArgs>(Network_SimChanged);
+            //client.Sound.SoundTrigger += new EventHandler<SoundTriggerEventArgs>(Sound_SoundTrigger);
+            //client.Sound.AttachedSound += new EventHandler<AttachedSoundEventArgs>(Sound_AttachedSound);
+            //client.Sound.PreloadSound += new EventHandler<PreloadSoundEventArgs>(Sound_PreloadSound);
+            //client.Objects.ObjectUpdate += new EventHandler<PrimEventArgs>(Objects_ObjectUpdate);
+            //client.Objects.KillObject += new EventHandler<KillObjectEventArgs>(Objects_KillObject);
+            //client.Network.SimChanged += new EventHandler<SimChangedEventArgs>(Network_SimChanged);
             client.Self.ChatFromSimulator += new EventHandler<ChatEventArgs>(Self_ChatFromSimulator);
         }
 
         void UnregisterClientEvents(GridClient client)
         {
-            client.Sound.SoundTrigger -= new EventHandler<SoundTriggerEventArgs>(Sound_SoundTrigger);
-            client.Sound.AttachedSound -= new EventHandler<AttachedSoundEventArgs>(Sound_AttachedSound);
-            client.Sound.PreloadSound -= new EventHandler<PreloadSoundEventArgs>(Sound_PreloadSound);
-            client.Objects.ObjectUpdate -= new EventHandler<PrimEventArgs>(Objects_ObjectUpdate);
-            client.Objects.KillObject -= new EventHandler<KillObjectEventArgs>(Objects_KillObject);
-            client.Network.SimChanged -= new EventHandler<SimChangedEventArgs>(Network_SimChanged);
+            //client.Sound.SoundTrigger -= new EventHandler<SoundTriggerEventArgs>(Sound_SoundTrigger);
+            //client.Sound.AttachedSound -= new EventHandler<AttachedSoundEventArgs>(Sound_AttachedSound);
+            //client.Sound.PreloadSound -= new EventHandler<PreloadSoundEventArgs>(Sound_PreloadSound);
+            //client.Objects.ObjectUpdate -= new EventHandler<PrimEventArgs>(Objects_ObjectUpdate);
+            //client.Objects.KillObject -= new EventHandler<KillObjectEventArgs>(Objects_KillObject);
+            //client.Network.SimChanged -= new EventHandler<SimChangedEventArgs>(Network_SimChanged);
             client.Self.ChatFromSimulator -= new EventHandler<ChatEventArgs>(Self_ChatFromSimulator);
         }
 
@@ -346,6 +346,7 @@ namespace Raindrop.Media
                 Vector3 newPosition = new Vector3(my.SimPosition);
                 float newFace = my.SimRotation.W;
 
+
                 // If we are standing still, nothing to update now, but
                 // FMOD needs a 'tick' anyway for callbacks, etc.  In looping
                 // 'game' programs, the loop is the 'tick'.   Since Radegast
@@ -388,14 +389,14 @@ namespace Raindrop.Media
                 // South
                 // East
 
-                //Logger.Log(
-                //    String.Format(
-                //        "Standing at <{0:0.0},{1:0.0},{2:0.0}> facing {3:d}",
-                //            listenerpos.x,
-                //            listenerpos.y,
-                //            listenerpos.z,
-                //            (int)(angle * 180.0 / 3.141592)),
-                //    Helpers.LogLevel.Debug);
+                Logger.Log(
+                    String.Format(
+                        "Standing at <{0:0.0},{1:0.0},{2:0.0}> facing {3:d}",
+                            listenerpos.x,
+                            listenerpos.y,
+                            listenerpos.z,
+                            (int)(angle * 180.0 / 3.141592)),
+                    Helpers.LogLevel.Debug);
 
                 // Tell FMOD the new orientation.
                 invoke(new SoundDelegate(delegate
@@ -408,6 +409,8 @@ namespace Raindrop.Media
                         ref UpVector));    // Top of head
 
                     FMODExec(system.update());
+
+                    Logger.DebugLog("updating listener postiion in thread.");
                 }));
             }
         }

@@ -26,6 +26,7 @@ using UnityEngine;
 namespace Raindrop
 {
     //this class wraps a TMPtextbox and implements Itextprinter interface, so that you can print into the TMOPtextbox.
+    //consider refactoring ITextPrinter into an adaptor class.
     public class TMPTextFieldPrinter:MonoBehaviour, ITextPrinter
     {
         private TMPro.TMP_Text rtb;

@@ -370,8 +370,8 @@ namespace Raindrop
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
-            client.Throttle.Total = 5000000f;
-            client.Settings.THROTTLE_OUTGOING_PACKETS = false;
+            client.Throttle.Total = 5000000f; //0.625 megabytes.
+            client.Settings.THROTTLE_OUTGOING_PACKETS = true; //please throttle to be good boy.
             client.Settings.LOGIN_TIMEOUT = 120 * 1000;
             client.Settings.SIMULATOR_TIMEOUT = 180 * 1000;
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
@@ -708,7 +708,6 @@ namespace Raindrop
         //    get { return ui_manager; }
         //}
 
-        public OpenMetaverse.Vector3 cameraLoc { get; internal set; }
 
         //public TabsConsole TabConsole
         //{

@@ -148,7 +148,7 @@ namespace Raindrop.Media
         {
             set
             {
-                position = FromOMVSpace(value);
+                position = FromOMVSpace(value); //check position is problem?
                 //if (channel == null) return;
 
                 invoke(new SoundDelegate(delegate

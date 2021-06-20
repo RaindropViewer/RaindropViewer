@@ -78,6 +78,7 @@ namespace Raindrop.Presenters
          
         void Start()
         {
+            //0 create dropdown for login location 
             loginLocationDropdown = new LoginLocationDropdown(locationDropdown);
 
             //1 load default UI fields.
@@ -85,7 +86,7 @@ namespace Raindrop.Presenters
 
             //2 load various loginInformation from the settings.
             InitializeConfig();
-
+             
 
             //GridDropdownGO = this.gameObject.GetComponent<GenericDropdown>().gameObject;
             //genericDropdown = GridDropdownGO.GetComponent<GenericDropdown>();
@@ -321,7 +322,7 @@ namespace Raindrop.Presenters
         public void OnLoginBtnClick()
         {
             LoginButton.interactable = false;
-            instance.MediaManager.PlayUISound(UISounds.Click);
+            //instance.MediaManager.PlayUISound(UISounds.Click);
             //sanity 
             if (Username == INIT_USERNAME || Password == INIT_PASSWORD)
             {
@@ -412,8 +413,7 @@ namespace Raindrop.Presenters
 
             //placeholder to select SL as grid.
             netcom.LoginOptions.Grid = instance.GridManger.Grids[0]; //0 means sl i think
-
-            instance.Client.Settings.CAPS_TIMEOUT = 13*1000; //expect to see the error every 13 seconds now!
+             
 
             //note: setting this ridiculously low yields log: "< >: Login status: Failed: A task was canceled."
 

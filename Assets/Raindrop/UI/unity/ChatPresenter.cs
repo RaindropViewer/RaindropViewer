@@ -51,7 +51,7 @@ namespace Raindrop.Presenters
         public GameObject ChatButtonContainer;
         public List<GameObject> ChatButtons;
         public GameObject SelectedButton;
-        public InputField ChatInputField;
+        public TMP_InputField ChatInputField;
 
         public TMP_Text ChatBox;
         public TMPTextFieldPrinter tmp_printer;
@@ -83,15 +83,26 @@ namespace Raindrop.Presenters
 
             RegisterClientEvents(client);
 
-            tmp_printer = ChatBox.gameObject.AddComponent<TMPTextFieldPrinter>(); 
+            //check if printer is attached to textbox. else attach it.
+            tmp_printer = ChatBox.gameObject.GetComponent<TMPTextFieldPrinter>();
             if (!tmp_printer)
             {
-                OpenMetaverse.Logger.Log("failed to make the tmp_printer component to the tmp textbox.", Helpers.LogLevel.Error);
+                tmp_printer = ChatBox.gameObject.AddComponent<TMPTextFieldPrinter>(); 
+                //OpenMetaverse.Logger.Log("failed to make the tmp_printer component to the tmp textbox.", Helpers.LogLevel.Error);
             }
 
             chatManager = new ChatManager(instance);
 
+            chatManager.localChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
+
             startChat(true);
+        }
+
+        private void LocalChatManager_ChatLineAdded(object sender, ChatLineAddedArgs e)
+        {
+            //new message in local chat! print it.
+            ChatBufferItem item = e.Item;
+            runPrinterOnItem(tmp_printer,  item);
         }
 
         //id relative to the list. -1 means local. 0 means others.
@@ -101,74 +112,81 @@ namespace Raindrop.Presenters
             {
                 //print everything in text buffer list.
                 List<ChatBufferItem> x = chatManager.localChatManager.getChatBuffer();
-                runPrinter(tmp_printer, x, 0,20); //print the selected range into the UI
+                runPrinterOnList(tmp_printer, x, 0,20); //print the selected range into the UI
             }
 
         }
 
-        public void runPrinter(TMPTextFieldPrinter TextPrinter, List<ChatBufferItem> x, int rangeNew, int rangeOld)
+        public void runPrinterOnItem(TMPTextFieldPrinter TextPrinter, ChatBufferItem item)
+        {
+            //ChatBufferItem item = x[i];
+
+            if (/*showTimestamps*/ true)
+            {
+                //if(fontSettings.ContainsKey("Timestamp"))
+                //{
+                //    var fontSetting = fontSettings["Timestamp"];
+                //    TextPrinter.ForeColor = fontSetting.ForeColor;
+                //    TextPrinter.BackColor = fontSetting.BackColor;
+                //    TextPrinter.Font = fontSetting.Font;
+                //    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                //}
+                //else
+                //{
+                //TextPrinter.ForeColor = SystemColors.GrayText;
+                //TextPrinter.BackColor = Color.Transparent;
+                //TextPrinter.Font = Settings.FontSetting.DefaultFont;
+                TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                //}
+            }
+
+            //if(fontSettings.ContainsKey("Name"))
+            //{
+            //    var fontSetting = fontSettings["Name"];
+            //    TextPrinter.ForeColor = fontSetting.ForeColor;
+            //    TextPrinter.BackColor = fontSetting.BackColor;
+            //    TextPrinter.Font = fontSetting.Font;
+            //}
+            //else
+            //{
+            //TextPrinter.ForeColor = SystemColors.WindowText;
+            //TextPrinter.BackColor = Color.Transparent;
+            //TextPrinter.Font = Settings.FontSetting.DefaultFont;
+            //}
+
+            if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
+            {
+                TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
+            }
+            else
+            {
+                TextPrinter.PrintText(item.From);
+            }
+
+            //if(fontSettings.ContainsKey(item.Style.ToString()))
+            //{
+            //    var fontSetting = fontSettings[item.Style.ToString()];
+            //    TextPrinter.ForeColor = fontSetting.ForeColor;
+            //    TextPrinter.BackColor = fontSetting.BackColor;
+            //    TextPrinter.Font = fontSetting.Font;
+            //}
+            //else
+            //{
+            //    TextPrinter.ForeColor = SystemColors.WindowText;
+            //    TextPrinter.BackColor = Color.Transparent;
+            //    TextPrinter.Font = Settings.FontSetting.DefaultFont;
+            //}
+
+            TextPrinter.PrintTextLine(item.Text);
+        }
+
+        //you can run the printer when a new text comes in.
+        //or you can run it when the user opens a new chat and you gotta update the chat text.
+        public void runPrinterOnList(TMPTextFieldPrinter TextPrinter, List<ChatBufferItem> x, int rangeNew, int rangeOld)
         {
             for (int i = rangeNew; i < rangeOld; i++)
             {
-                ChatBufferItem item = x[i];
-
-                if (/*showTimestamps*/ true)
-                {
-                    //if(fontSettings.ContainsKey("Timestamp"))
-                    //{
-                    //    var fontSetting = fontSettings["Timestamp"];
-                    //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                    //    TextPrinter.BackColor = fontSetting.BackColor;
-                    //    TextPrinter.Font = fontSetting.Font;
-                    //    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
-                    //}
-                    //else
-                    //{
-                    //TextPrinter.ForeColor = SystemColors.GrayText;
-                    //TextPrinter.BackColor = Color.Transparent;
-                    //TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
-                    //}
-                }
-
-                //if(fontSettings.ContainsKey("Name"))
-                //{
-                //    var fontSetting = fontSettings["Name"];
-                //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                //    TextPrinter.BackColor = fontSetting.BackColor;
-                //    TextPrinter.Font = fontSetting.Font;
-                //}
-                //else
-                //{
-                //TextPrinter.ForeColor = SystemColors.WindowText;
-                //TextPrinter.BackColor = Color.Transparent;
-                //TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                //}
-
-                if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
-                {
-                    TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
-                }
-                else
-                {
-                    TextPrinter.PrintText(item.From);
-                }
-
-                //if(fontSettings.ContainsKey(item.Style.ToString()))
-                //{
-                //    var fontSetting = fontSettings[item.Style.ToString()];
-                //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                //    TextPrinter.BackColor = fontSetting.BackColor;
-                //    TextPrinter.Font = fontSetting.Font;
-                //}
-                //else
-                //{
-                //    TextPrinter.ForeColor = SystemColors.WindowText;
-                //    TextPrinter.BackColor = Color.Transparent;
-                //    TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                //}
-
-                TextPrinter.PrintTextLine(item.Text);
+                runPrinterOnItem(TextPrinter, x[i]);
             }
         }
 
@@ -207,6 +225,9 @@ namespace Raindrop.Presenters
 
 
             UnregisterClientEvents(client);
+
+            chatManager.Dispose();
+            chatManager = null;
         }
 
         private void OnInputChanged(string _)
@@ -220,6 +241,7 @@ namespace Raindrop.Presenters
             if (selectedChatIdx == -1)
             {//public chat
                 ProcessChatInput(msgtext, ChatType.Normal);
+                Debug.LogError("ProcessChatInput");
                 return;
             } else
             {
@@ -316,6 +338,7 @@ namespace Raindrop.Presenters
             if (/*chatList.getSelected() == "local chat"*/ true)
             {
                 chatManager.localChatManager.ProcessChatInput(input, type);
+
             } 
             //else
             //{

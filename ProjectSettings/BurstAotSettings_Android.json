@@ -1,10 +1,10 @@
 {
   "MonoBehaviour": {
     "Version": 3,
-    "EnableBurstCompilation": true,
-    "EnableOptimisations": true,
+    "EnableBurstCompilation": false,
+    "EnableOptimisations": false,
     "EnableSafetyChecks": false,
-    "EnableDebugInAllBuilds": false,
+    "EnableDebugInAllBuilds": true,
     "CpuMinTargetX32": 0,
     "CpuMaxTargetX32": 0,
     "CpuMinTargetX64": 0,

@@ -17,8 +17,7 @@ namespace Raindrop
         private RaindropNetcom netcom => instance.Netcom;
 
         private void Awake()
-        {
-            ServiceLocatorSample.ServiceLocator.ServiceLocator.Current.Get<UIManager>().initialiseUI();
+        { 
         }
 
         void OnApplicationQuit()
@@ -71,6 +70,33 @@ namespace Raindrop
             netcom.Logout();
 
             Debug.Log("Logged out! :)");
+
+            frmMain_Disposed();
+            Debug.Log("disposed mainform! :)");
+        }
+
+        //wraps up the netcom and client.
+        void frmMain_Disposed( )
+        {
+            if (netcom != null)
+            {
+                //netcom = null;
+                //netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+                //netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
+                //netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
+            }
+
+            //if (instance.Client != null)
+            //{
+            //    UnregisterClientEvents(client);
+            //}
+
+            //if (instance?.Names != null)
+            //{
+            //    instance.Names.NameUpdated -= new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
+            //}
+
+            instance.CleanUp();
         }
     }
 }

@@ -60,15 +60,18 @@ namespace ServiceLocatorSample.ServiceLocator
             } 
     
             if (loadUI)
-                SceneManager.LoadSceneAsync("UIscene", LoadSceneMode.Additive);
+                SceneManager.LoadScene("UIscene", LoadSceneMode.Additive);
             if (load3D)
-                SceneManager.LoadSceneAsync("3Dscene", LoadSceneMode.Additive);
+                SceneManager.LoadScene("3Dscene", LoadSceneMode.Additive);
 
-            Debug.Log("Bootstrap finished!");
+            Debug.Log("Bootstrap finished, all scenes loaded.!");
 
+            ServiceLocatorSample.ServiceLocator.ServiceLocator.Current.Get<UIManager>().initialiseUI();
 
+            Debug.Log("UI should be appeared in front of you");
         }
 
-        
+
+
     }
 }

@@ -653,12 +653,12 @@ namespace OpenMetaverse
             if (Client.Network.CurrentSim.Caps != null
                 && Client.Network.CurrentSim.Caps.CapabilityURI("ViewerAsset") != null)
             {
-                Logger.DebugLog("Assetmanager : requesting over http");
+                Logger.DebugLog("Assetmanager : requesting over http " + assetType.ToString());
                 RequestAssetHTTP(assetID, transfer, callback);
             }
             else
             {
-                Logger.DebugLog("Assetmanager : requesting over UDP");
+                Logger.DebugLog("Assetmanager : requesting over UDP" + assetType.ToString());
                 RequestAssetUDP(assetID, itemID, taskID, transfer, callback);
             }
 
