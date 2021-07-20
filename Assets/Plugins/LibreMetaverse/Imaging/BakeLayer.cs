@@ -356,7 +356,7 @@ namespace OpenMetaverse.Imaging
                         if (stream != null)
                         {
 
-                            var tex = TGALoader.LoadTGA(stream);
+                            var tex = LoadTGAClass.LoadTGA(stream);
                             bitmap = new Bitmap(tex);
                         }
                     }
