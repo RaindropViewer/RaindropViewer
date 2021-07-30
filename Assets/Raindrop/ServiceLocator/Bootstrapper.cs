@@ -16,7 +16,7 @@ namespace ServiceLocatorSample.ServiceLocator
 
     public static class Bootstrapper
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Initiailze()
         {
             //if (!log4net.LogManager.GetRepository().Configured)
