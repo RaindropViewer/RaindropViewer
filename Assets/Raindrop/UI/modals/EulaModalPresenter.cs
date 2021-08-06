@@ -10,7 +10,7 @@ using UnityEngine.UI;
 //a monobehavior that makes a toggle toggle the eula acceptance in globalSettings 
 public class EulaModalPresenter : MonoBehaviour
 {
-    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+    private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
     //public string nameOfEulaToggleGO;
     private Toggle EulaToggle;
     public GameObject EulaToggleGO;

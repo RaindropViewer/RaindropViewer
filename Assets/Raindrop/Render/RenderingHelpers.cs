@@ -435,7 +435,7 @@ namespace Raindrop.Rendering
 
             try
             {
-                string fname = RaindropInstance.GlobalInstance.ComputeCacheName(RaindropInstance.GlobalInstance.Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
@@ -483,7 +483,7 @@ namespace Raindrop.Rendering
         {
             try
             {
-                string fname = RaindropInstance.GlobalInstance.ComputeCacheName(RaindropInstance.GlobalInstance.Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Create, FileAccess.Write, FileShare.None))
                 {

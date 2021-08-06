@@ -99,7 +99,7 @@ namespace Raindrop
         /// <returns>Display text for URI</returns>
         public string GetLinkName(string uri)
         {
-            if (!RaindropInstance.GlobalInstance.GlobalSettings["resolve_uris"])
+            if (!ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().GlobalSettings["resolve_uris"])
             {
                 return uri;
             }
@@ -262,7 +262,7 @@ namespace Raindrop
         /// <returns>Name of agent on success, INCOMPLETE_NAME on failure or timeout</returns>
         private string GetAgentName(UUID agentID, ResolveType nameType)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             string name = RaindropInstance.INCOMPLETE_NAME;
 
             using (ManualResetEvent gotName = new ManualResetEvent(false))
@@ -318,7 +318,7 @@ namespace Raindrop
         /// <returns>Name of the group on success, INCOMPLETE_NAME on failure or timeout</returns>
         private string GetGroupName(UUID groupID)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             string name = RaindropInstance.INCOMPLETE_NAME;
 
             using (ManualResetEvent gotName = new ManualResetEvent(false))
@@ -356,7 +356,7 @@ namespace Raindrop
         /// <returns>Name of the parcel on success, INCOMPLETE_NAME on failure or timeout</returns>
         private string GetParcelName(UUID parcelID)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             string name = RaindropInstance.INCOMPLETE_NAME;
             
             using (ManualResetEvent gotName = new ManualResetEvent(false))
@@ -629,7 +629,7 @@ namespace Raindrop
         #region Link Execution
         private void ExecuteLinkRegionUri(Match match)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
 
             string name = HttpUtility.UrlDecode(match.Groups["region_name"].Value);
             int x = match.Groups["local_x"].Success ? int.Parse(match.Groups["local_x"].Value) : 128;
@@ -643,7 +643,7 @@ namespace Raindrop
 
         private void ExecuteLinkAgent(Match match)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             UUID agentID = new UUID(match.Groups["agent_id"].Value);
             //string action = match.Groups["action"].Value;
 
@@ -679,7 +679,7 @@ namespace Raindrop
 
         private void ExecuteLinkGroup(Match match)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             string action = match.Groups["action"].Value;
 
             switch (action)
@@ -761,7 +761,7 @@ namespace Raindrop
 
         private void ExecuteLinkWorldMap(Match match)
         {
-            RaindropInstance instance = RaindropInstance.GlobalInstance;
+            RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
 
             string name = HttpUtility.UrlDecode(match.Groups["region_name"].Value);
             int x = match.Groups["local_x"].Success ? int.Parse(match.Groups["local_x"].Value) : 128;

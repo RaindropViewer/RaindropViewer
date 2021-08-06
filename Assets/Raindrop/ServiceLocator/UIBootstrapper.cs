@@ -6,24 +6,53 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using ServiceLocator;
 
 namespace Raindrop
 {
     //get the UI manger and show the first UI panel to the user.
     class UIBootstrapper : MonoBehaviour
     {
-        private RaindropInstance instance => Raindrop.RaindropInstance.GlobalInstance;
+        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
 
         private RaindropNetcom netcom => instance.Netcom;
 
+        // bootstraps in order to obtain the canvasmanager instance.
+        // bootstraps to find all instances of panels in the children tree.
+        // has a funny role; in that it will register itself to the UIservice on start/awake. this should really be the other way round - that the UIservice creates/has dependency on the UIrootGO!!!
         private void Awake()
-        { 
+        {
+            ServiceLocator.ServiceLocator.Initiailze();
+
+            if (ServiceLocator.ServiceLocator.Instance.IsRegistered<UIService>())
+            {
+                Debug.LogError("Attempted to register UI Service again! ");
+                return;
+            }
+
+            if (! ServiceLocator.ServiceLocator.Instance.IsRegistered<RaindropInstance>())
+            {
+                Debug.LogWarning("UIBootstrapper creating and registering raindropinstance!");
+                ServiceLocator.ServiceLocator.Instance.Register<RaindropInstance>(new RaindropInstance(new OpenMetaverse.GridClient()));
+                //return;
+            }
+
+            var cm = GetComponentInChildren<CanvasManager>();
+            var mm = GetComponentInChildren<ModalManager>();
+            
+            ServiceLocator.ServiceLocator.Instance.Register<UIService>(new UIService(cm,mm));
+        }
+
+        private void Start()
+        {
+            ServiceLocator.ServiceLocator.Instance.Get<UIService>().startUIInitialView();
+            Debug.Log("UI should be appeared");
+            
         }
 
         void OnApplicationQuit()
         {
-            Debug.Log("Application ending after " + Time.time + " seconds");
-            Debug.Log("logging out");
+            Debug.Log("Application ending after " + Time.time + " seconds"); 
 
             //if (instance.GlobalSettings["confirm_exit"].AsBoolean())
             //{

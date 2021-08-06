@@ -12,7 +12,7 @@ public class joystickToMovementBackend : MonoBehaviour
 {
     public LeanJoystick variableJoystick;
     public GameObject theJoystickInScene;
-    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+    private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
     private RaindropNetcom netcom { get { return instance.Netcom; } }
     private GridClient client { get { return instance.Client; } }
 

@@ -19,8 +19,8 @@ namespace Raindrop.Tests
         private bool loggedin;
         private bool testfail = false;
 
-        private RaindropNetcom netcom { get { return RaindropInstance.GlobalInstance.Netcom; } }
-        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private RaindropNetcom netcom { get { return instance.Netcom; } }
+        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
         [UnityTest]
         //login UI-backend-UI test
@@ -39,8 +39,8 @@ namespace Raindrop.Tests
 
             //get viewmodel to login.
             //getCurrentForeground gives us the loginVM, which we then call onloginbtnclick from.
-            var servicer = ServiceLocatorSample.ServiceLocator.ServiceLocator.Current;
-            GameObject temp = (GameObject)servicer.Get<UIManager>().getCurrentForegroundPresenter();
+            var servicer = ServiceLocator.ServiceLocator.Instance;
+            GameObject temp = (GameObject)servicer.Get<UIService>().getCurrentForegroundPresenter();
             if (temp == null)
             {
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ServiceLocatorSample.ServiceLocator
+namespace ServiceLocator
 {
     /// <summary>
     /// Simple service locator for <see cref="IGameService"/> instances.
@@ -19,14 +19,14 @@ namespace ServiceLocatorSample.ServiceLocator
         /// <summary>
         /// Gets the currently active service locator instance.
         /// </summary>
-        public static ServiceLocator Current { get; private set; }
+        public static ServiceLocator Instance { get; private set; }
 
         /// <summary>
         /// Initalizes the service locator with a new instance.
         /// </summary>
         public static void Initiailze()
         {
-            Current = new ServiceLocator();
+            Instance = new ServiceLocator();
         }
 
         /// <summary>
@@ -44,6 +44,21 @@ namespace ServiceLocatorSample.ServiceLocator
             }
 
             return (T)services[key];
+        }
+         /// <summary>
+        /// Returns if there already registered the service instance of the given type.
+        /// </summary>
+        /// <typeparam name="T">The type of the service to lookup.</typeparam>
+        /// <returns>The service instance.</returns>
+        public bool IsRegistered<T>() where T : IGameService
+        {
+            string key = typeof(T).Name;
+            if (!services.ContainsKey(key))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

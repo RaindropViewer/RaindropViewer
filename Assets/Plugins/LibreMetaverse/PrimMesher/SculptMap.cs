@@ -30,6 +30,7 @@ using System.Collections.Generic;
 //using System.Drawing;
 //using System.Drawing.Drawing2D;
 using Catnip.Drawing;
+using UnityEngine;
 
 namespace LibreMetaverse.PrimMesher
 {
@@ -45,10 +46,10 @@ namespace LibreMetaverse.PrimMesher
         {
         }
 
-        public SculptMap(Bitmap bm, int lod)
+        public SculptMap(Texture2D bm, int lod)
         {
-            var bmW = bm.Width;
-            var bmH = bm.Height;
+            var bmW = bm.width;
+            var bmH = bm.height;
 
             if (bmW == 0 || bmH == 0)
                 throw new Exception("SculptMap: bitmap has no data");
@@ -72,7 +73,7 @@ namespace LibreMetaverse.PrimMesher
             try
             {
                 if (needsScaling)
-                    bm.resize(width,height);
+                    bm.Resize(width,height);
                     //bm = ScaleImage(bm, width, height,
                     //    InterpolationMode.NearestNeighbor);
             }
@@ -101,7 +102,7 @@ namespace LibreMetaverse.PrimMesher
                     for (var y = 0; y < height; y++)
                     for (var x = 0; x < width; x++)
                     {
-                        var c = bm.GetPixel(x, y);
+                        Color32 c = bm.GetPixel(x, y);
 
                         redBytes[byteNdx] = c.r;
                         greenBytes[byteNdx] = c.g;
@@ -113,7 +114,7 @@ namespace LibreMetaverse.PrimMesher
                     for (var y = 0; y <= height; y++)
                     for (var x = 0; x <= width; x++)
                     {
-                        var c = bm.GetPixel(x < width ? x * 2 : x * 2 - 1,
+                        Color32 c = bm.GetPixel(x < width ? x * 2 : x * 2 - 1,
                             y < height ? y * 2 : y * 2 - 1);
 
                         redBytes[byteNdx] = c.r;

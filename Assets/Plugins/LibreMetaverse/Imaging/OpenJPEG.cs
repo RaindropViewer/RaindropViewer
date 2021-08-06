@@ -519,19 +519,19 @@ namespace OpenMetaverse.Imaging
         /// <param name="bitmap">The source <seealso cref="System.Drawing.Bitmap"/> object to encode</param>
         /// <param name="lossless">true to enable lossless decoding</param>
         /// <returns>A byte array containing the source Bitmap object</returns>
-        public unsafe static byte[] EncodeFromImage(Bitmap bitmap, bool lossless)
+        public unsafe static byte[] EncodeFromImage(Texture2D bitmap, bool lossless)
         {
-            NativeArray<Color32> bd = bitmap.getAsNativeArray();
+            NativeArray<Color32> bd = bitmap.GetRawTextureData<Color32>();//bitmap.getAsNativeArray();
 
             ManagedImage decoded;
 
-            int bitmapWidth = bitmap.Width;
-            int bitmapHeight = bitmap.Height;
+            int bitmapWidth = bitmap.width;
+            int bitmapHeight = bitmap.height;
             int pixelCount = bitmapWidth * bitmapHeight;
             int i;
 
             //if ((bitmap.Format & PixelFormat.Alpha) != 0 || (bitmap.PixelFormat & PixelFormat.PAlpha) != 0)
-            if (bitmap.Format.Equals(TextureFormat.ARGB32)  )
+            if (bitmap.format.Equals(TextureFormat.ARGB32)  )
             {
                 // Four layers, RGBA
                 decoded = new ManagedImage(bitmapWidth, bitmapHeight,

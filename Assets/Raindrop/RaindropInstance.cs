@@ -39,7 +39,7 @@ using Raindrop.Media;
 using OpenMetaverse;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
-using ServiceLocatorSample.ServiceLocator;
+using ServiceLocator;
 
 namespace Raindrop
 {
@@ -72,19 +72,7 @@ namespace Raindrop
 
         // Singleton, there can be only one instance
 
-        private static RaindropInstance globalInstance = null;
-        public static RaindropInstance GlobalInstance
-        {
-            get
-            {
-                if (globalInstance == null)
-                {
-                    globalInstance = new RaindropInstance(new GridClient());
-                }
-                return globalInstance;
-            }
-        }
-        
+
         // managed the chats that are loaded in memory. (including local chat.)
         //public ChatManager ChatManger { get { return chatManger; } }
         //private ChatManager chatManger;
@@ -214,7 +202,7 @@ namespace Raindrop
         /// <summary>Manages default params for different grids</summary>
         public GridManager GridManger { get { return gridManager; } }
 
-        
+
         /// <summary>
         /// Current Outfit Folder (appearnce) manager
         /// </summary>
@@ -290,10 +278,7 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client0)
         {
-            //Logger.DebugLog("test");
 
-            // incase something else calls GlobalInstance while we are loading
-            globalInstance = this;
 
             app_data_dir = Application.persistentDataPath;
             streaming_assets_dir = Application.streamingAssetsPath;
@@ -315,7 +300,7 @@ namespace Raindrop
             monoRuntime = Type.GetType("Mono.Runtime") != null;
             if (monoRuntime)
             {
-                Logger.Log("Mono runtime is detected", Helpers.LogLevel.Debug);
+                Logger.Log("Mono runtime is detected. This should not happen except in the editor.", Helpers.LogLevel.Warning);
             }
 
             //Keyboard = new Keyboard();
@@ -669,7 +654,7 @@ namespace Raindrop
         {
             try
             {
-                userDir = Path.Combine(app_data_dir , PROGRAMNAME);
+                userDir = Path.Combine(app_data_dir, PROGRAMNAME);
                 if (!Directory.Exists(userDir))
                 {
                     Directory.CreateDirectory(userDir);

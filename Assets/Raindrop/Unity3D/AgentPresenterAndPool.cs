@@ -13,7 +13,7 @@ namespace Raindrop.Presenters
     {
         private Dictionary<uint, UnityEngine.GameObject> avatarsGO;
 
-        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         //private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 

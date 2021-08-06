@@ -761,7 +761,7 @@ namespace OpenMetaverse
                     task.TokenSource.Cancel();
                     RemoveTransfer(task.RequestID);
 
-                    _Client.Assets.Cache.SaveAssetToCache(task.RequestID, task.Transfer.AssetData);
+                    _Client.Assets.Cache.SaveAssetToCache(task.RequestID, task.Transfer.AssetData); //the image is saved to disk in whatever format that it arrived in the packet in.
 
                     foreach (var callback in task.Callbacks)
                         callback(TextureRequestState.Finished, new AssetTexture(task.RequestID, task.Transfer.AssetData));

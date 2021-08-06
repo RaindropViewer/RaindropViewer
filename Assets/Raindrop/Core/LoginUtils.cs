@@ -8,13 +8,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Zenject;
 
 namespace Raindrop
 {
     class LoginUtils
     {
-        
-
         public class SavedLogin
         {
             public string Username;
@@ -59,7 +58,7 @@ namespace Raindrop
 
             public override string ToString()
             {
-                RaindropInstance instance = RaindropInstance.GlobalInstance;
+                RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
                 string gridName;
                 if (GridID == "custom_login_uri")
                 {

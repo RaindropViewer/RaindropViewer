@@ -383,7 +383,7 @@ namespace OpenMetaverse
         {
             EconomyDataPacket econ = (EconomyDataPacket)e.Packet;
 
-            priceUpload = econ.Info.PriceUpload;
+            priceUpload = econ.Info.PriceUpload;  //TODO: is this thread safe?  no lock
         }
 
         #endregion

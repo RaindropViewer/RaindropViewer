@@ -129,14 +129,14 @@ namespace OpenMetaverse.Imaging
         /// <param name="bitmap"></param>
         /// 
         //apparently this method only loads the image (.tga) as a bitmap, then returns it as a managed image. the bitmap is not used. perhaps we can skip this intermediary?
-        public ManagedImage(Bitmap tex)
+        public ManagedImage(Texture2D tex)
         {
-            Width = tex.Width;
-            Height = tex.Height;
+            Width = tex.width;
+            Height = tex.height;
 
             int pixelCount = Width * Height;
 
-            if (tex.Format == TextureFormat.ARGB32)   //PixelFormat.Format32bppArgb  --- 32 bits per pixel; 8 bits each are used for the alpha, red, green, and blue 
+            if (tex.format == TextureFormat.ARGB32)   //PixelFormat.Format32bppArgb  --- 32 bits per pixel; 8 bits each are used for the alpha, red, green, and blue 
             {
                 Channels = ImageChannels.Alpha | ImageChannels.Color;
                 Red = new byte[pixelCount];
@@ -180,7 +180,7 @@ namespace OpenMetaverse.Imaging
 
             //    throw new NotImplementedException("16bpp grayscale image support is incomplete");
             //}
-            else if (tex.Format == TextureFormat.RGB24) //== PixelFormat.Format24bppRgb)
+            else if (tex.format == TextureFormat.RGB24) //== PixelFormat.Format24bppRgb)
             {
                 Channels = ImageChannels.Color;
                 Red = new byte[pixelCount];
@@ -207,8 +207,8 @@ namespace OpenMetaverse.Imaging
 
                 for (int i = 0; i < pixelCount; i++)
                 {
-                    int _x = i % Width;
-                    int _y = i / Width;
+                    //int _x = i % Width;
+                    //int _y = i / Width;
                     Color32 bit = tex.GetPixel(i % Width, i / Width);
                     Blue[i] = bit.b;
                     Green[i] = bit.g;
@@ -216,7 +216,7 @@ namespace OpenMetaverse.Imaging
 
                 }
             }
-			else if (tex.Format == TextureFormat.RGB24) // PixelFormat.Format32bppRgb) --- The remaining 8 bits are not used.
+			else if (tex.format == TextureFormat.RGB24) // PixelFormat.Format32bppRgb) --- The remaining 8 bits are not used.
             {
 				Channels = ImageChannels.Color;
 				Red = new byte[pixelCount];
@@ -253,7 +253,7 @@ namespace OpenMetaverse.Imaging
 			}
 			else
             {
-                throw new NotSupportedException("Unrecognized pixel format: " + tex.Format.ToString());
+                throw new NotSupportedException("Unrecognized pixel format: " + tex.format.ToString());
             }
         }
 #endif

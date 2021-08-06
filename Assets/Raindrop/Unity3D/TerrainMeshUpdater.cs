@@ -16,7 +16,7 @@ namespace Raindrop.Unity3D
     //sets the mesh of the gameobject to match the sim's shape. 
     class TerrainMeshUpdater : MonoBehaviour
     {
-        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private GridClient Client { get { return instance.Client; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;

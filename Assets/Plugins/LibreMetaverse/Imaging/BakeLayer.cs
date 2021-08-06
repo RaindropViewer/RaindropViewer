@@ -348,7 +348,7 @@ namespace OpenMetaverse.Imaging
         {
             try
             {
-                Bitmap bitmap = null;
+                Texture2D bitmap = null;
                 lock (ResourceSync)
                 {
                     using (Stream stream = Helpers.GetResourceStream(fileName, Settings.RESOURCE_DIR))
@@ -356,8 +356,8 @@ namespace OpenMetaverse.Imaging
                         if (stream != null)
                         {
 
-                            var tex = LoadTGAClass.LoadTGA(stream);
-                            bitmap = new Bitmap(tex);
+                            bitmap = LoadTGAClass.LoadTGA(stream);
+                            //bitmap = new Texture2D(tex);
                         }
                     }
                 }

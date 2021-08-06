@@ -1084,7 +1084,7 @@ namespace OpenMetaverse
         #endregion
 
         #region Private Methods
-
+        // actually perform the login.
         private void BeginLogin()
         {
             LoginParams loginParams = CurrentContext;

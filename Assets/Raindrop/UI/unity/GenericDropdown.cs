@@ -12,7 +12,7 @@ namespace Raindrop.Presenters
     public class GenericDropdown : MonoBehaviour
     {
 
-        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
 

@@ -46,7 +46,7 @@ namespace Raindrop.Core
         /// </summary>
         public void BeginMonitoring()
         {
-            var client = RaindropInstance.GlobalInstance.Client;
+            var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
             client.Inventory.Store.InventoryObjectAdded += Store_InventoryObjectAdded;
             client.Inventory.Store.InventoryObjectUpdated += Store_InventoryObjectUpdated;
 
@@ -67,7 +67,7 @@ namespace Raindrop.Core
         /// </summary>
         public void StopMonitoring()
         {
-            var client = RaindropInstance.GlobalInstance.Client;
+            var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
             client.Inventory.Store.InventoryObjectAdded -= Store_InventoryObjectAdded;
             client.Inventory.Store.InventoryObjectUpdated -= Store_InventoryObjectUpdated;
         }
@@ -114,7 +114,7 @@ namespace Raindrop.Core
         private bool ProcessWord(string word, StringBuilder outString)
         {
             var possibleTriggers = new List<GestureTrigger>();
-            var client = RaindropInstance.GlobalInstance.Client;
+            var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
             var lowerWord = word.ToLower();
 
             client.Self.ActiveGestures.ForEach(pair =>
@@ -169,7 +169,7 @@ namespace Raindrop.Core
         /// <param name="gesture">Gesture that was added or updated.</param>
         private void UpdateInventoryGesture(InventoryGesture gesture)
         {
-            var client = RaindropInstance.GlobalInstance.Client;
+            var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
 
             client.Assets.RequestAsset(gesture.AssetUUID, AssetType.Gesture, false, (_, asset) =>
             {

@@ -45,7 +45,7 @@ namespace Raindrop
 
         public ChatManager(RaindropInstance instance)
         {
-            this.instance = instance; 
+            instance = this.instance;
 
             UnityEngine.Debug.Log("chatmanager being constructed");
             //setup

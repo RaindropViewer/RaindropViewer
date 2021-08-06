@@ -115,9 +115,9 @@ namespace OpenMetaverse
         /// <param name="pos">Starting position of the UUID in the byte array</param>
         public void FromBytes(byte[] source, int pos)
         {
-            int a = (source[pos + 0] << 24) | (source[pos + 1] << 16) | (source[pos + 2] << 8) | source[pos + 3];
-            short b = (short)((source[pos + 4] << 8) | source[pos + 5]);
-            short c = (short)((source[pos + 6] << 8) | source[pos + 7]);
+            int a = (source[pos + 0] << 24) | (source[pos + 1] << 16) | (source[pos + 2] << 8) | source[pos + 3]; //4 bytes aka 32bits aka int
+            short b = (short)((source[pos + 4] << 8) | source[pos + 5]); // 2 bytes aka 16 bits
+            short c = (short)((source[pos + 6] << 8) | source[pos + 7]); // 2 bytes aka 16 bits
 
             Guid = new Guid(a, b, c, source[pos + 8], source[pos + 9], source[pos + 10], source[pos + 11],
                 source[pos + 12], source[pos + 13], source[pos + 14], source[pos + 15]);

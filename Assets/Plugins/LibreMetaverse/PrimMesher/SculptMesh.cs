@@ -55,22 +55,22 @@ namespace LibreMetaverse.PrimMesher
 
         public List<ViewerFace> viewerFaces;
 
+        //<Deprecated : Sculptie from image file>
+        //public SculptMesh(string fileName, int sculptType, int lod, int viewerMode, int mirror, int invert)
+        //{
+        //    //var bitmap = (Bitmap) Image.FromFile(fileName);
+        //    var myreader = new BMPLoader();
+        //    BMPImage myimg = myreader.LoadBMP(fileName);
+        //    Texture2D tex = myimg.ToTexture2D();
+        //    Texture2D fakebmp = new Texture2D(tex);
 
-        public SculptMesh(string fileName, int sculptType, int lod, int viewerMode, int mirror, int invert)
-        {
-            //var bitmap = (Bitmap) Image.FromFile(fileName);
-            var myreader = new BMPLoader();
-            BMPImage myimg = myreader.LoadBMP(fileName);
-            Texture2D tex = myimg.ToTexture2D();
-            Bitmap fakebmp = new Bitmap(tex);
+        //    _SculptMesh(fakebmp, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
+        //    //bitmap.Dispose();
 
-            _SculptMesh(fakebmp, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
-            //bitmap.Dispose();
-
-            fakebmp.delete();
+        //    fakebmp.delete();
 
 
-        }
+        //}
 
         /// <summary>
         ///     ** Experimental ** May disappear from future versions ** not recommeneded for use in applications
@@ -179,12 +179,12 @@ namespace LibreMetaverse.PrimMesher
                 calcVertexNormals(SculptType.plane, numXElements, numYElements);
         }
 
-        public SculptMesh(Bitmap sculptBitmap, SculptType sculptType, int lod, bool viewerMode)
+        public SculptMesh(Texture2D sculptBitmap, SculptType sculptType, int lod, bool viewerMode)
         {
             _SculptMesh(sculptBitmap, sculptType, lod, viewerMode, false, false);
         }
 
-        public SculptMesh(Bitmap sculptBitmap, SculptType sculptType, int lod, bool viewerMode, bool mirror,
+        public SculptMesh(Texture2D sculptBitmap, SculptType sculptType, int lod, bool viewerMode, bool mirror,
             bool invert)
         {
             _SculptMesh(sculptBitmap, sculptType, lod, viewerMode, mirror, invert);
@@ -308,7 +308,7 @@ namespace LibreMetaverse.PrimMesher
         //}
 
 
-        private void _SculptMesh(Bitmap sculptBitmap, SculptType sculptType, int lod, bool viewerMode, bool mirror,
+        private void _SculptMesh(Texture2D sculptBitmap, SculptType sculptType, int lod, bool viewerMode, bool mirror,
             bool invert)
         {
             _SculptMesh(new SculptMap(sculptBitmap, lod).ToRows(mirror), sculptType, viewerMode, mirror, invert);

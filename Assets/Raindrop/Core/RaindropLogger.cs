@@ -76,8 +76,8 @@ namespace Raindrop
                 }
                 Console.WriteLine();
 
-                if (RaindropInstance.GlobalInstance.GlobalLogFile != null && (!RaindropInstance.GlobalInstance.GlobalSettings.ContainsKey("log_to_file") || RaindropInstance.GlobalInstance.GlobalSettings["log_to_file"]))
-                    File.AppendAllText(RaindropInstance.GlobalInstance.GlobalLogFile, RenderLoggingEvent(le) + Environment.NewLine);
+                //if (RaindropInstance.GlobalInstance.GlobalLogFile != null && (!RaindropInstance.GlobalInstance.GlobalSettings.ContainsKey("log_to_file") || RaindropInstance.GlobalInstance.GlobalSettings["log_to_file"]))
+                //    File.AppendAllText(RaindropInstance.GlobalInstance.GlobalLogFile, RenderLoggingEvent(le) + Environment.NewLine);
             }
             catch (Exception) { }
         }

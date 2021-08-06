@@ -1,4 +1,4 @@
-namespace ServiceLocatorSample.ServiceLocator
+namespace ServiceLocator
 {
     /// <summary>
     /// Base interface for our service locator to work with. Services implementing

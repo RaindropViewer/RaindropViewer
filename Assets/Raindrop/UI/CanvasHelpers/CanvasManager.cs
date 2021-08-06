@@ -8,21 +8,25 @@ using UnityEngine;
 //helper class that helps to pop, push, stack canvases.
 //singleton.
 //on awake, it searches children for all canvases.
-public class CanvasManager : Singleton<CanvasManager>
+public class CanvasManager : MonoBehaviour
 {
-    List<CanvasIdentifier> canvasControllerList;
-    //CanvasIdentifier lastActiveCanvas;
+    [SerializeField]
+    //public GameObject[] CanvasPrefabsList;
+
+    public List<CanvasIdentifier> canvasControllerList = new List<CanvasIdentifier>();
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
-
-    protected override void Awake()
+    
+    private void Awake()
     {
-        base.Awake();
-        canvasControllerList = FindObjectsOfType<CanvasIdentifier>().ToList();
+        int childrenCount = transform.childCount;
+        for (int i = 0; i < childrenCount ; i++)
+        {
+            //GameObject panelRoot = Instantiate(prefab) as GameObject;
+            //panelRoot.transform.SetParent(this.transform);
+            canvasControllerList.Add(transform.GetChild(i).GetComponent<CanvasIdentifier>());
+        }
         canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
-        Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers." );
-
-     
-
+        Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers.");
     }
 
     public void resetToLoginScreen()

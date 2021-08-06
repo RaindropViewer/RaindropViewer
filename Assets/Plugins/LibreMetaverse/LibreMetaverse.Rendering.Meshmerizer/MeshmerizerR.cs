@@ -40,6 +40,7 @@ using LibreMetaverse.PrimMesher;
 using OMV = OpenMetaverse;
 using OMVR = OpenMetaverse.Rendering;
 using Catnip.Drawing;
+using UnityEngine;
 
 namespace OpenMetaverse.Rendering
 {
@@ -93,7 +94,7 @@ namespace OpenMetaverse.Rendering
         /// <param name="sculptTexture">Sculpt texture</param>
         /// <param name="lod">Level of detail to generate the mesh at</param>
         /// <returns>The generated mesh or null on failure</returns>
-        public SimpleMesh GenerateSimpleSculptMesh(Primitive prim, Bitmap sculptTexture, DetailLevel lod)
+        public SimpleMesh GenerateSimpleSculptMesh(Primitive prim, Texture2D sculptTexture, DetailLevel lod)
         {
             var faceted = GenerateFacetedSculptMesh(prim, sculptTexture, lod);
 
@@ -188,7 +189,7 @@ namespace OpenMetaverse.Rendering
         /// routine since all the context for finding teh texture is elsewhere.
         /// </summary>
         /// <returns>The faceted mesh or null if can't do it</returns>
-        public OMVR.FacetedMesh GenerateFacetedSculptMesh(Primitive prim, Bitmap scupltTexture, DetailLevel lod)
+        public OMVR.FacetedMesh GenerateFacetedSculptMesh(Primitive prim, Texture2D scupltTexture, DetailLevel lod)
         {
             LibreMetaverse.PrimMesher.SculptMesh.SculptType smSculptType;
             switch (prim.Sculpt.Type)

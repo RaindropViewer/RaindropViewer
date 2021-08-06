@@ -12,7 +12,7 @@ namespace Raindrop.Unity3D
     //sets the attached gameobject to the location of the user in the sim.
     class AgentLocationUpdater : MonoBehaviour
     {
-        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
+        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
