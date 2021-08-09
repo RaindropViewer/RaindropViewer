@@ -1,12 +1,13 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
 using UnityEngine.UI;
 
+// An implementation of view. Attach to GO that has rawimage.
+// refers to a single texture; a single tile. can refer to many sims on a single tile.
 [RequireComponent(typeof(RawImage))]
-public class RawImageView  : MonoBehaviour
-
+public class MapTileView : MonoBehaviour
 {
     public void setRawImage(Texture2D img)
     {
@@ -14,10 +15,9 @@ public class RawImageView  : MonoBehaviour
 
         if (this.GetComponent<RawImage>().texture != null)
         {
-            Object.Destroy(this.GetComponent<RawImage>().texture);
+            UnityEngine.Object.Destroy(this.GetComponent<RawImage>().texture);
         }
         this.GetComponent<RawImage>().texture = img;
 
     }
 }
-

@@ -462,6 +462,8 @@ namespace OpenMetaverse.Imaging
             return LoadTGA(stream); // better refactor this mess later
 
         }
+
+        //Decode TGA file given in stream form.
         public static Texture2D LoadTGA(System.IO.Stream source)
         {
             //byte[] buffer = new byte[source.Length];
