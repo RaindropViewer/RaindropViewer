@@ -72,22 +72,41 @@ namespace Raindrop.Network
 
                     for (int i = nr; i < ParallelDownloads && queue.Count > 0; i++)
                     {
-                        QueuedItem item = queue.Dequeue();
-                        Debug.Log("Requesting " + item.address);
-                        HttpWebRequest req = SetupRequest(item.address, item.contentType);
-                        CapsBase.DownloadDataAsync(
-                            req,
+                        QueuedItem item = queue.Dequeue(); //checlk this
+
+                        var req = CapsBase.DownloadStringAsync(
+                            item.address,
+                            null,
                             item.millisecondsTimeout,
                             item.downloadProgressCallback,
                             (request, response, responseData, error) =>
-                            {
-                                lock (activeDownloads) activeDownloads.Remove(request);
-                                item.completedCallback(request, response, responseData, error);
-                                EnqueuePending();
-                            }
-                        );
+                                {
+                                    lock (activeDownloads) activeDownloads.Remove(request);
+                                    item.completedCallback(request, response, responseData, error);
+                                    EnqueuePending();
+                                    Debug.Log("CompletionCallback done!.");
+                                }
+                            );
 
-                        lock (activeDownloads) activeDownloads.Add(req);
+                        //Why the fuck the following snippet, which was the original implementaion in radegast, causes the main thread to stall on the instruction 
+                        //    "  IAsyncResult result = request.BeginGetResponse(GetResponse, state);  "  in    CapsBase.cs line 110   (call to DownloadDataAsync() ).
+                        //  like really why???
+
+                        //Debug.Log("Requesting " + item.address);
+                        //HttpWebRequest req = SetupRequest(item.address, item.contentType);
+                        //CapsBase.DownloadDataAsync(
+                        //    req,
+                        //    item.millisecondsTimeout,
+                        //    item.downloadProgressCallback,
+                        //    (request, response, responseData, error) =>
+                        //    {
+                        //        lock (activeDownloads) activeDownloads.Remove(request);
+                        //        item.completedCallback(request, response, responseData, error);
+                        //        EnqueuePending();
+                        //    }
+                        //);
+
+                        lock (activeDownloads) activeDownloads.Add(req); // this line?
                     }
                 }
             }

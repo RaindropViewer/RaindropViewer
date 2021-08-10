@@ -80,7 +80,7 @@ namespace Raindrop
 
                     downloader.QueueDownlad(
                         new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
-                        20 * 1000,
+                        3 * 1000, // was 20.
                         null,
                         null,
                         (request, response, responseData, error) =>
@@ -89,22 +89,58 @@ namespace Raindrop
                             {
                                 try
                                 {
+                                    Debug.Log("done!");
                                     //using (MemoryStream s = new MemoryStream(responseData)) //s of JPEG
                                     //{
-                                        //lock (mapData.regionTiles)
-                                        //{
-                                        //    //decode http response data into texture2d
-                                        //    MapTile tex = mapData.getUnusedTex();
-                                        //    tex.texture.LoadImage(responseData); //Image.FromStream(s);
-                                        //    //mapData.regionTiles[handle] = 
-                                        //    //needRepaint = true;
-                                        //}
+                                    //lock (mapData.regionTiles)
+                                    //{
+                                    //    //decode http response data into texture2d
+                                    //    MapTile tex = mapData.getUnusedTex();
+                                    //    tex.texture.LoadImage(responseData); //Image.FromStream(s);
+                                    //    //mapData.regionTiles[handle] = 
+                                    //    //needRepaint = true;
+                                    //}
                                     //}
                                 }
                                 catch { }
                             }
                         }
                     );
+
+
+
+                    //downloader.QueueDownlad(
+                    //    new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
+                    //    3 * 1000, // was 20.
+                    //    null,
+                    //    null,
+                    //    (request, response, responseData, error) =>
+                    //    {
+                    //        if (error == null && responseData != null)
+                    //        {
+                    //            try
+                    //            {
+                    //                Debug.Log("done!");
+                    //                //using (MemoryStream s = new MemoryStream(responseData)) //s of JPEG
+                    //                //{
+                    //                //lock (mapData.regionTiles)
+                    //                //{
+                    //                //    //decode http response data into texture2d
+                    //                //    MapTile tex = mapData.getUnusedTex();
+                    //                //    tex.texture.LoadImage(responseData); //Image.FromStream(s);
+                    //                //    //mapData.regionTiles[handle] = 
+                    //                //    //needRepaint = true;
+                    //                //}
+                    //                //}
+                    //            }
+                    //            catch { }
+                    //        }
+                    //    }
+                    //);
+
+
+
+
 
                     lock (mapData.regionTiles)
                     {

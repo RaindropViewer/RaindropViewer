@@ -30,6 +30,7 @@ using System.Net;
 using System.IO;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
+using UnityEngine;
 
 namespace OpenMetaverse.Http
 {
@@ -107,6 +108,8 @@ namespace OpenMetaverse.Http
 
             // Start the request for the remote server response
             IAsyncResult result = request.BeginGetResponse(GetResponse, state);
+
+            Debug.Log("testing");
             // Register a timeout for the request
             ThreadPool.RegisterWaitForSingleObject(result.AsyncWaitHandle, TimeoutCallback, state, millisecondsTimeout, true);
         }
