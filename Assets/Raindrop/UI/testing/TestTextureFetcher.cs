@@ -9,10 +9,13 @@ using UnityEngine;
 
 namespace Raindrop
 {
+    // contains a function and mapfetcher for fetching and decoding the map tile. does not show the image.
+
     class TestTextureFetcher : MonoBehaviour
     {
         [SerializeField]
-        public MapLogic.MapFetcher mapFetcher;
+        public MapLogic.MapFetcher mapFetcher; //fetching logic + pooling data here
+
 
         private void Awake()
         {
@@ -24,14 +27,6 @@ namespace Raindrop
         public void testfetch()
         {
 
-
-            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(string.Format("http://map.secondlife.com/map-1-1000-1000-objects.jpg"));
-            //request.Timeout = 3 * 1000;
-            //request.BeginGetResponse(new AsyncCallback(Finish), request); ;
-
-            // Create an object to hold all of the state for this request
-
-
             //IAsyncResult result = request.BeginGetResponse(Finish, request);
             //ServicePointManager.ServerCertificateValidationCallback =
             //    (sender, certificate, chain, sslPolicyErrors) => true;
@@ -39,14 +34,14 @@ namespace Raindrop
 
             var handle = Utils.UIntsToLong(256 * 1000, 256 * 1000);
             mapFetcher.GetRegionTileExternal(handle, 1);
-            Debug.Log("end of start fetch subroutine");
+            Debug.Log("end of initial fetch call.");
         }
 
 
 
-        private void Finish(IAsyncResult result)
-        {
-            Debug.Log("FINISH"); 
-        }
+        //private void Finish(IAsyncResult result)
+        //{
+        //    Debug.Log("FINISH"); 
+        //}
     }
 }
