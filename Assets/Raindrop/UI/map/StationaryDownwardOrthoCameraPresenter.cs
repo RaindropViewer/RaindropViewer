@@ -17,8 +17,10 @@ namespace Raindrop.Presenters
             //viewableSize = camera.orthographicSize; //orthographicSize is half the size of the vertical viewing volume. 
             init();
         }
-
-        // get the viewable range of the camera as x,y tuple.
+        /// <summary>
+        /// get the viewable range (height and width) of the camera as x,y tuple. Units are in orthographic units.
+        /// </summary>
+        /// <returns></returns>
         public OpenMetaverse.Vector2 getRange()
         {
             return new Vector2(getHorzRange(), getVertRange());
@@ -36,10 +38,19 @@ namespace Raindrop.Presenters
             return;
         }
 
+        /// <summary>
+        /// Get the complete height of the camera. (top-down.)
+        /// </summary>
+        /// <returns></returns>
         private float getVertRange()
         {
             return camera.orthographicSize * 2;
         }
+
+        /// <summary>
+        /// Get the complete width of the camera. (left-right)
+        /// </summary>
+        /// <returns></returns>
         private float getHorzRange()
         {
             return camera.orthographicSize * 2 * camera.aspect;

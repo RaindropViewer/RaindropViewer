@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
+using Raindrop.Map;
 
 namespace Raindrop.UI
 {
@@ -59,6 +60,11 @@ namespace Raindrop.UI
         //    updateTexturesIfNecessary(min, max);
         //}
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="focalPoint">Where the camera is looking at - in Sim coordinates*256 ie handle coords. </param>
+        /// <param name="range"></param>
         public void setViewableRange(OpenMetaverse.Vector2 focalPoint, OpenMetaverse.Vector2 range)
         {
             var min = MapLogic.getMinVec2(range, focalPoint);

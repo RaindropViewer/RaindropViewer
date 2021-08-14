@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+using Raindrop.Map;
 
 namespace Raindrop
 {

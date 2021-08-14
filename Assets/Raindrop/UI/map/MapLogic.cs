@@ -7,53 +7,90 @@ using System.Collections.Generic;
 using System.IO;
 using UniRx;
 using UnityEngine;
-using static Raindrop.MapDataPool;
 
-namespace Raindrop
+namespace Raindrop.Map
 {
+    /// <summary>
+    /// Contains logic to fetch and decode the map textures.
+    /// </summary>
+
     public class MapLogic
     {
-        //range logic
+        #region range logic
+
+        //    ---------@  max
+        //    |        |
+        //    |        |
+        //    |        |
+        //    |        |
+        //min @---------
+
+        // range - bottom left corner 
         internal static OpenMetaverse.Vector2 getMinVec2(OpenMetaverse.Vector2 range, OpenMetaverse.Vector2 focalPoint)
         {
             return focalPoint - new OpenMetaverse.Vector2(range.X / 2 , range.Y / 2);
         }
         
+        // range - top right corner
+
         internal static OpenMetaverse.Vector2 getMaxVec2(OpenMetaverse.Vector2 range, OpenMetaverse.Vector2 focalPoint)
         {
             return focalPoint + new OpenMetaverse.Vector2(range.X / 2 , range.Y / 2);
         }
 
+        #endregion
+
         //backend image fetch logic
 
 
-        //backend, map fetching class
+        // map fetching class.
+        // contains a dict for tracking the tile maps.
+        // contains the reusable pool to discard and recycle tile maps.
         public class MapFetcher
         {
-            private MapDataPool mapData;
+            MapDataManager mapDataMgr;
             List<ulong> tileRequests = new List<ulong>(); // a list of pending fetch requests. the ulongs are the x and y world coordinates (gridX * 256), packed.
             uint regionSize = 256;
             private ParallelDownloader downloader;
             int poolSize = 10;
 
+            UnityMainThreadDispatcher mainThreadInstance;
+
             public MapFetcher()
             {
-                mapData = new MapDataPool(poolSize);
+                mapDataMgr = new MapDataManager(10);
+
                 downloader = new ParallelDownloader();
+
+                mainThreadInstance = UnityMainThreadDispatcher.Instance();
             }
 
+            /// <summary>
+            /// API to Get the map tile at specific region handle and zoom level. Only zoom level 1 is supported.
+            /// </summary>
+            /// <param name="handle"></param>
+            /// <param name="zoom"></param>
+            /// <returns></returns>
             public MapTile GetMapTile(ulong handle, int zoom)
             {
-                if (mapData.regionTiles.ContainsKey(handle))
-                {
-                    return mapData.regionTiles[handle];
-                }
+                MapTile res = null;
 
-                return null;
+                //try
+                //{
+                res = mapDataMgr.tryGetTile(handle);
+                //}
+                //catch (Exception)
+                //{
+                //    uint x, y;
+                //    Utils.LongToUInts(handle, out x, out y);
+                //    throw new Exception("no tile found at " + x + " " + y);
+                //}
+                return res;
             }
 
 
             //get region tile using SL map API -- JPEG images.
+            // obtains the image from URL, decodes it in main thread, the stores data in the appropriate maptile.
             public MapTile GetRegionTileExternal(ulong handle, int zoom)
             {
                 if ( (zoom > 4) || (zoom < 1) )
@@ -62,9 +99,9 @@ namespace Raindrop
                 }
 
 
-                if (mapData.regionTiles.ContainsKey(handle))
+                if (GetMapTile(handle, 1) != null)
                 {
-                    return mapData.regionTiles[handle];
+                    return GetMapTile(handle, 1);
                 }
                 else
                 {
@@ -92,27 +129,24 @@ namespace Raindrop
                                 try
                                 {
                                     Debug.Log("fetching the texture was successful!");
-                                    //using (MemoryStream s = new MemoryStream(responseData)) //s of JPEG
-                                    //{
-
-                                    lock (mapData.regionTiles)
-                                    {
-                                        //decode http response data into texture2d
-                                        MapTile tex = mapData.getUnusedTex();
-
-                                        //run jpeg decoding on the main thread, for now.
-                                        MainThreadDispatcher.StartCoroutine(TestAsync(tex, responseData));
-
-                    
-                                        //Image.FromStream(s);
-                                        //mapData.regionTiles[handle] = 
-                                        //needRepaint = true;
-                                        
-                                        mapData.regionTiles.Add( handle,tex);
-                                    }
-
-                                    //}
                                     
+                                    //lock (mapData.sceneTiles)
+                                    //{
+                                        Debug.Log("1");
+                                        //decode http response data into texture2d
+                                        //MapTile tex = mapData.getTile();
+                                        MapTile tex = GetMapTile(handle,1 ); //Tile is a empty tile right now -- we write to it soon.
+
+                                        Debug.Log("2");
+                                        //run jpeg decoding on the main thread, for now.
+                                        mainThreadInstance.Enqueue(TestAsync(tex, responseData));
+
+                                        Debug.Log("3");
+                                        //set the tile into tile manager
+                                        mapDataMgr.setTile( handle,tex);
+                                        Debug.Log("4");
+                                    //}
+
                                 }
                                 catch (Exception e)
                                 {
@@ -123,10 +157,10 @@ namespace Raindrop
                     );
 
 
-                    lock (mapData.regionTiles)
-                    {
-                        mapData.regionTiles[handle] = null;
-                    }
+                    //lock (mapData.sceneTiles)
+                    //{
+                    //    mapData.sceneTiles[handle] = mapData.acquireTile(); //wtf!
+                    //}
 
                     return null;
                 }
@@ -134,17 +168,18 @@ namespace Raindrop
 
             private IEnumerator TestAsync(MapTile tex, byte[] responseData)
             {
-                try
-                {
-                    bool success = tex.texture.LoadImage(responseData);
+                //try
+                //{
+                //    bool success = tex.texture.LoadImage(responseData);
 
-                }
-                catch (Exception w)
-                {
-                    Debug.Log("decode the texture failed : " + w.Message);
-                }
-                Debug.Log("completed mainthread async texture Decode.");
+                //}
+                //catch (Exception w)
+                //{
+                //    Debug.Log("decode the texture failed : " + w.Message);
+                //}
+                //Debug.Log("completed mainthread async texture Decode.");
 
+                Debug.Log("5");
                 yield return null;
 
             }

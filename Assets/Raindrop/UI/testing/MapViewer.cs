@@ -8,7 +8,7 @@ using Raindrop;
 using UnityEngine.UI;
 using Raindrop.Presenters;
 using OpenMetaverse;
-using static Raindrop.MapDataPool;
+using Raindrop.Map;
 
 // lets you view the maps by choosing parameters.
 // use external API. does not need login.
@@ -40,12 +40,18 @@ public class MapViewer : MonoBehaviour
     private void Awake()
     {
         mapFetcher = new MapLogic.MapFetcher();
-    } 
-    
+
+    }
+
+    private void Update()
+    {
+        //redrawMap();
+    }
+
 
     private void Start()
     {
-        InvokeRepeating("drawImage", 5f, 30f);
+        InvokeRepeating("redrawMap", 5f, 5f);
 
         //get reference to the view.
         iv = mapTileGO.GetComponent<MapTileView>();
@@ -69,9 +75,15 @@ public class MapViewer : MonoBehaviour
         }
 
         mapFetcher = new MapLogic.MapFetcher();
+
+
+        // for testing
+        onRefresh();
     }
 
-    //call this to redraw everything based on new params
+    /// <summary>
+    /// Retrieves desired tile from backend.
+    /// </summary>
     public void onRefresh()
     {
         ulong handle = mapMover.GetLookAt();
@@ -88,11 +100,12 @@ public class MapViewer : MonoBehaviour
         return;
     }
 
-
-    // 1. checks if repaint is needed 2. proceeds to get the view-ablemaptiles 3. draws these subset of tiles.
-    private void drawImage( )
+    /// <summary>
+    /// Redraws the tiles if the redraw flag is true.
+    /// </summary>
+    private void redrawMap( )
     {
-        onRefresh(); //hacky
+        //onRefresh(); //hacky
 
         if (needRepaint)
         {
@@ -106,7 +119,7 @@ public class MapViewer : MonoBehaviour
 
         if (tex != null) 
         {
-            iv.setRawImage(tex.texture);
+            iv.setRawImage(tex.getTex());
         }
         Debug.Log("drew images.");
     }
