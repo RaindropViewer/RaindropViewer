@@ -2,8 +2,10 @@
 using Raindrop.Network;
 using Raindrop.UI;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UniRx;
 using UnityEngine;
 using static Raindrop.MapDataPool;
 
@@ -80,7 +82,7 @@ namespace Raindrop
 
                     downloader.QueueDownlad(
                         new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
-                        3 * 1000, // was 20.
+                        20 * 1000,
                         null,
                         null,
                         (request, response, responseData, error) =>
@@ -89,57 +91,36 @@ namespace Raindrop
                             {
                                 try
                                 {
-                                    Debug.Log("done!");
+                                    Debug.Log("fetching the texture was successful!");
                                     //using (MemoryStream s = new MemoryStream(responseData)) //s of JPEG
                                     //{
-                                    //lock (mapData.regionTiles)
-                                    //{
-                                    //    //decode http response data into texture2d
-                                    //    MapTile tex = mapData.getUnusedTex();
-                                    //    tex.texture.LoadImage(responseData); //Image.FromStream(s);
-                                    //    //mapData.regionTiles[handle] = 
-                                    //    //needRepaint = true;
+
+                                    lock (mapData.regionTiles)
+                                    {
+                                        //decode http response data into texture2d
+                                        MapTile tex = mapData.getUnusedTex();
+
+                                        //run jpeg decoding on the main thread, for now.
+                                        MainThreadDispatcher.StartCoroutine(TestAsync(tex, responseData));
+
+                    
+                                        //Image.FromStream(s);
+                                        //mapData.regionTiles[handle] = 
+                                        //needRepaint = true;
+                                        
+                                        mapData.regionTiles.Add( handle,tex);
+                                    }
+
                                     //}
-                                    //}
+                                    
                                 }
-                                catch { }
+                                catch (Exception e)
+                                {
+                                    Debug.LogError(e.Message);
+                                }
                             }
                         }
                     );
-
-
-
-                    //downloader.QueueDownlad(
-                    //    new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
-                    //    3 * 1000, // was 20.
-                    //    null,
-                    //    null,
-                    //    (request, response, responseData, error) =>
-                    //    {
-                    //        if (error == null && responseData != null)
-                    //        {
-                    //            try
-                    //            {
-                    //                Debug.Log("done!");
-                    //                //using (MemoryStream s = new MemoryStream(responseData)) //s of JPEG
-                    //                //{
-                    //                //lock (mapData.regionTiles)
-                    //                //{
-                    //                //    //decode http response data into texture2d
-                    //                //    MapTile tex = mapData.getUnusedTex();
-                    //                //    tex.texture.LoadImage(responseData); //Image.FromStream(s);
-                    //                //    //mapData.regionTiles[handle] = 
-                    //                //    //needRepaint = true;
-                    //                //}
-                    //                //}
-                    //            }
-                    //            catch { }
-                    //        }
-                    //    }
-                    //);
-
-
-
 
 
                     lock (mapData.regionTiles)
@@ -149,6 +130,23 @@ namespace Raindrop
 
                     return null;
                 }
+            }
+
+            private IEnumerator TestAsync(MapTile tex, byte[] responseData)
+            {
+                try
+                {
+                    bool success = tex.texture.LoadImage(responseData);
+
+                }
+                catch (Exception w)
+                {
+                    Debug.Log("decode the texture failed : " + w.Message);
+                }
+                Debug.Log("completed mainthread async texture Decode.");
+
+                yield return null;
+
             }
 
 

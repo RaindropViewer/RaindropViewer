@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 
 namespace Raindrop
@@ -15,11 +16,11 @@ namespace Raindrop
     {
         [SerializeField]
         public MapLogic.MapFetcher mapFetcher; //fetching logic + pooling data here
-
+        
 
         private void Awake()
         {
-
+            MainThreadDispatcher.Initialize();
             mapFetcher = new MapLogic.MapFetcher();
         }
 
@@ -38,10 +39,5 @@ namespace Raindrop
         }
 
 
-
-        //private void Finish(IAsyncResult result)
-        //{
-        //    Debug.Log("FINISH"); 
-        //}
     }
 }

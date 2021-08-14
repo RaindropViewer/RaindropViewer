@@ -39,8 +39,7 @@ public class MapViewer : MonoBehaviour
     System.Threading.Timer repaint;
     private void Awake()
     {
-        //in main thread, before all uses.
-        //BetterStreamingAssets.Initialize();
+        mapFetcher = new MapLogic.MapFetcher();
     } 
     
 
@@ -78,7 +77,10 @@ public class MapViewer : MonoBehaviour
         ulong handle = mapMover.GetLookAt();
         int zoom = (int)zoomSlider.value;
         // how 2 convert look at floats into uints? (uints are gridpos * 256)
-        mapFetcher.GetRegionTileExternal(handle, zoom);
+        if (mapFetcher.GetMapTile(handle, 1) == null) //hack for now.
+        {
+            mapFetcher.GetRegionTileExternal(handle, 1);
+        } 
         
         needRepaint = true;
 
@@ -86,6 +88,8 @@ public class MapViewer : MonoBehaviour
         return;
     }
 
+
+    // 1. checks if repaint is needed 2. proceeds to get the view-ablemaptiles 3. draws these subset of tiles.
     private void drawImage( )
     {
         onRefresh(); //hacky
@@ -99,7 +103,11 @@ public class MapViewer : MonoBehaviour
         }
         ulong handle = mapMover.GetLookAt();
         MapTile tex = mapFetcher.GetMapTile(handle, 1);
-        iv.setRawImage(tex.texture);
+
+        if (tex != null) 
+        {
+            iv.setRawImage(tex.texture);
+        }
         Debug.Log("drew images.");
     }
 }

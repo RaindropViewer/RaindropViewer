@@ -109,7 +109,6 @@ namespace OpenMetaverse.Http
             // Start the request for the remote server response
             IAsyncResult result = request.BeginGetResponse(GetResponse, state);
 
-            Debug.Log("testing");
             // Register a timeout for the request
             ThreadPool.RegisterWaitForSingleObject(result.AsyncWaitHandle, TimeoutCallback, state, millisecondsTimeout, true);
         }
