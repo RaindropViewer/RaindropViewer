@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Raindrop.Map
 {
     /// <summary>
-    /// API to retrieve, delete, modify MapTiles in the scene
+    /// API to retrieve, delete, modify, create MapTiles in the scene
     /// </summary>
     public class MapDataManager
     {
@@ -34,7 +34,7 @@ namespace Raindrop.Map
         }
 
         /// <summary>
-        /// gets a maptile
+        /// gets a maptile, if it is present
         /// </summary>
         /// <param name="handle">the region handle of the tile to get ; gridCoords * 256 and pack X&Y together.</param>
         /// <returns> Tile </returns>
@@ -51,6 +51,18 @@ namespace Raindrop.Map
             {
                 return tile;
             }
+        }
+        
+        /// <summary>
+        /// creates a blank maptile at a grid handle.
+        /// </summary>
+        /// <param name="handle">the region handle of the tile to get ; gridCoords * 256 and pack X&Y together.</param>
+        /// <returns> Tile </returns>
+        public MapTile setEmptyTile(ulong handle)
+        {
+            MapTile tile = pool.acquireTile();
+            sceneTiles.Add(handle, tile);
+            return tile;
         }
 
         /// <summary>

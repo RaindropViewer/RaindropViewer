@@ -81,9 +81,9 @@ namespace Raindrop.Map
                 //}
                 //catch (Exception)
                 //{
-                //    uint x, y;
-                //    Utils.LongToUInts(handle, out x, out y);
-                //    throw new Exception("no tile found at " + x + " " + y);
+                uint x, y;
+                Utils.LongToUInts(handle, out x, out y);
+                Debug.LogError("no tile found at " + x + " " + y);
                 //}
                 return res;
             }
@@ -135,11 +135,11 @@ namespace Raindrop.Map
                                         Debug.Log("1");
                                         //decode http response data into texture2d
                                         //MapTile tex = mapData.getTile();
-                                        MapTile tex = GetMapTile(handle,1 ); //Tile is a empty tile right now -- we write to it soon.
+                                        MapTile tex = mapDataMgr.setEmptyTile(handle); //Tile is a empty tile right now -- we write to it soon.
 
                                         Debug.Log("2");
                                         //run jpeg decoding on the main thread, for now.
-                                        mainThreadInstance.Enqueue(TestAsync(tex, responseData));
+                                        mainThreadInstance.Enqueue(DecodeDataToTexAsync(tex, responseData));
 
                                         Debug.Log("3");
                                         //set the tile into tile manager
@@ -166,20 +166,20 @@ namespace Raindrop.Map
                 }
             }
 
-            private IEnumerator TestAsync(MapTile tex, byte[] responseData)
+            private IEnumerator DecodeDataToTexAsync(MapTile tex, byte[] responseData)
             {
-                //try
-                //{
-                //    bool success = tex.texture.LoadImage(responseData);
+                try
+                {
+                    Texture2D _tex = tex.getTex();
+                    bool success = _tex.LoadImage(responseData);
 
-                //}
-                //catch (Exception w)
-                //{
-                //    Debug.Log("decode the texture failed : " + w.Message);
-                //}
-                //Debug.Log("completed mainthread async texture Decode.");
+                }
+                catch (Exception w)
+                {
+                    Debug.Log("decode the texture failed : " + w.Message);
+                }
+                Debug.Log("completed mainthread async texture Decode.");
 
-                Debug.Log("5");
                 yield return null;
 
             }
