@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Raindrop.Map
+namespace Raindrop.Map.Model
 {
     //pooling pattern for objects -- holds UNUSED map in memory.
-    public class MapDataPool
+    public class MapTilesPool
     {
         private Queue<MapTile> tilePool;
 
         public int count => tilePool.Count;
 
 
-        public MapDataPool(int poolSize)
+        public MapTilesPool(int poolSize)
         {
             tilePool = new Queue<MapTile>(poolSize);
             for (int i = 0; i < poolSize; i++)

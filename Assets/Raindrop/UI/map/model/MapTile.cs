@@ -1,7 +1,7 @@
 ﻿using OpenMetaverse;
 using UnityEngine;
 
-namespace Raindrop.Map
+namespace Raindrop.Map.Model
 {
     /// <summary>
     /// A DS that represents a maptile in the scene.

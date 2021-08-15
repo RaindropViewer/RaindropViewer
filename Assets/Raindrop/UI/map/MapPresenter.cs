@@ -1,8 +1,10 @@
 ﻿using OpenMetaverse;
 using OpenMetaverse.Assets;
 using OpenMetaverse.Imaging;
+using Raindrop.Map.Model;
 using Raindrop.Netcom;
 using Raindrop.UI;
+using Raindrop.UI.Views;
 using System;
 using System.Collections.Generic;
 using UniRx;
@@ -12,88 +14,131 @@ using UnityEngine.UI;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
-namespace Raindrop.Presenters
+namespace Raindrop.UI.Presenters
 {
-    // map texture module - root gameobject.
-
-    // this manages the 2d texture objects in the map texture layer
-    // min = bottom left (OM)
-    // max = top right (OM)
-    public class MapPresenter : MonoBehaviour
+    public class MapPresenter
     {
-        //camera. contains the viewable range.
-        [SerializeField]
-        public GameObject cameraPresenterGO;
-        private StationaryDownwardOrthoCameraPresenter cameraPresenter;
-
-        //map mover. Contains focal point. Moves focal point in response to screen swipes.
-        [SerializeField]
-        public GameObject mapMoverGO;
-        private MapMover mapMover;
-        //public OpenMetaverse.Vector2 focalPoint;
-        //public Transform mapOrigin; // 1000,1000
-
-        // map manager. keeps track of mapsGOs. creates new mapGOs from prefabs. culls those that are no longer visible. fetches those that need to be viewed.
-        [SerializeField]
-        public GameObject mapManagerGO;
-        private MapPoolPresenter mapManager;
-
-        // a reference to the avatar in the grid.
-        public GameObject Avatar;
+        private MapViewer mapViewer;
+        private MapSceneView mapSceneView;
+        private MapBackend mapFetcher;
+        private bool needRepaint;
 
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
+        bool Active => instance.Client.Network.Connected;
 
-
-
-        public void Awake()
+        /// <summary>
+        /// ctor -- takes in a UI view and a gameobject view
+        /// </summary>
+        /// <param name="mapViewer"></param>
+        public MapPresenter(MapViewer mapViewer, MapSceneView mapSceneView)
         {
+            this.mapViewer = mapViewer;
+            this.mapSceneView = mapSceneView;
 
-            if (cameraPresenterGO == null)
-            {
-                throw new Exception("cameraPresenterGO not assigned.");
-            }
-            cameraPresenter = cameraPresenterGO.GetComponent<StationaryDownwardOrthoCameraPresenter>();
-
-            if (mapMoverGO == null)
-            {
-                throw new Exception("MapMoverGO not assigned.");
-            }
-            mapMover = mapMover.GetComponent<MapMover>();
-
-            if (mapManagerGO == null)
-            {
-                throw new Exception("mapManagerGO not assigned.");
-            }
-            mapManager = mapManager.GetComponent<MapPoolPresenter>(); 
-
-
-            //instance.Client.Network.SimChanged += Network_OnCurrentSimChanged;
-        }
-
-
-        private void Update()
-        {
-            UpdateMapViewing();
+            //mapFetcher = ServiceLocator.ServiceLocator.Instance.Get<MapBackend>();
+            mapFetcher = new MapBackend();
         }
 
 
         /// <summary>
-        /// Update what is viewable and what is not.
+        /// get a list of region handles that are visible to the camera.
         /// </summary>
-        private void UpdateMapViewing()
+        /// <returns></returns>
+        public List<ulong> calcVisibleRegionHandles()
         {
-            var range = cameraPresenter.getRange(); // we can see this ranges now.
-            ulong focalPoint = mapMover.GetLookAt();
-            uint x;
-            uint y;
-            //var min = MapLogic.getMinVec2(range, focalPoint);
-            //var max = MapLogic.getMaxVec2(range, focalPoint);
-            Utils.LongToUInts(focalPoint, out x, out y);
-            mapManager.setViewableRange(x, y, range);
+            // camera pos
+            CameraView camView = mapSceneView.getCameraView();
+            // camera bounds
+            Vector2 min = Vector2.Max(camView.getMin(), Vector2.zero);
+            Vector2 max = Vector2.Max(camView.getMax(), Vector2.zero);
+            // for loop from bounds to bounds.
+            List<ulong> visiblehandles = new List<ulong>();
+            int vert_min = (int) min.y;
+            int vert_max = (int) max.y;
+            int horz_min = (int) min.x;
+            int horz_max = (int) max.x;
+            for (int i = horz_min; i<horz_max; i++)
+            {
+                for (int j = vert_min; j < vert_max ; j++)
+                {
+                    ulong region = Utils.UIntsToLong((uint)(i * 256), (uint)(j * 256));
+                    visiblehandles.Add(region);
+                }
+            }
 
+            if (visiblehandles.Count > 30)
+            {
+                throw new Exception("too many tiles to downlaod bro!");
+            }
+
+            return visiblehandles;
         }
+
+        /// <summary>
+        /// Retrieves desired tile from backend. if not present, tiles will be fetched and come in at a later time.
+        /// </summary>
+        public void onRefresh()
+        {
+            var handles = calcVisibleRegionHandles();
+
+            foreach(var handle in handles)
+            {
+                var tile = mapFetcher.tryGetMapTile(handle, 1);
+
+                if (tile == null) 
+                {
+                    //not avail in backend so fetch it.
+                    mapFetcher.GetRegionTileExternal(handle, 1);
+                    Debug.Log("fetching texture at " + handle);
+                } else
+                {
+                    //if (mapSceneView.isPresent(handle))
+                    //{
+
+                    //}
+                    //else
+                    //{
+                        mapSceneView.createMapTileAt(handle, tile);
+                        Debug.Log("making tile at " + handle);
+
+                    //}
+                }
+
+
+            }
+
+            Debug.Log("refreshed internal images. fetching images if any..");
+            return;
+        }
+
+
+        /// <summary>
+        /// Redraws the tiles if the redraw flag is true.
+        /// </summary>
+        //private void redrawMap()
+        //{
+        //    //onRefresh(); //hacky
+
+        //    if (needRepaint)
+        //    {
+        //        needRepaint = false;
+        //    }
+        //    else
+        //    {
+        //        return;
+        //    }
+
+        //    ulong handle = mapLookAt.GetLookAt();
+        //    MapTile tex = mapFetcher.tryGetMapTile(handle, 1);
+
+        //    if (tex != null)
+        //    {
+        //        mapSceneView.setRawImage(tex.getTex());
+        //    }
+        //    Debug.Log("drew images.");
+        //}
 
         //private void Network_OnCurrentSimChanged(object sender, SimChangedEventArgs e)
         //{
@@ -134,7 +179,7 @@ namespace Raindrop.Presenters
 
         //}
 
-        
+
 
 
     }

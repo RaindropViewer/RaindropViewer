@@ -1,59 +1,115 @@
 ﻿using OpenMetaverse;
 using System;
 using UnityEngine;
-using Vector2 = OpenMetaverse.Vector2;
+//using Vector2 = OpenMetaverse.Vector2;
+using UE = UnityEngine;
 
-namespace Raindrop.Presenters
+namespace Raindrop.UI.Views
 {
     //the camera no longer moves. however the zoom is still controlled here.
     //the map moves.
-    internal class StationaryDownwardOrthoCameraPresenter : MonoBehaviour
+    internal class CameraView : MonoBehaviour
     {
+        public bool isDownward = true;
+        public bool isOrtho = true;
+
         public GameObject cameraGO;
-        public Camera camera;
+        private Camera camera;
+
+        //map mover. Contains focal point. Moves focal point in response to screen swipes.
+        [SerializeField]
+        public GameObject MapLookAtGO;
+        private MapLookAt mapLookAt;
+
+        private UE.Vector2 min;
+        private UE.Vector2 max;
+
+        /// <summary>
+        /// 2D axes
+        /// </summary>
+        private float centerX => this.transform.position.x;
+        private float centerY => this.transform.position.z;
+
 
         private void Awake()
         {
             //viewableSize = camera.orthographicSize; //orthographicSize is half the size of the vertical viewing volume. 
             init();
+            //mapLookAt = mapLookAt.GetComponent<MapLookAt>();
         }
+
+
+        /// <summary>
+        /// Sets the zoom of the orth camera. a value of 1 means that the height of the viewing is 1. a value of 10 means the height of the viewing is 10.
+        /// </summary>
+        /// <param name="zoom"></param>
+        public void setZoom(float zoom)
+        {
+            var maxZoom = 10;
+            zoom = Mathf.Clamp(zoom, 1, maxZoom);
+            setVertHeight(zoom);
+        }
+
         /// <summary>
         /// get the viewable range (height and width) of the camera as x,y tuple. Units are in orthographic units.
         /// </summary>
         /// <returns></returns>
-        public OpenMetaverse.Vector2 getRange()
+        //public OpenMetaverse.Vector2 getRange()
+        //{
+        //    return new Vector2(getHorzRange(), getVertRange());
+        //}
+
+        
+
+        /// <returns></returns>
+        /// <summary>
+        /// In unity units. -- you need to x256
+        /// </summary>
+        /// <returns></returns>
+        public UE.Vector2 getMin()
         {
-            return new Vector2(getHorzRange(), getVertRange());
+            var pos_x = centerX - getHorzRange();
+            var pos_y = centerY - getVertRange();
+
+            min.Set(pos_x, pos_y);
+            return min;
         }
 
-        // get the vertical height of the camera as float.
-        public float getVertHeight()
+        /// <summary>
+        /// In unity units. -- you need to x256
+        /// </summary>
+        public UE.Vector2 getMax()
         {
-            return camera.orthographicSize;
+            var pos_x = centerX + getHorzRange();
+            var pos_y = centerY + getVertRange();
+
+            max.Set(pos_x, pos_y);
+            return max;
         }
+
         // set the vertical height of the camera as float.
-        public void setVertHeight(float height)
+        private void setVertHeight(float height)
         {
             camera.orthographicSize = height;
             return;
         }
 
         /// <summary>
-        /// Get the complete height of the camera. (top-down.)
+        /// Get the half-height of the camera. 
         /// </summary>
         /// <returns></returns>
         private float getVertRange()
         {
-            return camera.orthographicSize * 2;
+            return camera.orthographicSize;
         }
 
         /// <summary>
-        /// Get the complete width of the camera. (left-right)
+        /// Get the half-width of the ortho camera. 
         /// </summary>
         /// <returns></returns>
         private float getHorzRange()
         {
-            return camera.orthographicSize * 2 * camera.aspect;
+            return camera.orthographicSize * camera.aspect;
         }
 
         ////these coordinate differences are quite condfusing.
@@ -87,6 +143,9 @@ namespace Raindrop.Presenters
         //    _updateCameraPos(gridX, gridY);
         //}
 
+        /// <summary>
+        /// Initilise camera with relevant params
+        /// </summary>
         internal void init()
         {
             if (cameraGO == null || !cameraGO.GetComponent<Camera>())
@@ -96,6 +155,16 @@ namespace Raindrop.Presenters
                 return;
             }
             camera = cameraGO.GetComponent<Camera>();
+
+            //if (isDownward)
+            //{
+            //    cameraGO.transform.LookAt(transform.position + UnityEngine.Vector3.down);
+            //}
+
+            //if (isOrtho)
+            //{
+            //    camera.orthographic = true;
+            //}
 
             //cameraGO = new GameObject();
             //camera = cameraGO.AddComponent<Camera>();

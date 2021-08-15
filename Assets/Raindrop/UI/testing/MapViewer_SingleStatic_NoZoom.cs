@@ -9,14 +9,16 @@ using UnityEngine.UI;
 using Raindrop.Presenters;
 using OpenMetaverse;
 using Raindrop.Map;
+using Raindrop.Map.Model;
+using Raindrop.UI.Views;
 
 // lets you view the maps by choosing parameters.
 // use external API. does not need login.
-public class MapViewer : MonoBehaviour
+public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
 {
     
     [SerializeField]
-    public MapLogic.MapFetcher mapFetcher;
+    public MapBackend mapFetcher;
 
     [SerializeField]
     public GameObject mapTileGO;
@@ -28,7 +30,7 @@ public class MapViewer : MonoBehaviour
 
     [SerializeField]
     public GameObject mapMoverGO;
-    private MapMover mapMover;
+    private MapLookAt mapMover;
 
     private float timeStart;
     private int imagesCount;
@@ -39,7 +41,7 @@ public class MapViewer : MonoBehaviour
     System.Threading.Timer repaint;
     private void Awake()
     {
-        mapFetcher = new MapLogic.MapFetcher();
+        mapFetcher = new MapBackend();
 
     }
 
@@ -64,17 +66,17 @@ public class MapViewer : MonoBehaviour
         zoomSlider = zoomSliderGO.GetComponent<Slider>();
         if (zoomSlider == null)
         {
-            throw new System.Exception("slider is fucked"); // fix exception type plz
+            Debug.LogWarning("slider is fucked"); // fix exception type plz
         }
 
         //get reference to the view.
-        mapMover = mapMoverGO.GetComponent<MapMover>();
+        mapMover = mapMoverGO.GetComponent<MapLookAt>();
         if (mapMover == null)
         {
             throw new System.Exception("mapMoverGO is fucked"); // fix exception type plz
         }
 
-        mapFetcher = new MapLogic.MapFetcher();
+        mapFetcher = new MapBackend();
 
 
         // for testing
@@ -89,7 +91,7 @@ public class MapViewer : MonoBehaviour
         ulong handle = mapMover.GetLookAt();
         int zoom = (int)zoomSlider.value;
         // how 2 convert look at floats into uints? (uints are gridpos * 256)
-        if (mapFetcher.GetMapTile(handle, 1) == null) //hack for now.
+        if (mapFetcher.tryGetMapTile(handle, 1) == null) //hack for now.
         {
             mapFetcher.GetRegionTileExternal(handle, 1);
         } 
@@ -115,7 +117,7 @@ public class MapViewer : MonoBehaviour
             return;
         }
         ulong handle = mapMover.GetLookAt();
-        MapTile tex = mapFetcher.GetMapTile(handle, 1);
+        MapTile tex = mapFetcher.tryGetMapTile(handle, 1);
 
         if (tex != null) 
         {

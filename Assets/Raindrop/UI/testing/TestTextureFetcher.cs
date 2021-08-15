@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 using Raindrop.Map;
+using Raindrop.Map.Model;
 
 namespace Raindrop
 {
@@ -16,13 +17,13 @@ namespace Raindrop
     class TestTextureFetcher : MonoBehaviour
     {
         [SerializeField]
-        public MapLogic.MapFetcher mapFetcher; //fetching logic + pooling data here
+        public MapBackend mapFetcher; //fetching logic + pooling data here
         
 
         private void Awake()
         {
             MainThreadDispatcher.Initialize();
-            mapFetcher = new MapLogic.MapFetcher();
+            mapFetcher = new MapBackend();
         }
 
 

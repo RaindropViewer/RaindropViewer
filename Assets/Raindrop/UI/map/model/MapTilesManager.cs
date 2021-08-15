@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace Raindrop.Map
+namespace Raindrop.Map.Model
 {
     /// <summary>
     /// API to retrieve, delete, modify, create MapTiles in the scene
     /// </summary>
-    public class MapDataManager
+    public class MapTilesManager
     {
 
         //number of tiles that are in the scene.
@@ -16,10 +16,10 @@ namespace Raindrop.Map
         //tiles that are in the scene.
         private Dictionary<ulong, MapTile> sceneTiles = new Dictionary<ulong, MapTile>();
 
-        private MapDataPool pool;
-        public MapDataManager(int poolSize)
+        private MapTilesPool pool;
+        public MapTilesManager(int poolSize)
         {
-            pool = new MapDataPool(poolSize);
+            pool = new MapTilesPool(poolSize);
 
         }
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using ServiceLocator;
+using Raindrop.Map.Model;
 
 namespace Raindrop
 {
@@ -34,6 +35,13 @@ namespace Raindrop
             {
                 Debug.LogWarning("UIBootstrapper creating and registering raindropinstance!");
                 ServiceLocator.ServiceLocator.Instance.Register<RaindropInstance>(new RaindropInstance(new OpenMetaverse.GridClient()));
+                //return;
+            }
+
+            if (! ServiceLocator.ServiceLocator.Instance.IsRegistered<MapBackend>())
+            {
+                Debug.LogWarning("UIBootstrapper creating and registering MapBackend.MapFetcher!");
+                ServiceLocator.ServiceLocator.Instance.Register<MapBackend>(new MapBackend());
                 //return;
             }
 
