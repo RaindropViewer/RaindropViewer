@@ -14,13 +14,10 @@ namespace Raindrop.Presenters
         [SerializeField]
         public uint lookAt_y = 1000 * 256;
 
-
-
-        ////get the grid location that we are looking at.
-        //public OpenMetaverse.Vector2 GetLookAt()
-        //{
-        //    return new OpenMetaverse.Vector2(lookAt_x,lookAt_y);
-        //}
+        /// <summary>
+        /// get lookat of the camera in ( gridCoord * 256 ) units
+        /// </summary>
+        /// <returns></returns>
 
         public ulong GetLookAt()
         {

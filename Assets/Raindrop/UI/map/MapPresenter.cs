@@ -78,7 +78,10 @@ namespace Raindrop.Presenters
             UpdateMapViewing();
         }
 
-        //update what is viewable and what is not.
+
+        /// <summary>
+        /// Update what is viewable and what is not.
+        /// </summary>
         private void UpdateMapViewing()
         {
             var range = cameraPresenter.getRange(); // we can see this ranges now.

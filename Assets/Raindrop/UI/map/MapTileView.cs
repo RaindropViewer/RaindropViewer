@@ -4,20 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// An implementation of view. Attach to GO that has rawimage.
-// refers to a single texture; a single tile. can refer to many sims on a single tile.
-[RequireComponent(typeof(RawImage))]
-public class MapTileView : MonoBehaviour
+namespace Raindrop.Presenters
 {
-    public void setRawImage(Texture2D img)
+    // An implementation of view. Attach to GO that has rawimage.
+    // refers to a single texture; a single tile. can refer to many sims on a single tile.
+    [RequireComponent(typeof(RawImage))]
+    public class MapTileView : MonoBehaviour
     {
-        //hack: delete old texture before loading new one
-
-        if (this.GetComponent<RawImage>().texture != null)
+        public void setRawImage(Texture2D img)
         {
-            UnityEngine.Object.Destroy(this.GetComponent<RawImage>().texture);
-        }
-        this.GetComponent<RawImage>().texture = img;
+            //hack: delete old texture before loading new one
 
+            if (this.GetComponent<RawImage>().texture != null)
+            {
+                UnityEngine.Object.Destroy(this.GetComponent<RawImage>().texture);
+            }
+            this.GetComponent<RawImage>().texture = img;
+
+        }
     }
 }
