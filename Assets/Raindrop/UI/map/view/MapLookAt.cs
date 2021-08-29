@@ -22,9 +22,9 @@ namespace Raindrop.UI.Views
 
         //values when the finger is not released yet.
         [SerializeField]
-        public float prev_floatingLookAt_x = 1000;
+        public float lookAt_pre_release_x = 1000;
         [SerializeField]
-        public float prev_floatingLookAt_y = 1000;
+        public float lookAt_pre_release_y = 1000;
 
 
         /// <summary>
@@ -46,16 +46,18 @@ namespace Raindrop.UI.Views
         /// <param name="y"></param>
         public void MoveFloatingLookAt_Relative(float x, float y)
         {
-            floatingLookAt_x = prev_floatingLookAt_x + x;
-            floatingLookAt_y = prev_floatingLookAt_y + y;
+            floatingLookAt_x = lookAt_pre_release_x + x;
+            floatingLookAt_y = lookAt_pre_release_y + y;
 
-            Debug.Log(x);
-            Debug.Log(y);
-
-            updateThisPos(floatingLookAt_x, floatingLookAt_y);
+            updatePosInScene(floatingLookAt_x, floatingLookAt_y);
         }
 
-        private void updateThisPos(float floatingLookAt_x, float floatingLookAt_y)
+        /// <summary>
+        /// update postiion to the specified position.
+        /// </summary>
+        /// <param name="floatingLookAt_x"></param>
+        /// <param name="floatingLookAt_y"></param>
+        private void updatePosInScene(float floatingLookAt_x, float floatingLookAt_y)
         {
             this.transform.position = new UnityEngine.Vector3(floatingLookAt_x, this.transform.position.x, floatingLookAt_y);
         }
@@ -67,14 +69,14 @@ namespace Raindrop.UI.Views
         /// <param name="y"></param>
         public void MoveFloatingLookAt_Relative_OnRelease(float x, float y)
         {
-            floatingLookAt_x = prev_floatingLookAt_x + x;
-            floatingLookAt_y = prev_floatingLookAt_y + y;
+            floatingLookAt_x = lookAt_pre_release_x + x;
+            floatingLookAt_y = lookAt_pre_release_y + y;
 
-            prev_floatingLookAt_x = floatingLookAt_x;
-            prev_floatingLookAt_y = floatingLookAt_y;
+            lookAt_pre_release_x = floatingLookAt_x;
+            lookAt_pre_release_y = floatingLookAt_y;
 
         }
-
+        
         private void Awake()
         {
 

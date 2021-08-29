@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
@@ -9,6 +10,7 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 /// </summary>
 public class TouchScreenInteractionInstance
 {
+
     // interaction state.
     internal enum InteractionType
     {
@@ -28,32 +30,46 @@ public class TouchScreenInteractionInstance
     public float twoFingerPinchDelta { get; private set; }
     public Vector2 twoFingerMoveDelta { get; private set; }
 
+    // The camera that we are interacting through
+    public Camera camera; 
+
+    // The object of our touch interaction instance
+    public GameObject pointingContext;
+    private LayerMask layerMask;
+
     /// <summary>
     /// update the internal status.
     /// </summary>
-    public void updateInteractionState()
+    public void update()
     {
-        //touch 
+        //1. get interaction type from finger count 
         InteractionType presentType = fingerCountToInteractionType(Touch.activeFingers.Count);
+        //2. check if the interaction has changed
         interactionTypeHasChanged = isStateChanged(previousType, presentType);
+        //3a. if changed, 
         if (interactionTypeHasChanged)
         {
-            UpdateInitialFingerPositions();
+            ResetInitialFingerPositions();
             //getProbableTouchFocus();
             return;
         }
         else
         {
             updatePresentFingerPositions();
-            updateGlobalAccessibleStates(presentType);
+            updateDeltaVariables(presentType);
 
         }
 
-
-
     }
 
-    private void updateGlobalAccessibleStates(InteractionType presentType)
+
+
+    internal void finaliseInteraction()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void updateDeltaVariables(InteractionType presentType)
     {
         if (presentType == InteractionType.zoom)
         {
@@ -76,7 +92,7 @@ public class TouchScreenInteractionInstance
         return previousType;
     }
 
-    public bool isDifferentInteraction()
+    public bool isInteractionChanged()
     {
         return interactionTypeHasChanged;
     }
@@ -105,13 +121,43 @@ public class TouchScreenInteractionInstance
         }
     }
 
-    private void UpdateInitialFingerPositions()
+    private void ResetInitialFingerPositions()
     {
         initialTouchPositions.Clear();
         for (int i = 0; i < Touch.activeFingers.Count; i++)
         {
             initialTouchPositions.Add(Touch.activeFingers[i].screenPosition);
         }
+        if (initialTouchPositions.Count > 0)
+        {
+            pointingContext = getPointingContext(this.camera, initialTouchPositions[0], layerMask);
+        } else
+
+        {
+            pointingContext = null;
+        }
+
+
+    }
+
+    /// <summary>
+    /// Return the gameobejct that the finger is touching.
+    /// </summary>
+    /// <returns></returns>
+    private GameObject getPointingContext(Camera cam , Vector2 touchPos, LayerMask layerMask)
+    {
+        RaycastHit hit;
+        Vector3 worldPoint = camera.ScreenToWorldPoint(touchPos);
+        Ray ray = camera.ScreenPointToRay(touchPos);
+        Debug.DrawRay(ray.origin, ray.direction * 10, Color.yellow);
+
+        RaycastHit rayHit;
+        GameObject res = null;
+        if (Physics.Raycast(ray, out rayHit, 500, layerMask))
+        {
+            res = rayHit.transform.gameObject;
+        }
+        return res;
     }
 
     /// <summary>

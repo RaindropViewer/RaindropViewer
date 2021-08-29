@@ -49,7 +49,7 @@ namespace Raindrop.UI.Presenters
         public List<ulong> calcVisibleRegionHandles()
         {
             // camera pos
-            CameraView camView = mapSceneView.getCameraView();
+            DownwardOrthoCameraView camView = mapSceneView.getCameraView();
             // camera bounds
             Vector2 min = Vector2.Max(camView.getMin(), Vector2.zero);
             Vector2 max = Vector2.Max(camView.getMax(), Vector2.zero);

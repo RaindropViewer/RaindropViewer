@@ -6,17 +6,15 @@ using UE = UnityEngine;
 
 namespace Raindrop.UI.Views
 {
-    //the camera no longer moves. however the zoom is still controlled here.
-    //the map moves.
-    internal class CameraView : MonoBehaviour
+    /// <summary>
+    /// Controls the camera
+    /// </summary>
+    internal class DownwardOrthoCameraView : MonoBehaviour
     {
-        public bool isDownward = true;
-        public bool isOrtho = true;
-
         public GameObject cameraGO;
         private Camera camera;
 
-        //map mover. Contains focal point. Moves focal point in response to screen swipes.
+        //map mover. Contains focal point.
         [SerializeField]
         public GameObject MapLookAtGO;
         private MapLookAt mapLookAt;
@@ -38,6 +36,19 @@ namespace Raindrop.UI.Views
             //mapLookAt = mapLookAt.GetComponent<MapLookAt>();
         }
 
+        private void Update()
+        {
+
+        }
+
+        /// <summary>
+        /// set the look at, parameters of the camera.
+        /// </summary>
+        /// <param name="LookAt"></param>
+        public void init(GameObject LookAt)
+        {
+            this.MapLookAtGO = LookAt;
+        }
 
         /// <summary>
         /// Sets the zoom of the orth camera. a value of 1 means that the height of the viewing is 1. a value of 10 means the height of the viewing is 10.

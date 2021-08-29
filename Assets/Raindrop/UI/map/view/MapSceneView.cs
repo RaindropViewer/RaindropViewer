@@ -18,6 +18,7 @@ namespace Raindrop.UI.Views
     /// - instantiates map tile prefabs.
     /// - keeps track of the map tiles in a dict.
     /// - contains the camera
+    /// - has an api for us to specify the rendered regions.
     /// </summary>
 
     public class MapSceneView : MonoBehaviour
@@ -31,7 +32,7 @@ namespace Raindrop.UI.Views
         //camera. contains the viewable range.
         [SerializeField]
         public GameObject cameraViewGO;
-        private CameraView cameraView;
+        private DownwardOrthoCameraView cameraView;
 
         private Dictionary<ulong, GameObject> map_collection = new Dictionary<ulong, GameObject>(); //tiles that are in the scene.
 
@@ -40,16 +41,19 @@ namespace Raindrop.UI.Views
         public int max_X, max_Y;
         public int min_X, min_Y;
 
-        //the current zoom level that the user is requesting.
-        // 1 - one 256^2 texture is 1 sim.
-        // ...
-        // 4 - one 256^2 texture is 8*8 sims.
+        /// <summary>
+        ///zoom level of map. 
+        /// 1 : height of camera is 1 //see about 1 map only
+        /// 2 : height of camera is 2 
+        /// 10 : height of camera is 10 //see alot
+        /// </summary>
         public int zoomLevel;
+
 
         private void Awake()
         {
 
-            cameraView = cameraViewGO.GetComponent<CameraView>();
+            cameraView = cameraViewGO.GetComponent<DownwardOrthoCameraView>();
 
             mapPoolPresenter = new MapPoolPresenter(this);
 
@@ -85,7 +89,7 @@ namespace Raindrop.UI.Views
             return new UE.Vector3(x/256, 0, y/256);
         }
 
-        internal CameraView getCameraView()
+        internal DownwardOrthoCameraView getCameraView()
         {
             return cameraView;
         }

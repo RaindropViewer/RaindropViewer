@@ -18,6 +18,9 @@ namespace Raindrop.UI.Views
         private MapLookAt mm;
         private TouchScreenInteractionInstance fingerInteraction;
 
+        public GameObject pnzGO;
+        public PanAndZoom pnz;
+
         [SerializeField]
         public GameObject mapCam;
         private Camera cam;
@@ -37,13 +40,35 @@ namespace Raindrop.UI.Views
             cam = mapCam.GetComponent<Camera>();
 
             EnhancedTouchSupport.Enable();
+
+            pnz = pnzGO.GetComponent<PanAndZoom>();
+            pnz.onTap += Pnz_onTap;
+        }
+
+        private void Pnz_onTap(Vector2 obj)
+        {
+            Debug.Log("tapped");
+
         }
 
         void Update()
         {
-            fingerInteraction.updateInteractionState(); //get new touch data!
 
 
+            //1. get current touch status
+            fingerInteraction.update(); //get new touch data!
+
+            //2. check if touch type has changed. reset state if necessary
+            if (fingerInteraction.isInteractionChanged()) //interaction has changed in current frame.
+            {
+                //finalise the current-previous interaction.
+                fingerInteraction.finaliseInteraction();
+
+                var pandelta = fingerInteraction.getPanDelta();
+                mm.MoveFloatingLookAt_Relative_OnRelease(pandelta.x, pandelta.y);
+            }
+
+            //3. move the camera as needed base on the current touch status.
             if (fingerInteraction.isPan())
             {
                 var pandelta = fingerInteraction.getPanDelta();
@@ -56,12 +81,6 @@ namespace Raindrop.UI.Views
                 //mm.MoveFloatingLookAt_Relative(pandelta.x, pandelta.y);
             }
 
-            if (fingerInteraction.isDifferentInteraction())
-            {
-                //finalise the current-previous interaction.
-                var pandelta = fingerInteraction.getPanDelta();
-                mm.MoveFloatingLookAt_Relative_OnRelease(pandelta.x, pandelta.y);
-            }
 
             //if (currentState == InteractionState.pan)
             //{
