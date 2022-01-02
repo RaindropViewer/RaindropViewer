@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Raindrop.ServiceLocator;
 using UnityEngine;
 
 //helper class that helps to pop, push, stack canvases.
@@ -10,29 +11,64 @@ using UnityEngine;
 //on awake, it searches children for all canvases.
 public class CanvasManager : MonoBehaviour
 {
-    [SerializeField]
-    //public GameObject[] CanvasPrefabsList;
-
+    [Tooltip("The canvases that are available to use.")]
     public List<CanvasIdentifier> canvasControllerList = new List<CanvasIdentifier>();
+    [Tooltip("The canvases that are created and in memory stack.")]
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
+
+    public CanvasType main;
     
     private void Awake()
     {
         int childrenCount = transform.childCount;
         for (int i = 0; i < childrenCount ; i++)
         {
-            //GameObject panelRoot = Instantiate(prefab) as GameObject;
-            //panelRoot.transform.SetParent(this.transform);
-            canvasControllerList.Add(transform.GetChild(i).GetComponent<CanvasIdentifier>());
+            var _ = transform.GetChild(i).GetComponent<CanvasIdentifier>();
+            if (_ != null)
+            {
+                canvasControllerList.Add(_);
+            }
         }
-        canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
-        Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers.");
+
+        try
+        {
+            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+            Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("missing canvas controller in some child.");
+            
+        }
     }
 
-    public void resetToLoginScreen()
+    public void resetToInitialScreen()
     {
-        canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
-        pushCanvas(CanvasType.Login);
+        if (! getEulaAcceptance())
+        {
+            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+            pushCanvas(CanvasType.Eula);
+        }
+        else
+        {
+            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+            pushCanvas(main);
+        }
+    }
+
+    private bool getEulaAcceptance()
+    {
+        if (ServiceLocator.Instance.Get<RaindropInstance>().GlobalSettings["EulaAccepted"])
+        {
+            Debug.Log("User has already accepted the EULA");
+            return true;
+        }
+        else
+        {
+            Debug.Log("User has NOT accepted the EULA");
+            return false;
+            
+        } 
     }
 
     public GameObject getForegroundCanvas()
@@ -116,5 +152,4 @@ public class CanvasManager : MonoBehaviour
 
 
     }
-
 }

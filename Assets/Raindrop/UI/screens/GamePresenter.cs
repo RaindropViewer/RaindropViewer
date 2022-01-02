@@ -12,6 +12,7 @@ using UnityEngine.UI;
 using UniRx;
 using TMPro;
 using OpenMetaverse.Imaging;
+using Raindrop.Services;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)

@@ -28,7 +28,6 @@ using System;
 using Unity.Collections;
 //using System.Drawing;
 //using System.Drawing.Imaging;
-using Catnip.Drawing;
 //using Catnip.Drawing.Imaging;
 using UnityEngine;
 

@@ -49,6 +49,9 @@ namespace Lean.Gui
 		/// If you enable this, then the joystick will be placed relative to the place you first touch this UI element.</summary>
 		public bool RelativeToOrigin { set { relativeToOrigin = value; } get { return relativeToOrigin; } } [SerializeField] private bool relativeToOrigin;
 
+		/// <summary>When the mouse/finger releases from the joystick, should the joystick value reset to the center, or stay where it is?</summary>
+		public bool CenterOnRelease { set { centerOnRelease = value; } get { return centerOnRelease; } } [SerializeField] private bool centerOnRelease = true;
+
 		/// <summary>If you want to show the boundary of the joystick relative to the origin, then you can make a new child GameObject graphic, and set its RectTransform here.</summary>
 		public RectTransform RelativeRect { set { relativeRect = value; } get { return relativeRect; } } [SerializeField] private RectTransform relativeRect;
 
@@ -88,6 +91,12 @@ namespace Lean.Gui
 		[System.NonSerialized]
 		private bool cachedRectTransformSet;
 
+		[System.NonSerialized]
+		private Vector2 lastValue;
+
+		[System.NonSerialized]
+		private bool lastValueSet;
+
 		public RectTransform CachedRectTransform
 		{
 			get
@@ -105,6 +114,11 @@ namespace Lean.Gui
 		protected virtual void Update()
 		{
 			var value = Vector2.zero;
+
+			if (centerOnRelease == false && lastValueSet == true)
+			{
+				value = lastValue;
+			}
 
 			if (pointer != null)
 			{
@@ -138,6 +152,9 @@ namespace Lean.Gui
 					NullPointerNow();
 				}
 			}
+
+			lastValue    = value;
+			lastValueSet = true;
 
 			// Update scaledValue
 			if (shape == ShapeType.Box)
@@ -267,6 +284,7 @@ namespace Lean.Gui.Editor
 			Separator();
 
 			Draw("relativeToOrigin", "By default, the joystick will be placed relative to the center of this UI element.\n\nIf you enable this, then the joystick will be placed relative to the place you first touch this UI element.");
+			Draw("centerOnRelease", "When the mouse/finger releases from the joystick, should the joystick value reset to the center, or stay where it is?");
 
 			if (Any(tgts, t => t.RelativeToOrigin == true))
 			{

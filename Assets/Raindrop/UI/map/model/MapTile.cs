@@ -50,8 +50,6 @@ namespace Raindrop.Map.Model
         private void setTex(Texture2D tex, ulong handle)
         {
             setTex(tex);
-            //uint x, y;
-            //Utils.LongToUInts(handle, out x, out y);
             setLoc(handle);
         }
 
@@ -66,6 +64,12 @@ namespace Raindrop.Map.Model
         private void setLoc(ulong handle)
         {
             gridHandle = handle;
+        }
+
+        //set the location of sim that the maptile represents.
+        public ulong getLoc()
+        {
+            return gridHandle;
         }
 
     }

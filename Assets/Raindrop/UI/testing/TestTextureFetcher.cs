@@ -17,13 +17,13 @@ namespace Raindrop
     class TestTextureFetcher : MonoBehaviour
     {
         [SerializeField]
-        public MapBackend mapFetcher; //fetching logic + pooling data here
+        public MapFetcher mapFetcher; //fetching logic + pooling data here
         
 
         private void Awake()
         {
             MainThreadDispatcher.Initialize();
-            mapFetcher = new MapBackend();
+            mapFetcher = new MapFetcher();
         }
 
 

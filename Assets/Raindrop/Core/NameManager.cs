@@ -321,7 +321,7 @@ namespace Raindrop
         {
             if (string.IsNullOrEmpty(displayName) ||
                 displayName == "???" ||
-                displayName == RaindropInstance.INCOMPLETE_NAME)
+                displayName == RaindropInstance.IncompleteName)
             {
                 return true;
             }
@@ -572,7 +572,7 @@ namespace Raindrop
             }
 
             QueueNameRequest(agentID);
-            return RaindropInstance.INCOMPLETE_NAME;
+            return RaindropInstance.IncompleteName;
         }
 
         /// <summary>
@@ -593,7 +593,7 @@ namespace Raindrop
             }
 
             QueueNameRequest(agentID);
-            return RaindropInstance.INCOMPLETE_NAME;
+            return RaindropInstance.IncompleteName;
         }
 
         /// <summary>
@@ -614,7 +614,7 @@ namespace Raindrop
             }
 
             QueueNameRequest(agentID);
-            return RaindropInstance.INCOMPLETE_NAME;
+            return RaindropInstance.IncompleteName;
         }
 
         /// <summary>
@@ -639,7 +639,7 @@ namespace Raindrop
             }
 
             QueueNameRequest(agentID);
-            return RaindropInstance.INCOMPLETE_NAME;
+            return RaindropInstance.IncompleteName;
         }
 
         /// <summary>
@@ -670,7 +670,7 @@ namespace Raindrop
                 NameUpdated += handler;
                 name = Get(agentID);
 
-                if (name == RaindropInstance.INCOMPLETE_NAME)
+                if (name == RaindropInstance.IncompleteName)
                 {
                     gotName.WaitOne(20 * 1000, false);
                 }
@@ -692,7 +692,7 @@ namespace Raindrop
                 return defaultValue;
 
             string name = Get(agentID);
-            if (name == RaindropInstance.INCOMPLETE_NAME)
+            if (name == RaindropInstance.IncompleteName)
                 return defaultValue;
 
             return name;
@@ -711,7 +711,7 @@ namespace Raindrop
                 return defaultValue;
 
             string name = Get(agentID, blocking);
-            if (name == RaindropInstance.INCOMPLETE_NAME)
+            if (name == RaindropInstance.IncompleteName)
                 return defaultValue;
 
             return name;

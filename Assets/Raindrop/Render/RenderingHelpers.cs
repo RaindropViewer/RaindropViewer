@@ -388,6 +388,13 @@ namespace Raindrop.Rendering
             return new UnityEngine.Vector3(v.X, v.Z, v.Y);
         }
 
+        //same as above (fp.) for now.
+        public static UnityEngine.Vector3 TKVector3d(Vector3d v)
+        {
+            return new UnityEngine.Vector3((float)v.X, (float)v.Z, (float)v.Y);
+        }
+
+
         public static UnityEngine.Vector4 TKVector4(Vector4 v)
         {
             return new UnityEngine.Vector4(v.X, v.Y, v.Z, v.W);

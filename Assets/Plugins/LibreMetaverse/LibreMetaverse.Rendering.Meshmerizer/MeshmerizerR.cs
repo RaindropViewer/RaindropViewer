@@ -39,7 +39,7 @@ using OpenMetaverse.StructuredData;
 using LibreMetaverse.PrimMesher;
 using OMV = OpenMetaverse;
 using OMVR = OpenMetaverse.Rendering;
-using Catnip.Drawing;
+//using Catnip.Drawing;
 using UnityEngine;
 
 namespace OpenMetaverse.Rendering

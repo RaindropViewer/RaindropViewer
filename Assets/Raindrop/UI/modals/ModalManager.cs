@@ -3,21 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 
 //a singleton monobehavior that activates modals.
 //maintains reference to all modals.
 public class ModalManager : MonoBehaviour
 {
+    [Header("Provide a reference to your modals:")]
+    
+    [Tooltip("The generic modal gameobject")]
+    [SerializeField]
+    public GameObject GenericModal;
+    // [SerializeField]
+    // public GameObject EulaModal;
+    [SerializeField]
+    public GameObject LoginStatusModal;
+    
     Thread mainThread;
     //pool of modals.
-    private modalPresenter genericModalPresenter;
-    public modalPresenter eulaModal;
-    public modalPresenter loggingInStatusModal;
+    private ModalPresenter genericModalPresenter;
+    // private ModalPresenter eulaModalPresenter;
+    private ModalPresenter loginStatusModal;
 
 
-    [SerializeField]
-    public GameObject GenericModalPrefab;
 
     private void Awake()
     {
@@ -34,61 +43,71 @@ public class ModalManager : MonoBehaviour
         //    genericModal = FindObjectsOfType<modalPresenter>()[0];
         //    genericModal.closeModal();
         //}
+        
+        linkModals();
 
+        // GameObject GenericModal = Instantiate(GenericModalPrefab) as GameObject;
+        // GenericModal.transform.SetParent(this.transform);
+        // modalPresenter = GenericModal.GetComponent<modalPresenter>();
 
-        GameObject GenericModal = Instantiate(GenericModalPrefab) as GameObject;
-        GenericModal.transform.SetParent(this.transform);
-        genericModalPresenter = GenericModal.GetComponent<modalPresenter>();
-
-        if (genericModalPresenter == null)
-        {
-            Debug.LogError("cannot find the gneric modal");
-        }
 
         mainThread = System.Threading.Thread.CurrentThread;
     }
 
-    public void openEula()
+    private void linkModals()
     {
-        setVisibleEulaModal(true);
+
+
+        genericModalPresenter = GenericModal.GetComponent<ModalPresenter>();
+        if (genericModalPresenter == null)
+        {
+            Debug.LogError("cannot find the gneric modal");
+        }
+        
     }
+    //
+    // public void openEula()
+    // {
+    //     setVisibleEulaModal(true);
+    // }
+    //
+    // public void closeEula()
+    // {
+    //     setVisibleEulaModal(false);
+    // }
     
-    public void closeEula()
-    {
-        setVisibleEulaModal(false);
-    }
-
-    public void setVisibleEulaModal(bool visibility)
-    {
-        if (isOnMainThread())
-        {
-            if (eulaModal != null)
-            {
-                eulaModal.gameObject.SetActive(visibility);
-            }
-            else
-            {
-                Debug.Log("unable to get the modalPresenter object!");
-            }
-        }
-        else
-        {
-
-            UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
-                setVisibleEulaModal(visibility);
-            });
-        }
-
-
-    }
+    //
+    // public void setVisibleEulaModal(bool visibility)
+    // {
+    //     if (isOnMainThread())
+    //     {
+    //         if (eulaModalPresenter != null)
+    //         {
+    //             eulaModalPresenter.gameObject.SetActive(visibility);
+    //         }
+    //         else
+    //         {
+    //             Debug.Log("unable to get the modalPresenter object!");
+    //         }
+    //     }
+    //     else
+    //     {
+    //
+    //         UnityMainThreadDispatcher.Instance().Enqueue(() => {
+    //             Debug.Log(" dispatching of showing modal");
+    //             setVisibleEulaModal(visibility);
+    //         });
+    //     }
+    //
+    //
+    // }
     public void setVisibleGenericModal(string title, string content, bool visibility)
     {
         if (isOnMainThread())
         {
             if (genericModalPresenter != null)
             {
-                genericModalPresenter.setModal(title, content);
+                genericModalPresenter.setModalNoActions(title, content);
                 genericModalPresenter.gameObject.SetActive(visibility);
             }
             else
@@ -115,10 +134,10 @@ public class ModalManager : MonoBehaviour
 
         if (isOnMainThread())
         {
-            if (loggingInStatusModal != null)
+            if (loginStatusModal != null)
             {
-                loggingInStatusModal.setModal(title, content);
-                loggingInStatusModal.gameObject.SetActive(true);
+                loginStatusModal.setModalNoActions(title, content);
+                loginStatusModal.gameObject.SetActive(true);
             }
             else
             {
@@ -143,11 +162,15 @@ public class ModalManager : MonoBehaviour
         return mainThread.Equals(System.Threading.Thread.CurrentThread);
     }
 
-    public void showSimpleModalBoxWithActionBtn(string title, string content, string Action)
+    public void showModalNotification(string title, string content)
     {
         if (genericModalPresenter != null)
         {
-            genericModalPresenter.setModal(title, content, Action);
+            genericModalPresenter.setModal(
+                title,
+                content, 
+                "Ok"
+                );
             genericModalPresenter.gameObject.SetActive(true);
         }
         else

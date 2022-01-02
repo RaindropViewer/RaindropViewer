@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 //using System.Drawing;
 using System.Text;
 using Raindrop.Netcom;
@@ -35,8 +36,8 @@ using Raindrop.Core;
 
 namespace Raindrop
 {
-    //used to : holds a reference to the textboxUI and prints into it. //no way man this makes no sense
-
+    //if you pass a refernce to the text box, this class will print to it.
+    
     //class that functions as model. holds data on the local chat.
     public class ChatTextManager : IDisposable
     {
@@ -49,7 +50,7 @@ namespace Raindrop
         private RaindropNetcom netcom => instance.Netcom;
         private GridClient client => instance.Client;
 
-        private List<ChatBufferItem> textBuffer;
+        private List<ChatBufferItem> textBuffer; //a list of all the lines of chat that we have.
         public List<ChatBufferItem> getChatBuffer()
         {
             return textBuffer;
@@ -59,14 +60,16 @@ namespace Raindrop
 
         //public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
 
-        public ChatTextManager(RaindropInstance instance)
+        public ChatTextManager(RaindropInstance instance, ref string localChat)
         {
             //TextPrinter = textPrinter;
-            textBuffer = new List<ChatBufferItem>();
+            textBuffer = new List<ChatBufferItem>(); // a pipe into the string.
 
+            
             this.instance = instance;
             InitializeConfig();
 
+            this.localChat = localChat;
             // Callbacks
             netcom.ChatReceived += new EventHandler<ChatEventArgs>(netcom_ChatReceived);
             netcom.ChatSent += new EventHandler<ChatSentEventArgs>(netcom_ChatSent);
@@ -178,13 +181,20 @@ namespace Raindrop
         }
 
         private Object SyncChat = new Object();
+        private string localChat;
 
+
+        // put the buffer item into the chat string.
         public void ProcessBufferItem(ChatBufferItem item, bool addToBuffer)
         {
 
             lock (SyncChat)
             {
+                this.localChat += ((string)(item.From + item.Text)); //ok... it seems, the list of chatbufferitem is like each line of the chat. This helps us iterate thru each line of chat in a sane fashion. i see. This can enable scrolling iteratively, like array.
                 instance.LogClientMessage("chat.txt", item.From + item.Text);
+
+                return; //for now...
+                
                 if (addToBuffer) textBuffer.Add(item);
 
                 if (showTimestamps)

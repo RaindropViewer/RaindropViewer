@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 using System;
+using Raindrop.Services;
 using Settings = Raindrop.Settings;
 using UnityEngine.UI;
 using UniRx;
 using TMPro;
 using static Raindrop.LoginUtils;
-using ServiceLocator;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
@@ -147,25 +147,25 @@ namespace Raindrop.Presenters
             {
                 case LoginStatus.ConnectingToLogin:
                     Login_msg.GetType().GetProperty("Value").SetValue(Login_msg, "Connecting to login server...");
-                    uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
+                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ConnectingToSim:
                     Login_msg.Value = ("Connecting to region...");
-                    uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
+                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.Redirecting:
                     Login_msg.Value = "Redirecting...";
-                    uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
+                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
                 case LoginStatus.ReadingResponse:
                     Login_msg.Value = "Reading response...";
-                    uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...", Login_msg.Value, "close modal");
+                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
                     //lblLoginStatus.ForeColor = Color.Black;
                     break;
 
@@ -178,7 +178,7 @@ namespace Raindrop.Presenters
                     btnLoginEnabled.Value = false;
                     instance.Client.Groups.RequestCurrentGroups();
 
-                    uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in process...","Logged in !", "yay!");
+                    uimanager.modalManager.showModalNotification("Logging in process...","Logged in !");
                     uimanager.canvasManager.pushCanvasWithOrWithoutPop("Game", true); //refactor needed: better way to schedule push and pop as we are facing some issues here.
                     //instance.UI.canvasManager.popCanvas();
                     LoginButton.interactable = true;
@@ -189,7 +189,7 @@ namespace Raindrop.Presenters
                     if (e.FailReason == "tos")
                     {
                         Login_msg.Value = "Must agree to Terms of Service before logging in";
-                        uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed",Login_msg.Value, "ok");
+                        uimanager.modalManager.showModalNotification("Logging in failed",Login_msg.Value);
                         //pnlTos.Visible = true;
                         //txtTOS.Text = e.Message.Replace("\n", "\r\n");
                         btnLoginEnabled.Value = true;
@@ -198,7 +198,7 @@ namespace Raindrop.Presenters
                     else
                     {
                         Login_msg.Value = e.Message;
-                        uimanager.modalManager.showSimpleModalBoxWithActionBtn("Logging in failed", Login_msg.Value, "ok");
+                        uimanager.modalManager.showModalNotification("Logging in failed", Login_msg.Value);
                         btnLoginEnabled.Value = true;
                         LoginButton.interactable = true;
                     }
@@ -212,7 +212,7 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
             Login_msg.Value = "logged out.";
-            uimanager.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
             //pnlLoginPrompt.Visible = true;
             //pnlLoggingIn.Visible = false;
 
@@ -225,7 +225,7 @@ namespace Raindrop.Presenters
             btnLoginEnabled.Value = false;
 
             Login_msg.Value = "Logging out...";
-            uimanager.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;
@@ -234,7 +234,7 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggingIn(object sender, OverrideEventArgs e)
         {
             Login_msg.Value = "Logging in...";
-            uimanager.modalManager.showSimpleModalBoxWithActionBtn("Login status", Login_msg.Value, "ok");
+            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
             //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
 
             //proLogin.Visible = true;

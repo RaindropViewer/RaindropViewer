@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using FMOD;
 using System.Threading;
 using OpenMetaverse;
+using OpenMetaverse.StructuredData;
 using Raindrop;
 
 #if (COGBOT_LIBOMV || USE_STHREADS)
@@ -53,11 +54,23 @@ namespace Raindrop.Media
             Instance = instance;
             manager = this;
 
-            //if (MainProgram.s_CommandLineOpts.DisableSound)
-            //{
-            //    SoundSystemAvailable = false;
-            //    return;
-            //}
+            // OSD media_on;
+            // OSD node_present = instance.GlobalSettings["media_on"];
+            // if (!node_present)
+            // {
+            //     // instance.GlobalSettings.Add(media_on, false);
+            // } else if (false)
+            // {
+            //     SoundSystemAvailable = false;
+            //     return;
+            // }
+            
+            
+            if (true /*MainProgram.s_CommandLineOpts.DisableSound*/)
+            {
+                SoundSystemAvailable = false;
+                return;
+            }
 
             endCallback = new CHANNELCONTROL_CALLBACK(DispatchEndCallback);
             allBuffers = new Dictionary<UUID, BufferSound>();

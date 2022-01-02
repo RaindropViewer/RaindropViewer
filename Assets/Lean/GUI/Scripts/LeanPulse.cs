@@ -11,6 +11,8 @@ namespace Lean.Gui
 	[AddComponentMenu(LeanGui.ComponentMenuPrefix + "Pulse")]
 	public class LeanPulse : MonoBehaviour
 	{
+		[System.Serializable] public class IntEvent : UnityEvent<int> {}
+
 		/// <summary>This stores all active and enabled LeanPulse instances, so you can manually pulse them by name from anywhere.</summary>
 		public static LinkedList<LeanPulse> Instances = new LinkedList<LeanPulse>();
 
@@ -33,8 +35,9 @@ namespace Lean.Gui
 		/// For example, the <b>LeanPlaySound (Play Sound Transition)</b> component can be used to play a pulse sound.</summary>
 		public LeanPlayer PulseTransitions { get { if (pulseTransitions == null) pulseTransitions = new LeanPlayer(); return pulseTransitions; } } [SerializeField] private LeanPlayer pulseTransitions;
 
-		/// <summary>This allows you to perform an action when this UI element pulses.</summary>
-		public UnityEvent OnPulse { get { if (onPulse == null) onPulse = new UnityEvent(); return onPulse; } } [SerializeField] private UnityEvent onPulse;
+		/// <summary>This allows you to perform an action when this UI element pulses.
+		/// int = RemainingPulses</summary>
+		public IntEvent OnPulse { get { if (onPulse == null) onPulse = new IntEvent(); return onPulse; } } [SerializeField] private IntEvent onPulse;
 
 		[System.NonSerialized]
 		private LinkedListNode<LeanPulse> link;
@@ -55,6 +58,8 @@ namespace Lean.Gui
 				}
 			}
 
+			remainingTime = timeInterval;
+
 			Pulse();
 		}
 
@@ -69,7 +74,7 @@ namespace Lean.Gui
 
 			if (onPulse != null)
 			{
-				onPulse.Invoke();
+				onPulse.Invoke(remainingPulses);
 			}
 		}
 

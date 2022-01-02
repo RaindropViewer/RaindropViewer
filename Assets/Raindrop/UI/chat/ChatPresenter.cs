@@ -13,9 +13,9 @@ using UniRx;
 using TMPro;
 using System.Text.RegularExpressions;
 using Raindrop.Core;
+using Raindrop.Services;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
-using Zenject;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
@@ -36,6 +36,8 @@ namespace Raindrop.Presenters
         bool Active => instance.Client.Network.Connected;
 
         private ChatManager chatManager;
+        
+        
 
         //private List<IMPresenter> listOfIMpanels;
         //private IMPresenter selectedChatLog;

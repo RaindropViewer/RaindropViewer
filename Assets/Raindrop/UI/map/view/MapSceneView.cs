@@ -10,21 +10,25 @@ using OpenMetaverse;
 using UE = UnityEngine;
 using Raindrop.Map.Model;
 using Raindrop.Presenters;
+using Vector2 = UnityEngine.Vector2;
+using System.Collections;
+using Raindrop.UI.Presenters;
 
 namespace Raindrop.UI.Views
 {
     /// <summary>
-    /// the view that is in the root of the map layer/ map scene.
-    /// - instantiates map tile prefabs.
-    /// - keeps track of the map tiles in a dict.
-    /// - contains the camera
-    /// - has an api for us to specify the rendered regions.
+    /// View. this is map tiles in 3d space. i use presenter.
     /// </summary>
 
     public class MapSceneView : MonoBehaviour
     {
-        private MapPoolPresenter mapPoolPresenter;
+        [SerializeField]
+        private const float RenderUpdatePeriod = 5f;
+        [SerializeField]
+        public bool fetchOn = false;
 
+        //the parent to spawn the map tiles under.
+        public GameObject mapRoot;
 
         [SerializeField]
         public GameObject mapPrefab;
@@ -33,8 +37,14 @@ namespace Raindrop.UI.Views
         [SerializeField]
         public GameObject cameraViewGO;
         private DownwardOrthoCameraView cameraView;
-
+        private MapScenePresenter mapPoolPresenter;
         private Dictionary<ulong, GameObject> map_collection = new Dictionary<ulong, GameObject>(); //tiles that are in the scene.
+        private Dictionary<UUID, MapEntity> agent_collection = new Dictionary<UUID, MapEntity>(); //agents that are in the scene.
+
+        internal void resetView()
+        {
+            cameraView.setToGridPos(new Vector2(1000,1000));
+        }
 
 
         //viewable area of the current map_collection.
@@ -47,46 +57,47 @@ namespace Raindrop.UI.Views
         /// 2 : height of camera is 2 
         /// 10 : height of camera is 10 //see alot
         /// </summary>
-        public int zoomLevel;
+        public float zoomLevel;
 
 
         private void Awake()
         {
-
             cameraView = cameraViewGO.GetComponent<DownwardOrthoCameraView>();
+            mapPoolPresenter = MapScenePresenter.getInstance();
+         
+        }
 
-            mapPoolPresenter = new MapPoolPresenter(this);
+        private void Start()
+        {
 
+            initModule();
+
+            if (fetchOn)
+            {
+                //'redraw' map every 5 secs.
+                InvokeRepeating("RedrawMap", RenderUpdatePeriod, RenderUpdatePeriod);
+            }
+        }
+
+
+
+        public void initModule()
+        {
+            resetCamera_DABOOM();
+        }
+
+        private void resetCamera_DABOOM()
+        {
             max_X = max_Y = max_X = max_Y = 1000;
             zoomLevel = 1;
         }
 
-
-        //private UE.Vector2Int handleToVector2(ulong handle)
-        //{
-        //    uint x, y;
-        //    Utils.LongToUInts(handle, out x, out y);
-        //    return new UnityEngine.Vector2Int((int)x, (int)y);
-        //}
-
-        public void createMapTileAt(ulong handle, MapTile tile)
+        internal void setZoom(float value)
         {
-            //var pos = handleToVector2(handle);
-
-            UE.Vector3 posInScene = toV3(handle); 
-
-            var map = Instantiate(mapPrefab, posInScene, UE.Quaternion.identity);
-            map_collection.Add(handle, map);
-
-            map.GetComponent<MapTileView>().setRawImage(tile.getTex());
-        }
-
-        private UE.Vector3 toV3(ulong handle)
-        {
-            uint x, y;
-            Utils.LongToUInts(handle, out x, out y);
-
-            return new UE.Vector3(x/256, 0, y/256);
+            if (value >= 0.1f)
+            {
+                zoomLevel = value;
+            }
         }
 
         internal DownwardOrthoCameraView getCameraView()
@@ -94,91 +105,65 @@ namespace Raindrop.UI.Views
             return cameraView;
         }
 
-        private void clearTiles()
+        private void clearFrontendTiles()
         {
             map_collection.Clear();
 
         }
         
-        internal bool isPresent(ulong handle)
+        internal bool isPresentInFrontend(ulong handle)
         {
             //var pos = handleToVector2(handle);
             return map_collection.ContainsKey(handle);
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="focalPoint">Where the camera is looking at - in Sim coordinates*256 ie handle coords. </param>
-        /// <param name="range"></param>
-        //public void setViewableRange(OpenMetaverse.Vector2 focalPoint, OpenMetaverse.Vector2 range)
-        //{
-        //    var min = MapBackend.getMinVec2(range, focalPoint);
-        //    var max = MapBackend.getMaxVec2(range, focalPoint);
+        public void lerpCamTo()
+        {
+            StartCoroutine("lerpTo");
 
-        //    // re-composites the scene based on the viewable region
-        //    updateTexturesIfNecessary(min, max);
+        }
+
+        IEnumerator lerpTo(Transform transform, Vector2 targetPosition, float duration)
+        {
+            float time = 0;
+            Vector2 startPosition = transform.position;
+
+            while (time < duration)
+            {
+                transform.position = Vector2.Lerp(startPosition, targetPosition, time / duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+            transform.position = targetPosition;
+        }
+
+
+        //private void Update()
+        //{
+        //    fetchMapsIfRequired();
+        //    redrawMap();
         //}
-        //public void setViewableRange(uint x,uint y, OpenMetaverse.Vector2 range)
+
+        //private void fetchMapsIfRequired()
         //{
-        //    setViewableRange(new OpenMetaverse.Vector2(x,y), range);
-        //}
-
-
-        ////sets a map block that is 256pic * 256pic
-        //private void SetMapLayer(Texture2D new_texture, Vector2Int regionXY)
-        //{
-        //    Debug.Log("setting the image to the new gameobject");
-        //    if (mapManager.map_collection.ContainsKey(regionXY))
+        //    if (visibleMapTiles.requireFetching())
         //    {
-        //        //update the region.
-        //        //MonoBehaviour theGO;
-        //        //map_collection.TryGetValue(regionXY, out theGO);
-
-        //        //Destroy(theGO.map_tex); //delete the tex2d that is no longer (?) used.
-        //    }
-        //    else
-        //    {
-        //        GameObject mapGO = new GameObject();
-        //        mapGO.transform.SetParent(this.transform);
-
-        //        var MR = mapGO.AddComponent<MeshRenderer>();
-        //        MR.sharedMaterial = new UnityEngine.Material(Shader.Find("Standard"));
-        //        //MR.
-        //        var MF = mapGO.AddComponent<MeshFilter>();
-
-        //        //generate the plane.
-        //        Mesh m = new Mesh();
-        //        var width = 1;
-        //        var height = 1;
-        //        m.vertices = new Vector3[]{
-        //                        new Vector3(0, 0, 0),
-        //                        new Vector3(width, 0, 0),
-        //                        new Vector3(width, height, 0),
-        //                        new Vector3(0, height, 0)
-        //        };
-        //        m.uv = new Vector2[]{
-        //            new Vector2(0, 0),
-        //            new Vector2(0, 1),
-        //            new Vector2(1, 1),
-        //            new Vector2(1, 0),
-        //        };
-        //        m.triangles = new int[] { 0, 2, 1, 0, 3, 2 }; //clockwise?
-        //        MF.mesh = m;
-        //        m.RecalculateBounds();
-        //        m.RecalculateNormals();
-
-        //        MR.material.mainTexture = new_texture;
-
-        //        map_collection.Add(regionXY, mapGO);
-
+        //        visibleMapTiles.fetch(list regionAreas);
         //    }
 
 
         //}
 
+        private void RedrawMap(DownwardOrthoCameraView cameraView)
+        {
 
+            bool needRedraw = true;
 
+            if (needRedraw)
+            {
+                mapPoolPresenter.RedrawMap();
+            }
+        }
     }
 }

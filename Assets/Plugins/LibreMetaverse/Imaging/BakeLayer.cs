@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.IO;
 //using System.Drawing;
 using OpenMetaverse.Assets;
-using Catnip.Drawing;
 using UnityEngine;
 
 namespace OpenMetaverse.Imaging

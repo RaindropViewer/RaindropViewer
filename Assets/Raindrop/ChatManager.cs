@@ -28,12 +28,15 @@
 //
 // $Id$
 //
+
+using System;
 using OpenMetaverse;
 using System.Collections.Generic;
 
 namespace Raindrop
 {
     //holds the chats in memory. functions as the model layer.
+    // equivalent to a chat window with all the tabs and chats the user is chatting in.
     public class ChatManager
     { 
         public ChatTextManager localChatManager { get; private set; } //TODO: refactor this class to become model. UI can access data in the model as required.
@@ -41,7 +44,9 @@ namespace Raindrop
 
         RaindropInstance instance;
         GridClient client { get { return instance.Client; } }
-         
+
+        private string mainChatStringReference;
+
 
         public ChatManager(RaindropInstance instance)
         {
@@ -55,7 +60,7 @@ namespace Raindrop
             instance.Client.Network.Disconnected += Network_Disconnected;
 
             //subscribe to localchat received event
-            //localChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
+            // localChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
         }
 
         public void Dispose()
@@ -78,10 +83,21 @@ namespace Raindrop
             Logger.Log("Simulator Connected", Helpers.LogLevel.Info);
 
             if (localChatManager == null)
-                localChatManager = new ChatTextManager(instance);
+                localChatManager = new ChatTextManager(instance, ref mainChatStringReference);
+            Logger.Log("creating local chat in memory.", Helpers.LogLevel.Info);
+
+            //print success msg.
+            ChatBufferItem line = new ChatBufferItem(
+                DateTime.Now,
+                string.Empty,
+                UUID.Zero,
+                "Simulator Connected",
+                ChatBufferTextStyle.Normal
+            );
+            localChatManager.ProcessBufferItem(line, true);
             
         }
-         
+        
 
 
 

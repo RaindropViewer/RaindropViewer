@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MapViewerTest_Daboom_Basic.unity
     guid: 07d358068ee106e4ea7053462a2740f3
   - enabled: 1

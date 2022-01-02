@@ -34,7 +34,7 @@ namespace Raindrop.UI.Views
 
         public ulong GetLookAt()
         {
-            return Utils.UIntsToLong(lookAt_x, lookAt_y);
+            return OpenMetaverse.Utils.UIntsToLong(lookAt_x, lookAt_y);
 
         }
 

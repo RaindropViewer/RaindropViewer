@@ -14,11 +14,13 @@ using Raindrop.UI.Views;
 
 // lets you view the maps by choosing parameters.
 // use external API. does not need login.
+//for testing...
+
 public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
 {
     
     [SerializeField]
-    public MapBackend mapFetcher;
+    public MapFetcher mapFetcher;
 
     [SerializeField]
     public GameObject mapTileGO;
@@ -41,7 +43,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
     System.Threading.Timer repaint;
     private void Awake()
     {
-        mapFetcher = new MapBackend();
+        mapFetcher = new MapFetcher();
 
     }
 
@@ -76,7 +78,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
             throw new System.Exception("mapMoverGO is fucked"); // fix exception type plz
         }
 
-        mapFetcher = new MapBackend();
+        mapFetcher = new MapFetcher();
 
 
         // for testing

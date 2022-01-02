@@ -5,7 +5,7 @@
     Game,
     Chat,
     Map,
-    EULA_modal,
+    Eula,
     Settings,
     UNKNOWN
 }

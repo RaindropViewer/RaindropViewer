@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 //using System.Drawing;
 //using System.Drawing.Drawing2D;
-using Catnip.Drawing;
+//using Catnip.Drawing;
 using UnityEngine;
 
 namespace LibreMetaverse.PrimMesher

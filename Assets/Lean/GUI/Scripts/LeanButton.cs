@@ -13,6 +13,18 @@ namespace Lean.Gui
 	[AddComponentMenu(LeanGui.ComponentMenuPrefix + "Button")]
 	public class LeanButton : LeanSelectable, IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, ISubmitHandler
 	{
+		[System.Flags]
+		public enum ButtonTypes
+		{
+			LeftMouse   = 1 << 0,
+			RightMouse  = 1 << 1,
+			MiddleMouse = 1 << 2,
+			Touch       = 1 << 5
+		}
+
+		/// <summary>Which buttons should this component react to?</summary>
+		public ButtonTypes RequiredButtons { set { requiredButtons = value; } get { return requiredButtons; } } [SerializeField] private ButtonTypes requiredButtons = (ButtonTypes)~0;
+
 		/// <summary>If you enable this then OnDown + DownTransition be invoked once for each finger that begins touching the button.
 		/// If you disable this then OnDown + DownTransition will only be invoked for the first finger that begins touching the button.</summary>
 		public bool MultiDown { set { multiDown = value; } get { return multiDown; } } [SerializeField] private bool multiDown;
@@ -59,8 +71,13 @@ namespace Lean.Gui
 		{
 			base.OnPointerDown(eventData);
 
-			if (IsInteractable() == true && eventData.button == PointerEventData.InputButton.Left)
+			if (IsInteractable() == true)
 			{
+				if (RequiredButtonPressed(eventData) == false)
+				{
+					return;
+				}
+
 				totalDelta = Vector2.zero;
 
 				downPointers.Add(eventData.pointerId);
@@ -188,6 +205,37 @@ namespace Lean.Gui
 				onClick.Invoke();
 			}
 		}
+
+		private bool RequiredButtonPressed(PointerEventData eventData)
+		{
+			if (LeanInput.GetMouseExists() == true)
+			{
+				if ((requiredButtons & ButtonTypes.LeftMouse) != 0 && eventData.button == PointerEventData.InputButton.Left)
+				{
+					return true;
+				}
+
+				if ((requiredButtons & ButtonTypes.RightMouse) != 0 && eventData.button == PointerEventData.InputButton.Right)
+				{
+					return true;
+				}
+
+				if ((requiredButtons & ButtonTypes.MiddleMouse) != 0 && eventData.button == PointerEventData.InputButton.Middle)
+				{
+					return true;
+				}
+			}
+
+			if (LeanInput.GetTouchCount() > 0)
+			{
+				if ((requiredButtons & ButtonTypes.Touch) != 0 && eventData.button == PointerEventData.InputButton.Left)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }
 
@@ -205,6 +253,7 @@ namespace Lean.Gui.Editor
 			base.DrawSelectableSettings();
 
 			Draw("dragThreshold", "If your finger presses down on the button and drags more than this many pixels, then selection will be canceled.\n\n-1 = Unlimited drag distance.\n\n0 = Until the finger exits the button graphic.");
+			Draw("requiredButtons", "Which buttons should this component react to?");
 			Draw("multiDown", "If you press multiple fingers on this button at the same time, should OnDown and DownTransition be invoked multiple times?");
 		}
 

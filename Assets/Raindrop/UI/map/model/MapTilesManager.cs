@@ -9,7 +9,6 @@ namespace Raindrop.Map.Model
     /// </summary>
     public class MapTilesManager
     {
-
         //number of tiles that are in the scene.
         public int visibleCount => sceneTiles.Count;
 
@@ -20,7 +19,6 @@ namespace Raindrop.Map.Model
         public MapTilesManager(int poolSize)
         {
             pool = new MapTilesPool(poolSize);
-
         }
 
         /// <summary>
@@ -40,17 +38,9 @@ namespace Raindrop.Map.Model
         /// <returns> Tile </returns>
         public MapTile tryGetTile(ulong handle)
         {
-            MapTile tile;
-            sceneTiles.TryGetValue(handle, out tile);
-
-            if (tile == null)
-            {
-                return null;
-            }
-            else
-            {
-                return tile;
-            }
+            MapTile tile = null;
+            bool success = sceneTiles.TryGetValue(handle, out tile);
+            return tile;
         }
         
         /// <summary>

@@ -153,9 +153,9 @@ namespace Raindrop.Netcom
 
 
             //if (CanSyncInvoke)
-            //    netcomSync.BeginInvoke(new OnInstantMessageRaise(OnInstantMessageReceived), new object[] { e });
+            //    netcomSync.BeginInvoke(new OnInstantMessageRaise(OnInstantMessageReceived), new object[] { e }); --queue task to run on the control's(UI's) thread/
             //else
-            //    OnInstantMessageReceived(e);
+            //    OnInstantMessageReceived(e); --run on current thread, since it is main thread.
         }
 
         void Network_LoginProgress(object sender, LoginProgressEventArgs e)
@@ -458,11 +458,5 @@ namespace Raindrop.Netcom
             get { return loginOptions; }
             set { loginOptions = value; }
         }
-
-        //public Control NetcomSync
-        //{
-        //    get { return netcomSync; }
-        //    set { netcomSync = value; }
-        //}
     }
 }

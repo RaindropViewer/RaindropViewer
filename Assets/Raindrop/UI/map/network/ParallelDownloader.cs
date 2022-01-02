@@ -6,12 +6,12 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Raindrop.Network
 {
     // why is the code so repeated!!!!
-
+    // parallel downloader for http maps tiles.
+    
     public class ParallelDownloader : IDisposable
     {
         Queue<QueuedItem> queue = new Queue<QueuedItem>();
@@ -84,7 +84,8 @@ namespace Raindrop.Network
                                     lock (activeDownloads) activeDownloads.Remove(request);
                                     item.completedCallback(request, response, responseData, error);
                                     EnqueuePending();
-                                    Debug.Log("CompletionCallback done!.");
+                                    OpenMetaverse.Logger.Log("download maptile completed",
+                                        OpenMetaverse.Helpers.LogLevel.Debug);
                                 }
                             );
 
