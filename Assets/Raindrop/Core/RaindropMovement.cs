@@ -35,19 +35,27 @@ using Debug = UnityEngine.Debug;
 
 namespace Raindrop
 {
+    // this class periodically updated the user movement to the backend.
+    //      the backend (Agent Managerr Movement.cs) has a timer that sends the
+    //      movment at 2.5 s per movement packet.
+    
+    //to have fancy movements, we can add extend this class. (orbit, 3rd person camera movements...)
     public class RaindropMovement : IDisposable
     {
         private RaindropInstance instance;
         private GridClient client { get { return instance.Client; } }
         private Timer timer;
         private Vector3 forward = new Vector3(1, 0, 0);
-        private bool turningLeft = false;
+        private bool turningLeft = false; 
         private bool turningRight = false;
-        private bool movingForward = false;
-        private bool movingBackward = false;
-        private bool movingLeftward = false;
-        private bool movingRightward = false;
-        //private bool modified = false;
+        
+        private bool movingForward = false; // ^
+        private bool movingBackward = false; // v
+        private bool movingLeftward = false; // <
+        private bool movingRightward = false; // >
+        
+        private bool modified = false;
+        private bool isMoving => movingForward | movingBackward | movingLeftward | movingRightward;
 
         public bool TurningLeft
         {
@@ -85,11 +93,13 @@ namespace Raindrop
                 turningRight = value;
                 if (value)
                 {
+                    //start movement immediate, set up the timer for more updates soon.
                     timer_Elapsed(null, null);
                     timer.Enabled = true;
                 }
                 else
                 {
+                    //stop movmeent immiate, stop timer updates.
                     timer.Enabled = false;
                     client.Self.Movement.TurnRight = false;
                     client.Self.Movement.SendUpdate(true);
@@ -97,121 +107,7 @@ namespace Raindrop
             }
         }
 
-        public bool MovingForward
-        {
-            get
-            {
-                return movingForward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingForward);
-                if (nochange) { return;  }
-
-                movingForward = value;
-                if (value)
-                {
-                    client.Self.Movement.AtPos = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.AtPos = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
-        }
-
-        public bool MovingBackward
-        {
-            get
-            {
-                return movingBackward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingBackward);
-                if (nochange) { return; }
-
-                movingBackward = value;
-                if (value)
-                {
-                    client.Self.Movement.AtNeg = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.AtNeg = false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
         
-        public bool MovingLeftward
-        {
-            get
-            {
-                return movingLeftward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingLeftward);
-                if (nochange) { return; }
-
-                movingLeftward = value;
-                if (value)
-                {
-                    client.Self.Movement.LeftPos = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.LeftPos = false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
-        
-        public bool MovingRight
-        {
-            get
-            {
-                return movingRightward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingRightward);
-                if (nochange) { return; }
-
-                movingRightward = value;
-                if (value)
-                {
-                    client.Self.Movement.LeftNeg = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.LeftNeg= false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
-
         public RaindropMovement(RaindropInstance instance)
         {
             this.instance = instance;
@@ -244,6 +140,56 @@ namespace Raindrop
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -delta);
                 client.Self.Movement.SendUpdate(true);
             }
+            
+            //update every periodic interval if i am still moving.
+            if (isMoving)
+            {
+                client.Self.Movement.SendUpdate(true);
+            }
+        }
+
+        //tell the movement machine that we are moving forward.
+        public void setForward()
+        {
+            client.Self.Movement.AtPos = true;
+            client.Self.Movement.AtNeg = false;
+        }
+        public void setBackward()
+        {
+            client.Self.Movement.AtPos = false;
+            client.Self.Movement.AtNeg = true;
+        }
+
+        public void stopMovementAndSendUpdate()
+        {
+            client.Self.Movement.AtPos = false;
+            client.Self.Movement.AtNeg = false;
+            client.Self.Movement.LeftPos = false;
+            client.Self.Movement.LeftNeg = false;
+            client.Self.Movement.SendUpdate(false);
+        }
+
+        public void setRightward()
+        {
+            client.Self.Movement.LeftPos = false;
+            client.Self.Movement.LeftNeg = true;
+        }
+        public void setLeftward()
+        {
+            client.Self.Movement.LeftPos = true;
+            client.Self.Movement.LeftNeg = false;
+        }
+
+        public void setTurningLeft()
+        {
+            client.Self.Movement.TurnLeft = true;
+            client.Self.Movement.TurnRight = false;
+        }
+
+        public void setTurningRight()
+        {
+            client.Self.Movement.TurnLeft = false;
+            client.Self.Movement.TurnRight = true;
         }
     }
 }

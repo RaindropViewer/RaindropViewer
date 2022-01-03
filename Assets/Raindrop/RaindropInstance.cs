@@ -298,7 +298,8 @@ namespace Raindrop
 
             _netcom = new RaindropNetcom(this);
             _state = new StateManager(this);
-            _mediaManager = new MediaManager(this);
+            //_mediaManager = new MediaManager(this);
+            
             //commandsManager = new CommandsManager(this);
             //ContextActionManager = new ContextActionsManager(this);
             //RegisterContextActions();
@@ -351,7 +352,7 @@ namespace Raindrop
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
 
             client.Self.Movement.AutoResetControls = false;
-            client.Self.Movement.UpdateInterval = 2500;
+            client.Self.Movement.UpdateInterval = 2500; //2.5 seconds?
 
             RegisterClientEvents(client);
             SetClientTag();
@@ -536,12 +537,7 @@ namespace Raindrop
             //}
             Logger.Log("RaindropInstance finished cleaning up.", Helpers.LogLevel.Debug);
         }
-
-        void mainForm_Load(object sender, EventArgs e)
-        {
-            //pluginManager.StartPlugins();
-        }
-
+        
         void netcom_ClientConnected(object sender, EventArgs e)
         {
             _client.Self.RequestMuteList();

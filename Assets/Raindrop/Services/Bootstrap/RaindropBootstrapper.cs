@@ -63,12 +63,10 @@ namespace Raindrop.Services.Bootstrap
             //1. main instance.
             CreateAndRegister_RaindropInstance();
             
-            // Application is ready to start, load your main UI. 
-            // Instantiate(UIBootstrapper);
+            //set client settings here
+            var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
+            // client.Settings.USE_ASSET_CACHE = false;
             
-            // SceneManager.LoadScene("UIscene", LoadSceneMode.Additive); //blocking load required as the UIService will be requested a few lines from now.
-            // SceneManager.LoadScene("3Dscene", LoadSceneMode.Additive);
-
             //Debug.Log("main Bootstrap finished");
 
             

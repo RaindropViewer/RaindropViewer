@@ -49,15 +49,22 @@ namespace Raindrop.Presenters
 
 
         #region references to UI elements
+        [Tooltip("button to close the chat view")]
         public Button CloseButton;
+        [Tooltip("button to send the text box to the chat")]
         public Button SendButton;
 
+        [Tooltip("list of chats. buttons.")]
         public GameObject ChatButtonContainer;
         public List<GameObject> ChatButtons;
-        public GameObject SelectedButton;
+        
+        //public GameObject SelectedButton;
+        [Tooltip("user types here.")]
         public TMP_InputField ChatInputField;
 
+        [Tooltip("show the current chat the user is viewing")]
         public TMP_Text ChatBox;
+        //wtf is this?
         public TMPTextFieldPrinter tmp_printer;
         #endregion
 
@@ -202,7 +209,7 @@ namespace Raindrop.Presenters
                 //add button and set transforms
                 var chatButton = Instantiate(buttonPrefab, new Vector3(0, 0, 0), Quaternion.identity);
                 ChatButtons.Add(chatButton);
-                SelectedButton = chatButton;
+                //SelectedButton = chatButton;
                 chatButton.transform.SetParent(ChatButtonContainer.transform);
 
                 //setup internal lcoalchat manager.
@@ -242,17 +249,12 @@ namespace Raindrop.Presenters
 
         private void OnSendBtnClick()
         {
-            if (selectedChatIdx == -1)
-            {//public chat
-                ProcessChatInput(msgtext, ChatType.Normal);
-                Debug.LogError("ProcessChatInput");
-                return;
-            } else
-            {
-                Debug.LogError("not implemented IM sending yet.");
-            }
-
+            //public chat
+            ProcessChatInput(msgtext, ChatType.Normal);
+            Debug.Log("Sending chat to local");
             return;
+            
+            
         }
 
         private void OnCloseBtnClick()

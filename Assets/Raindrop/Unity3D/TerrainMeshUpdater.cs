@@ -10,6 +10,7 @@ using OpenMetaverse;
 using System.Threading;
 using RenderSettings = Raindrop.Rendering.RenderSettings;
 using OpenMetaverse.Rendering;
+using Mesh = UnityEngine.Mesh;
 
 namespace Raindrop.Unity3D
 {
@@ -32,13 +33,13 @@ namespace Raindrop.Unity3D
         int[] newTriangles;
 
 
-        public bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
+        bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
         float[,] heightTable = new float[256, 256];     //heightmap of terrain
         bool fetchingTerrainTexture = false;            //semaphore for reading terrain tex.
         bool terrainTextureNeedsUpdate = false;         //does the texture need to be redrawn?
         private OpenMetaverse.Simulator knownCurrentSim;
         float terrainTimeSinceUpdate = Rendering.RenderSettings.MinimumTimeBetweenTerrainUpdated + 1f; // Update terrain om first run
-        bool terrainInProgress = false;
+        // bool terrainInProgress = false;
         MeshmerizerR renderer;
         //private float lastTimeItRendered = 0f;
 
@@ -47,7 +48,7 @@ namespace Raindrop.Unity3D
         Face terrainFace; //seems like a 'face' is the secondlife kind of face (where each prim can have up to 8 faces.)
         ColorVertex[] terrainVertices;
         uint[] terrainIndices;
-        private bool lastWorkWasDone = true;
+        private bool terrainMesherIsIdle = true;
 
         private void Awake()
         {
@@ -74,7 +75,7 @@ namespace Raindrop.Unity3D
         {
 
 
-            //Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
+            Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
 
 
         }
@@ -112,20 +113,24 @@ namespace Raindrop.Unity3D
                 return;
             }
 
-            if (instance.Client.Network.CurrentSim != knownCurrentSim) //different sim now.
-            {
-                knownCurrentSim = instance.Client.Network.CurrentSim;
-                ResetTerrain();
-            }
+            ResetIfSimChanged();
 
-
-            if (terrainTextureNeedsUpdate)
-            {
-                UpdateTerrainTexture();
-            }
+            //
+            // if (terrainTextureNeedsUpdate)
+            // {
+            //     UpdateTerrainTexture();
+            // }
 
             render(Time.deltaTime);
 
+            void ResetIfSimChanged()
+            {
+                if (instance.Client.Network.CurrentSim != knownCurrentSim) //different sim now.
+                {
+                    knownCurrentSim = instance.Client.Network.CurrentSim;
+                    ResetTerrainTex();
+                }
+            }
         }
 
         //this performs re-meshing and re-texturing. ONLY IF MODIFIED and sufficient time elapsed.
@@ -133,7 +138,7 @@ namespace Raindrop.Unity3D
         {
             terrainTimeSinceUpdate += timeSinceLastFrame;
 
-            if (lastWorkWasDone == false)
+            if (terrainMesherIsIdle == false)
             {
                 return;
             }
@@ -155,17 +160,14 @@ namespace Raindrop.Unity3D
             {
                 Debug.Log("Processing new rendering of terrain!");
 
-                if (!terrainInProgress)
-                {
-                    terrainInProgress = true;
-                    ResetTerrain(/*false*/);
+                    terrainMesherIsIdle = false;
+                    //ResetTerrainTex(/*false*/);
                     UpdateTerrain();
-                }
             }
 
             if (terrainTextureNeedsUpdate)
             {
-                UpdateTerrainTexture();
+                //PaintTerrain();
             }
 
 
@@ -196,10 +198,10 @@ namespace Raindrop.Unity3D
             ThreadPool.QueueUserWorkItem(sync =>
             {
 
-                lastWorkWasDone = false;
+                terrainMesherIsIdle = false;
                 Debug.Log("QueueUserWorkItem");
+                // 1. generate heightTable from patches in memory.
                 int step = 1;
-
                 for (int x = 0; x < 256; x += step)
                 {
                     for (int y = 0; y < 256; y += step)
@@ -217,42 +219,53 @@ namespace Raindrop.Unity3D
                 }
                 Debug.Log("finished terrain height work!");
 
+                // 2. create mesh-face from heighttable, using the meshmeriser.
                 terrainFace = renderer.TerrainMesh(heightTable, 0f, 255f, 0f, 255f); //generate mesh with heights //the result is a huge struct 'Face'
-
                 Debug.Log("terrainFace geenerated");
-                //generate mesh with colors
-                terrainVertices = new ColorVertex[terrainFace.Vertices.Count];
-                for (int i = 0; i < terrainFace.Vertices.Count; i++) //for each vert in terrainFace, append the vert to terraiVerticies
-                {
-                    byte[] part = Utils.IntToBytes(i);
-                    terrainVertices[i] = new ColorVertex()
-                    {
-                        Vertex = terrainFace.Vertices[i],
-                        Color = new Color4b()
-                        {
-                            R = part[0],
-                            G = part[1],
-                            B = part[2],
-                            A = 253 // terrain picking
-                        }
-                    };
-                }
-                terrainIndices = new uint[terrainFace.Indices.Count];
-                for (int i = 0; i < terrainIndices.Length; i++)
-                {
-                    terrainIndices[i] = terrainFace.Indices[i];
-                }
-                terrainInProgress = false;
-                Modified = false;
-                terrainTextureNeedsUpdate = true;
-                terrainTimeSinceUpdate = 0f;
+                
+                // 3. painting the face. we use ColorVertex objects to represent the color of the vertices of the terrain face.
+                // terrainVertices = new ColorVertex[terrainFace.Vertices.Count];
+                // for (int i = 0; i < terrainFace.Vertices.Count; i++) //for each vert in terrainFace, append the vert to terraiVerticies
+                // {
+                //     byte[] part = Utils.IntToBytes(i); // i = 0x 0000 0000 0000 0000   0000 0000 0000 0000 - 32 bits / 4 bytes. 
+                //     terrainVertices[i] = new ColorVertex()
+                //     {
+                //         Vertex = terrainFace.Vertices[i],
+                //         Color = new Color4b()
+                //         {
+                //             R = part[0],
+                //             G = part[1],
+                //             B = part[2],
+                //             A = 253 // terrain picking
+                //         }
+                //     };
+                // }
+                // terrainIndices = new uint[terrainFace.Indices.Count];
+                // for (int i = 0; i < terrainIndices.Length; i++)
+                // {
+                //     terrainIndices[i] = terrainFace.Indices[i];
+                // }
+                // Modified = false;
+                // //terrainTextureNeedsUpdate = true;
+                // terrainTimeSinceUpdate = 0f;
+                //
+                // terrainMesherIsIdle = true;
+                
+                // 4. apply this face-mesh to the gameobject's mesh component.
+                setMesh(ref terrainMesh, terrainFace);
 
-                lastWorkWasDone = true;
             });
         }
 
+        private void setMesh(ref Mesh mesh, Face face)
+        {
+            //todo
+            
+            throw new NotImplementedException();
+        }
+
         //delete terrain tex 
-        private void ResetTerrain()
+        private void ResetTerrainTex()
         {
             if (terrainImage != null)
             {
@@ -268,7 +281,7 @@ namespace Raindrop.Unity3D
         }
 
 
-        void UpdateTerrainTexture()
+        void PaintTerrain()
         {
             if (!fetchingTerrainTexture)
             {

@@ -26,7 +26,7 @@ public class ModalManager : MonoBehaviour
     // private ModalPresenter eulaModalPresenter;
     private ModalPresenter loginStatusModal;
 
-
+    
 
     private void Awake()
     {

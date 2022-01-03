@@ -7,77 +7,88 @@ using OpenMetaverse;
 using Raindrop.Netcom;
 using Lean.Gui;
 using Raindrop.ServiceLocator;
+using Vector2 = UnityEngine.Vector2;
 
 //make the joystick position drive the user's movement (u,d,l,r) :)
 public class joystickToMovementBackend : MonoBehaviour
 {
     public LeanJoystick variableJoystick;
     public GameObject theJoystickInScene;
+    public float joyThresh = 0.7f;
     private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
     private RaindropNetcom netcom { get { return instance.Netcom; } }
     private GridClient client { get { return instance.Client; } }
 
     bool Active => instance.Client.Network.Connected;
 
-    void Awake()
+    void Start()
     {
         if (theJoystickInScene.GetComponent<LeanJoystick>() == null)
         {
             Debug.LogError("the joystick object is not found!");
         } 
         variableJoystick = theJoystickInScene.GetComponent<LeanJoystick>();
+
+        //set zero.
+        OnJoyUp();
+        
+        variableJoystick.OnUp.AddListener(OnJoyUp);
+        variableJoystick.OnSet.AddListener(OnJoySet);
+    }
+
+    private void OnJoySet(Vector2 arg0)
+    {
+        setWASDMovements(arg0);
+        
+        
+    }
+
+    private void setWASDMovements(Vector2 arg0)
+    {
+        float vert = arg0.y;
+        float horz = arg0.x;
+        
+        if (vert > joyThresh)
+        {
+            instance.Movement.setForward();
+        }
+        if (vert < -joyThresh)
+        {
+            instance.Movement.setBackward();
+        }
+
+        if (horz > joyThresh)
+        {
+            instance.Movement.setRightward();
+        }
+        if (horz < -joyThresh)
+        {
+            instance.Movement.setLeftward();
+        }
+
+        
+    }
+
+    // no more sideways movment.
+    private void OnJoyUp()
+    {
+        if (! Active)
+        {
+            return;
+        }
+
+        setWASDMovementsZero();
+
+    }
+
+    private void setWASDMovementsZero()
+    {
+        instance.Movement.stopMovementAndSendUpdate();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (! Active)
-        //{
-        //    return;
-        //}
-
-        ////do not flood! no setting unless changed.
-        //float vert = variableJoystick.ScaledValue.y;
-        //float horz = variableJoystick.ScaledValue.x;
-
-        //float thresh = 0.7f;
-        //if (vert > thresh)
-        //{
-        //    instance.Movement.MovingBackward = false;
-        //    instance.Movement.MovingForward = true;
-
-        //}
-        //else if (vert < -thresh)
-        //{
-        //    instance.Movement.MovingBackward = true;
-        //    instance.Movement.MovingForward = false;
-
-        //}
-        //else
-        //{
-        //    instance.Movement.MovingBackward = false;
-        //    instance.Movement.MovingForward = false;
-
-        //}
-
-        //if (horz > thresh)
-        //{
-        //    instance.Movement.TurningLeft = false;
-        //    instance.Movement.TurningRight = true;
-
-        //}
-        //else if (horz < -thresh)
-        //{
-        //    instance.Movement.TurningLeft = true;
-        //    instance.Movement.TurningRight = false;
-
-        //}
-        //else
-        //{
-        //    instance.Movement.TurningLeft = false;
-        //    instance.Movement.TurningRight = false;
-
-        //}
-
+        
     }
 }

@@ -75,7 +75,6 @@ namespace Raindrop.Unity3D
                 agents.Remove(removeEntry);
             }
 
-            throw new NotImplementedException();
         }
     }
 }

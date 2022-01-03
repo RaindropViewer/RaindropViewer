@@ -72,6 +72,7 @@ namespace Raindrop.Services
         public void initialise()
         {
             startUIInitialView();
+            ready = true;
         }
 
         protected void startUIInitialView()
@@ -139,6 +140,8 @@ namespace Raindrop.Services
         {
             modalManager.showModalNotification("Logged out", "you have/were logged out");
 
+            canvasManager.resetToInitialScreen();
+
             //tsb3D.Enabled = tbtnVoice.Enabled = disconnectToolStripMenuItem.Enabled =
             //tbtnGroups.Enabled = tbnObjects.Enabled = tbtnWorld.Enabled = tbnTools.Enabled = tmnuImport.Enabled =
             //    tbtnFriends.Enabled = tbtnInventory.Enabled = tbtnSearch.Enabled = tbtnMap.Enabled = false;
@@ -173,6 +176,7 @@ namespace Raindrop.Services
 
         bool firstMoneyNotification = true;
         private string tlblMoneyBalanceText;
+        public bool ready = false;
 
         void Self_MoneyBalance(object sender, BalanceEventArgs e)
         {

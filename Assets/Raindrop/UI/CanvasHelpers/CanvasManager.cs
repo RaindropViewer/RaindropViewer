@@ -115,6 +115,17 @@ public class CanvasManager : MonoBehaviour
         }
         pushCanvas(theCanvasType);
     }
+    
+    // pop the current login screen, and push the game view. This is for viewing chats offline.
+    // planned for debug only. 
+    public void loginWithoutNetworking()
+    {
+        while ((activeCanvasStack.Count() != 0))
+        {
+            activeCanvasStack.Pop();
+        }
+        pushCanvasWithOrWithoutPop("Game", false);
+    }
 
 
     public void pushCanvas(CanvasType _type)

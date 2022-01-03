@@ -65,7 +65,7 @@ namespace Raindrop.Presenters
         public ReactiveProperty<string> Login_msg { get; private set; }
         private ReactiveProperty<bool> btnLoginEnabled;
 
-        public string uninitialised = "(unknown)";
+        //public string uninitialised = "(unknown)";
 
         private object lblLoginStatus;
 
@@ -104,7 +104,7 @@ namespace Raindrop.Presenters
             RememberCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbRememberBool = _); //when toggle checkbox, set boolean to the same value as the toggle-state
             TOSCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbTOStrue = _); //when toggle checkbox, set boolean to the same value as the toggle-state
 
-            Login_msg.AsObservable().Where(_ => ! _.Equals(uninitialised)).Subscribe(_ => UpdateModalText(_)); //no bug?
+            Login_msg.AsObservable()./*Where(_ => ! _.Equals(uninitialised)).*/Subscribe(_ => UpdateModalText(_)); //no bug?
 
             //gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
             //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
@@ -121,6 +121,12 @@ namespace Raindrop.Presenters
 
         private void UpdateModalText(string _)
         {
+            if (_ == null)
+                return;
+            if (uimanager == null)
+                return;
+            if (!uimanager.ready)
+                return;
             uimanager.modalManager.setVisibleLoggingInModal(_);
         }
 
@@ -253,7 +259,7 @@ namespace Raindrop.Presenters
             Password = INIT_PASSWORD;
 
             //login status message for the modal 
-            Login_msg = new ReactiveProperty<string>(uninitialised);
+            Login_msg = new ReactiveProperty<string>("...");
             
         }
 

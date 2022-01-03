@@ -30,6 +30,7 @@ using System.Drawing.Imaging;
 using OpenMetaverse;
 using OpenMetaverse.Rendering;
 
+//some base classes that are required for rendering
 namespace Raindrop.Rendering
 {
     [StructLayout(LayoutKind.Sequential)]
