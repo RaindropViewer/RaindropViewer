@@ -32,6 +32,7 @@ using System;
 using System.Timers;
 using OpenMetaverse;
 using Debug = UnityEngine.Debug;
+using Vector2 = UnityEngine.Vector2;
 
 namespace Raindrop
 {
@@ -49,31 +50,15 @@ namespace Raindrop
         private bool turningLeft = false; 
         private bool turningRight = false;
         
-        private bool movingForward = false; // ^
-        private bool movingBackward = false; // v
-        private bool movingLeftward = false; // <
-        private bool movingRightward = false; // >
-        
-        private bool modified = false;
-        private bool isMoving => movingForward | movingBackward | movingLeftward | movingRightward;
-
         public bool TurningLeft
         {
-            get
-            {
-                return turningLeft;
-            }
-            set
-            {
-                //modified = true;
+            get => turningLeft;
+            set {
                 turningLeft = value;
-                if (value)
-                {
+                if (value) {
                     timer_Elapsed(null, null);
                     timer.Enabled = true;
-                }
-                else
-                {
+                } else {
                     timer.Enabled = false;
                     client.Self.Movement.TurnLeft = false;
                     client.Self.Movement.SendUpdate(true);
@@ -83,23 +68,14 @@ namespace Raindrop
 
         public bool TurningRight
         {
-            get
-            {
-                return turningRight;
-            }
+            get => turningRight;
             set
             {
-                //modified = true;
                 turningRight = value;
-                if (value)
-                {
-                    //start movement immediate, set up the timer for more updates soon.
+                if (value) {
                     timer_Elapsed(null, null);
                     timer.Enabled = true;
-                }
-                else
-                {
-                    //stop movmeent immiate, stop timer updates.
+                } else {
                     timer.Enabled = false;
                     client.Self.Movement.TurnRight = false;
                     client.Self.Movement.SendUpdate(true);
@@ -123,27 +99,17 @@ namespace Raindrop
             timer = null;
         }
 
+        //handle the turning that causes new rotation per second.
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Debug.Log("movement timer ");
-            OpenMetaverse.Logger.DebugLog("movement timer ");
             float delta = (float)timer.Interval / 1000f;
-            if (turningLeft)
-            {
+            if (turningLeft) {
                 client.Self.Movement.TurnLeft = true;
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
                 client.Self.Movement.SendUpdate(true);
-            }
-            else if (turningRight)
-            {
+            } else if (turningRight) {
                 client.Self.Movement.TurnRight = true;
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -delta);
-                client.Self.Movement.SendUpdate(true);
-            }
-            
-            //update every periodic interval if i am still moving.
-            if (isMoving)
-            {
                 client.Self.Movement.SendUpdate(true);
             }
         }
@@ -160,15 +126,6 @@ namespace Raindrop
             client.Self.Movement.AtNeg = true;
         }
 
-        public void stopMovementAndSendUpdate()
-        {
-            client.Self.Movement.AtPos = false;
-            client.Self.Movement.AtNeg = false;
-            client.Self.Movement.LeftPos = false;
-            client.Self.Movement.LeftNeg = false;
-            client.Self.Movement.SendUpdate(false);
-        }
-
         public void setRightward()
         {
             client.Self.Movement.LeftPos = false;
@@ -182,14 +139,61 @@ namespace Raindrop
 
         public void setTurningLeft()
         {
-            client.Self.Movement.TurnLeft = true;
-            client.Self.Movement.TurnRight = false;
+            TurningLeft = true;
         }
 
         public void setTurningRight()
         {
-            client.Self.Movement.TurnLeft = false;
-            client.Self.Movement.TurnRight = true;
+            TurningRight = true;
+        }
+
+        // stop moving.
+        public void zero2DInput()
+        {
+            client.Self.Movement.AtPos = false;
+            client.Self.Movement.AtNeg = false;
+            client.Self.Movement.LeftPos = false;
+            client.Self.Movement.LeftNeg = false;
+            client.Self.Movement.SendUpdate(true);
+        }
+
+        
+        public void set2DInput(Vector2 arg0)
+        {
+            //note: is impossible to be no movement due to that is being handled by zero2DInput.
+
+            uint prev = client.Self.Movement.AgentControls;
+            
+            bool isUp = arg0.y > 0;
+            bool isDown = arg0.y < 0;
+            bool isNoVert = !isUp && !isDown;
+            
+            bool isRight = arg0.x > 0;
+            bool isLeft = arg0.x < 0;
+            bool isNoHorz = !isLeft && !isRight;
+
+            if (isUp) 
+            {
+                setForward();
+            }
+            if (isDown)
+            {
+                setBackward();
+            }
+            if (isRight)
+            {
+                setRightward();
+            }
+            if (isLeft)
+            {
+                setLeftward();
+            }
+
+            var present = client.Self.Movement.AgentControls;
+            if (prev != present)
+            {
+                client.Self.Movement.SendUpdate(true);
+            }
         }
     }
 }

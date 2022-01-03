@@ -28,7 +28,7 @@ namespace Raindrop.Presenters
         //right pane: the contents of the selected chat in the left pane.+
         //             input bar of the text to send to said chat.
 
-        private RaindropInstance instance;
+        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
         private GridClient client => instance.Client;

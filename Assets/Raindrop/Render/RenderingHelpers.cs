@@ -395,10 +395,16 @@ namespace Raindrop.Rendering
             return new UnityEngine.Vector3((float)v.X, (float)v.Z, (float)v.Y);
         }
 
-
+        //is this correct???
         public static UnityEngine.Vector4 TKVector4(Vector4 v)
         {
-            return new UnityEngine.Vector4(v.X, v.Y, v.Z, v.W);
+            return new UnityEngine.Vector4(v.X, v.Y, v.X, v.W);
+        }
+        
+        //is this correct???
+        public static UnityEngine.Quaternion TKQuaternion4(Quaternion v)
+        {
+            return new UnityEngine.Quaternion(v.X, v.Z, v.Y, v.W);
         }
 
         public static Vector2 OMVVector2(UnityEngine.Vector2 v)

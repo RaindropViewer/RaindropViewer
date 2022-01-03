@@ -7,14 +7,15 @@ using System.Threading;
 using UniRx.Triggers;
 using UE = UnityEngine ;
 using UnityEngine ;
+using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop.Presenters
 {
     //presents agents in the sim as boxes
-    public class AgentPresenterAndPool : MonoBehaviour
+    public class AgentPresenter : MonoBehaviour
     {
         public GameObject AgentPrefab;
-        public GameObject MainAgent;
+        //public GameObject MainAgent;
 
         private object avatarsDictLock = new object();
         private Dictionary<UUID, UnityEngine.GameObject> avatarsDict 
@@ -24,14 +25,50 @@ namespace Raindrop.Presenters
         //private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
-        
         void Start()
         {
             mainThread = System.Threading.Thread.CurrentThread;
-            instance.Client.Objects.AvatarUpdate += new EventHandler<AvatarUpdateEventArgs>(Objects_AvatarUpdate);
+            //this seems to happen on new avatars.
+            instance.Client.Objects.AvatarUpdate +=  Objects_AvatarUpdate;
+            //this seems to happen on avatar movements.
+            instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate;
         }
 
         
+        private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
+        {
+            if (e.Simulator != instance.Client.Network.CurrentSim)
+                return;
+            
+            if (isOnMainThread())
+            {
+                updateAvatarPosition(e);
+            } else
+            {
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() => {
+                    updateAvatarPosition(e);
+                });
+            }
+            
+        }
+
+        private void updateAvatarPosition(TerseObjectUpdateEventArgs e)
+        {
+            lock (avatarsDictLock)
+            {
+                GameObject agent;
+                avatarsDict.TryGetValue(e.Prim.ID, out agent);
+                if (agent != null)
+                {
+                    Debug.Log("agent " + e.Prim.ID.ToString() + "has moved");
+                    UE.Vector3 pos = RHelp.TKVector3(e.Prim.Position);
+                    agent.transform.position = pos;
+                }
+            }
+        }
+
+
         private bool isOnMainThread()
         {
             return mainThread.Equals(System.Threading.Thread.CurrentThread);
@@ -61,14 +98,7 @@ namespace Raindrop.Presenters
         //the routine that updates the position of the avatar or creates newly seen avatar
         private void updateAvatar(AvatarUpdateEventArgs e)
         {
-            //as avatar tracking is enabled -> thus all of this event is a new avatar that we never seen before 
-
-            if (e.Avatar.Name == instance.Client.Self.Name)
-            {
-                UE.Vector3 pos = RHelp.TKVector3(e.Avatar.Position);
-                MainAgent.transform.position = pos;
-                return;
-            }
+            
 
             lock (avatarsDictLock)
             {
@@ -81,6 +111,11 @@ namespace Raindrop.Presenters
                     aviGO = CreateAgentGameObject(e.Avatar.Name);
 
                     avatarsDict[e.Avatar.ID] = aviGO;
+                    if (e.Avatar.Name == instance.Client.Self.Name)
+                    {
+                        cameraTrackAgent(aviGO);
+                    }
+                    
                 }
                 else
                 {
@@ -90,23 +125,14 @@ namespace Raindrop.Presenters
                 UE.Vector3 pos = RHelp.TKVector3(e.Avatar.Position);
                 aviGO.transform.position = pos;
 
-                //
-                // if (avatarsGO.ContainsKey(e.))
-                // {
-                //     //update existing avatar
-                //     GameObject theavi = avatarsGO[e.Avatar.LocalID];
-                //     theavi.transform.position = RHelp.TKVector3(e.Avatar.Position);
-                // }
-                // else
-                // {
-                //     //make new avatar out of this information and add to dict.
-                //     var newavi = new GameObject();
-                //     newavi.transform.position = RHelp.TKVector3(e.Avatar.Position);
-                //     avatarsGO.Add(e.Avatar.LocalID, newavi);
-                //
-                //
-                // }
             }
+        }
+
+        //give the object for the main camera to track.
+        private void cameraTrackAgent(GameObject aviGo)
+        {
+            var _ = UE.Camera.main.gameObject.GetComponent<simpleFollow>();
+            _.target = aviGo.transform;
         }
 
 
@@ -116,17 +142,12 @@ namespace Raindrop.Presenters
         // and more ???
         private GameObject CreateAgentGameObject(string aviname)
         {
-            GameObject avi = Instantiate(AgentPrefab);
-            
+            GameObject avi = Instantiate(AgentPrefab, this.transform);
+
             var nametag = avi.GetComponent<nameTagPresenter>();
             nametag.setName(aviname);
             
             return avi;
         }
-        
-        
-        
-        
     }
-
 }

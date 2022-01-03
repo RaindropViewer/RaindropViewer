@@ -112,13 +112,13 @@ public class ModalManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("unable to get the modalPresenter object!");
+                Debug.LogWarning("unable to get the modalPresenter object!");
             }
         } else
         {
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
+                // Debug.Log(" dispatching of showing modal");
                 setVisibleGenericModal(title, content, visibility);
             });
         }
@@ -141,14 +141,14 @@ public class ModalManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("unable to get the modalPresenter object!");
+                Debug.LogWarning("unable to get the modalPresenter object!");
             }
         }
         else
         {
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
+                //Debug.Log(" dispatching of showing modal");
                 setVisibleLoggingInModal(content);
             });
         }

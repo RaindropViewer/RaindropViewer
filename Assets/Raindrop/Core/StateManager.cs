@@ -538,9 +538,9 @@ namespace Raindrop
 
         void netcom_ClientConnected(object sender, EventArgs e)
         {
-            if (!instance.GlobalSettings.ContainsKey("draw_distance"))
+            if (true /*!instance.GlobalSettings.ContainsKey("draw_distance")*/) //todo
             {
-                instance.GlobalSettings["draw_distance"] = 48;
+                instance.GlobalSettings["draw_distance"] = 20;
             }
 
             client.Self.Movement.Camera.Far = instance.GlobalSettings["draw_distance"];

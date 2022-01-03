@@ -38,36 +38,8 @@ public class joystickToMovementBackend : MonoBehaviour
 
     private void OnJoySet(Vector2 arg0)
     {
-        setWASDMovements(arg0);
-        
-        
-    }
-
-    private void setWASDMovements(Vector2 arg0)
-    {
-        float vert = arg0.y;
-        float horz = arg0.x;
-        
-        if (vert > joyThresh)
-        {
-            instance.Movement.setForward();
-        }
-        if (vert < -joyThresh)
-        {
-            instance.Movement.setBackward();
-        }
-
-        if (horz > joyThresh)
-        {
-            instance.Movement.setRightward();
-        }
-        if (horz < -joyThresh)
-        {
-            instance.Movement.setLeftward();
-        }
-
-        
-    }
+        instance.Movement.set2DInput(arg0);
+    } 
 
     // no more sideways movment.
     private void OnJoyUp()
@@ -76,19 +48,6 @@ public class joystickToMovementBackend : MonoBehaviour
         {
             return;
         }
-
-        setWASDMovementsZero();
-
-    }
-
-    private void setWASDMovementsZero()
-    {
-        instance.Movement.stopMovementAndSendUpdate();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        instance.Movement.zero2DInput();
     }
 }
