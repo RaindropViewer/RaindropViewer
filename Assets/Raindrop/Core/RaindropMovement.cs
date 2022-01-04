@@ -47,31 +47,40 @@ namespace Raindrop
         private GridClient client { get { return instance.Client; } }
         private Timer timer;
         private Vector3 forward = new Vector3(1, 0, 0);
-        private bool turningLeft = false; 
-        private bool turningRight = false;
+        private bool isTurning = false; 
+        // private bool turningRight = false;
         private uint _prev;
 
-        public void TurningRight()
+        public void SetTurningRight()
         {
-            turningRight = true;
-            turningLeft = false;
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = true;
+            client.Self.Movement.TurnLeft = false;
+            
             //start turning
-            TurnStart();
+            isTurning = true;
+            //TurnStart();
         }
 
-        public void TurningLeft()
+        public void SetTurningLeft()
         {
-            turningRight = false;
-            turningLeft = true;
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = false;
+            client.Self.Movement.TurnLeft = true;
+            
+            isTurning = true;
             //start turning
-            TurnStart();
+            //TurnStart();
         }
-        public void TurningStop()
+        public void SetTurningStop()
         {
-            turningRight = false;
-            turningLeft = false;
-            //start turning
-            TurnStop();
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = false;
+            client.Self.Movement.TurnLeft = false;
+            
+            isTurning = false;
+            //stop turning
+            //TurnStop();
         }
 
         private void TurnStart()
@@ -89,7 +98,7 @@ namespace Raindrop
         public RaindropMovement(RaindropInstance instance)
         {
             this.instance = instance;
-            timer = new System.Timers.Timer(1000);
+            timer = new System.Timers.Timer(100); //seems like turn left and right will have 100 timer.
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             timer.Enabled = false;
         }
@@ -105,20 +114,13 @@ namespace Raindrop
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             float delta = (float)timer.Interval / 1000f;
-            if (turningLeft) {
-                client.Self.Movement.TurnLeft = true;
+            if (isTurning) {
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
                 
                 SendMovementPacketIfChanged();
-            } else if (turningRight) {
-                // client.Self.Movement.TurnRight = true;
-                client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -delta);
-                
-                SendMovementPacketIfChanged();
-            }
+            } 
             else
-            {
-                
+            { //not turning
                 SendMovementPacketIfChanged();
             }
         }
@@ -163,8 +165,6 @@ namespace Raindrop
         {
             //note: is impossible to be no movement due to that is being handled by zero2DInput.
 
-            
-            
             bool isUp = arg0.y > 0;
             bool isDown = arg0.y < 0;
             bool isNoVert = !isUp && !isDown;
@@ -193,8 +193,16 @@ namespace Raindrop
             SendMovementPacketIfChanged();
         }
 
+        // this is a safer method to send packets, as it makes sure we don't send non-helpful information.
         private void SendMovementPacketIfChanged()
         {
+            //hacky: moving means send. not moving, then have to check if changes has occured.
+            if (isTurning)
+            {
+                client.Self.Movement.SendUpdate(true);
+                return;
+            }
+            
             var present = client.Self.Movement.AgentControls;
             if (_prev != present)
             {

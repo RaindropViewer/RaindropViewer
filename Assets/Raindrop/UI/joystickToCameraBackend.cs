@@ -24,28 +24,23 @@ public class joystickToCameraBackend : MonoBehaviour
 
     private void OnJoySet(Vector2 arg0)
     {
+        
         float vert = arg0.y;
         float horz = arg0.x;
 
-        if (Mathf.Abs(horz) > thresh)
-        {
-            //process vertical camera movment.
-            if (horz > 0)
-            {
-                instance.Movement.TurningLeft();
-            }
-            else
-            {
-                instance.Movement.TurningRight();
-            }
+        int horz_clamp = (Mathf.Abs(horz) > thresh) ? 1 :
+                (Mathf.Abs(horz) < thresh) ? -1 :0;
+
+        if (horz_clamp == 0){
+            instance.Movement.SetTurningStop();
+        } else if(horz_clamp == 1){
+            instance.Movement.SetTurningRight();
         }
         else
         {
-            instance.Movement.TurningStop();
-
+            instance.Movement.SetTurningLeft();
         }
-        
-        
+
     }
     
 }

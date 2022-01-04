@@ -24,5 +24,6 @@ public class simpleFollow : MonoBehaviour
  
         // Smoothly move the camera towards that target position
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
+        transform.LookAt(targetPosition);
     }
 }

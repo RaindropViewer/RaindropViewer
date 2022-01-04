@@ -35,13 +35,22 @@ namespace Raindrop.Presenters
 
         private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
         {
-            GameObject res;
-            objects.TryGetValue(e.Prim.ID, out res);
-            if (res != null)
+            GameObject obj;
+            objects.TryGetValue(e.Prim.ID, out obj);
+            if (obj != null)
             {
                 //Debug.Log("object " + e.Prim.ID.ToString() + "has moved");
-                Debug.LogWarning("object move to be implemented");
+                // Debug.LogWarning("object move to be implemented");
+                UpdateObjTransforms(e.Prim, obj);
             }
+        }
+        
+        private static void UpdateObjTransforms(Primitive e, GameObject obj)
+        {
+            UE.Vector3 pos = RHelp.TKVector3(e.Position);
+            UE.Quaternion rot = RHelp.TKQuaternion4(e.Rotation);
+            obj.transform.position = pos;
+            obj.transform.rotation = rot;
         }
         
         private void ObjectsOnObjectUpdate(object sender, PrimEventArgs e)
@@ -73,7 +82,8 @@ namespace Raindrop.Presenters
 
  
 
-        //the routine that updates the position of the avatar or creates newly seen avatar
+        //  1. create prim if not exists yet.
+        //  2. move prim if already exist
         private void updatePrim(PrimEventArgs e)
         {
             lock (objectsLock)
@@ -97,7 +107,7 @@ namespace Raindrop.Presenters
                 }
                 else
                 {
-                    Debug.Log("updating obj position. " + e.Prim.ID);
+                    //Debug.Log("updating obj position. " + e.Prim.ID);
                 }
 
                 SetPrimTransforms(e, primGO);

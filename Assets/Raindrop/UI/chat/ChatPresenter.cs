@@ -77,13 +77,13 @@ namespace Raindrop.Presenters
 
         #endregion
 
-        void Start()
+        void Awake()
         {
             CloseButton.onClick.AsObservable().Subscribe(_ => OnCloseBtnClick()); //when clicked, runs this method.
             SendButton.onClick.AsObservable().Subscribe(_ => OnSendBtnClick()); //change username property.
             ChatInputField.onValueChanged.AsObservable().Subscribe(_ => OnInputChanged(_)); //change username property.
 
-            RegisterClientEvents(client);
+            // RegisterClientEvents(client);
             
             _chatPresenterManager = new ChatPresenterManager(instance, localChatPrinter);
             
@@ -101,7 +101,7 @@ namespace Raindrop.Presenters
 
         private void OnDestroy()
         {
-            UnregisterClientEvents(client);
+            // UnregisterClientEvents(client);
 
             _chatPresenterManager.Dispose();
             _chatPresenterManager = null;
@@ -125,19 +125,7 @@ namespace Raindrop.Presenters
             var uimanager = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
             uimanager.canvasManager.PopCanvas();
         }
-
-        private void RegisterClientEvents(GridClient client)
-        {
-            //client.Grid.CoarseLocationUpdate += new EventHandler<CoarseLocationUpdateEventArgs>(Grid_CoarseLocationUpdate);
-            
-        }
-
-        private void UnregisterClientEvents(GridClient client)
-        {
-            //client.Grid.CoarseLocationUpdate -= new EventHandler<CoarseLocationUpdateEventArgs>(Grid_CoarseLocationUpdate);
-            
-        }
-
+        
         //adds a tab for this particular IM session
         public void AddIMTab(UUID target, UUID session, string targetName)
         {
