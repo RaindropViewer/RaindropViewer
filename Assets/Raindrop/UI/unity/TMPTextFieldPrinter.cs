@@ -34,14 +34,6 @@ namespace Raindrop
         Regex urlRegex;
         private SlUriParser uriParser;
 
-        //public TMPTextFieldPrinter(IPrintableTMP_GO textBox)
-        //{
-        //    rtb = 
-        //    if (rtb == null)
-        //    {
-        //        rtb = this.
-        //    } 
-
         private void Awake()
         {
             rtb = this.GetComponent<TMP_Text>();

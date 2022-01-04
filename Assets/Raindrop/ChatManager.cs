@@ -32,6 +32,7 @@
 using System;
 using OpenMetaverse;
 using System.Collections.Generic;
+using Raindrop.Services;
 
 namespace Raindrop
 {
@@ -39,29 +40,34 @@ namespace Raindrop
     // equivalent to a chat window with all the tabs and chats the user is chatting in.
     public class ChatManager
     { 
-        public ChatTextManager localChatManager { get; private set; } //TODO: refactor this class to become model. UI can access data in the model as required.
-        //public List<IMTextManager> IMManagerList { get; private set; }
+        public ChatTextManager localChatManager { get; private set; } 
 
         RaindropInstance instance;
         GridClient client { get { return instance.Client; } }
 
+        //this is the main chat.
         private string mainChatStringReference;
 
 
-        public ChatManager(RaindropInstance instance)
+
+        public ChatManager(RaindropInstance instance, ITextPrinter textPrinter)
         {
-            instance = this.instance;
+            this.instance = instance;
+            TextPrinter = textPrinter;
 
             UnityEngine.Debug.Log("chatmanager being constructed");
-            //setup
-
             //start local chat if connected to localsim
             instance.Client.Network.SimConnected += Network_SimConnected;
             instance.Client.Network.Disconnected += Network_Disconnected;
 
+            //make the chat manager. (seems like we destroy it on disconnection.)
+            localChatManager = new ChatTextManager(instance, TextPrinter);
+
             //subscribe to localchat received event
             // localChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
         }
+
+        public ITextPrinter TextPrinter { get; set; }
 
         public void Dispose()
         {
@@ -83,23 +89,27 @@ namespace Raindrop
             Logger.Log("Simulator Connected", Helpers.LogLevel.Info);
 
             if (localChatManager == null)
-                localChatManager = new ChatTextManager(instance, ref mainChatStringReference);
+                localChatManager = new ChatTextManager(instance, TextPrinter);
             Logger.Log("creating local chat in memory.", Helpers.LogLevel.Info);
 
+            printToMainChat("Simulator Connected");
+        }
+
+        public void printToMainChat(string message)
+        {
             //print success msg.
             ChatBufferItem line = new ChatBufferItem(
                 DateTime.Now,
                 string.Empty,
                 UUID.Zero,
-                "Simulator Connected",
+                message,
                 ChatBufferTextStyle.Normal
             );
-            localChatManager.ProcessBufferItem(line, true);
-            
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                //process printing in main thread.
+                localChatManager.ProcessBufferItem(line, true);
+            });
         }
-        
-
-
-
     }
 }

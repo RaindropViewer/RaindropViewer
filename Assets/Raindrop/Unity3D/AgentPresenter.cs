@@ -7,7 +7,6 @@ using System.Threading;
 using UniRx.Triggers;
 using UE = UnityEngine ;
 using UnityEngine ;
-using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop.Presenters
 {
@@ -61,9 +60,7 @@ namespace Raindrop.Presenters
                 avatarsDict.TryGetValue(e.Prim.ID, out agent);
                 if (agent != null)
                 {
-                    Debug.Log("agent " + e.Prim.ID.ToString() + "has moved");
-                    UE.Vector3 pos = RHelp.TKVector3(e.Prim.Position);
-                    agent.transform.position = pos;
+                    UpdateAvatarTransforms(e.Prim, agent);
                 }
             }
         }
@@ -122,10 +119,16 @@ namespace Raindrop.Presenters
                     Debug.Log("updating known-avi position. " + e.Avatar.Name);
                 }
 
-                UE.Vector3 pos = RHelp.TKVector3(e.Avatar.Position);
-                aviGO.transform.position = pos;
-
+                UpdateAvatarTransforms(e.Avatar, aviGO);
             }
+        }
+
+        private static void UpdateAvatarTransforms(Primitive e, GameObject aviGO)
+        {
+            UE.Vector3 pos = RHelp.TKVector3(e.Position);
+            UE.Quaternion rot = RHelp.TKQuaternion4(e.Rotation);
+            aviGO.transform.position = pos;
+            aviGO.transform.rotation = rot;
         }
 
         //give the object for the main camera to track.

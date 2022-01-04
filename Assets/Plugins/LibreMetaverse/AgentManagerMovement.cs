@@ -27,6 +27,7 @@
 using System;
 using System.Threading;
 using OpenMetaverse.Packets;
+using UnityEngine;
 
 namespace OpenMetaverse
 {
@@ -598,6 +599,8 @@ namespace OpenMetaverse
             /// <param name="simulator">Simulator to send the update to</param>
             public void SendUpdate(bool reliable, Simulator simulator)
             {
+                Debug.Log("sending movement packet.");
+                
                 // Since version 1.40.4 of the Linden simulator, sending this update
                 // causes corruption of the agent position in the simulator
                 if (simulator != null && (!simulator.AgentMovementComplete))

@@ -9,10 +9,7 @@ namespace Raindrop.Services.Bootstrap
     //show the first UI panel to the user.
     class UIBootstrapper : MonoBehaviour
     {
-        public bool UI_Is_on = false;
-
         private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-
         private RaindropNetcom netcom => instance.Netcom;
 
         // bootstraps in order to obtain the canvasmanager instance.
@@ -45,19 +42,12 @@ namespace Raindrop.Services.Bootstrap
                 //return;
             }
 
-            bool success = false;
             var cm = GetComponentInChildren<CanvasManager>();
             if (cm == null) Debug.LogError("canvasmanager not present");
             var mm = GetComponentInChildren<ModalManager>();
             if (mm == null) Debug.LogError("modalmanager not present");
 
             ServiceLocator.ServiceLocator.Instance.Register<UIService>(new UIService(cm, mm));
-            
-            
-            // in start, lauch the ui.
-            
-            // if (UI_Is_on)
-                // ServiceLocator.ServiceLocator.Instance.Get<UIService>().init();
         }
 
 
@@ -70,21 +60,6 @@ namespace Raindrop.Services.Bootstrap
             //    statusTimer.Stop();
             //    statusTimer.Dispose();
             //    statusTimer = null;
-            //}
-
-            //if (MediaConsole != null)
-            //{
-            //    if (TabConsole.TabExists("media"))
-            //    {
-            //        TabConsole.Tabs["media"].AllowClose = true;
-            //        TabConsole.Tabs["media"].Close();
-            //    }
-            //    else
-            //    {
-            //        MediaConsole.Dispose();
-            //    }
-            //    MediaConsole = null;
-            //    if (MessageBox.Show("Are you sure you
             //}
 
             if (!netcom.IsLoggedIn) return;
@@ -111,16 +86,13 @@ namespace Raindrop.Services.Bootstrap
         {
             if (netcom != null)
             {
-                //netcom = null;
-                //netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
-                //netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
-                //netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
+                netcom.Dispose();
             }
-
-            //if (instance.Client != null)
-            //{
-            //    UnregisterClientEvents(client);
-            //}
+            //
+            // if (instance.Client != null)
+            // {
+            //     instance.UnregisterClientEvents(client);
+            // }
 
             //if (instance?.Names != null)
             //{
@@ -129,5 +101,6 @@ namespace Raindrop.Services.Bootstrap
 
             instance.CleanUp();
         }
+        
     }
 }

@@ -49,41 +49,43 @@ namespace Raindrop
         private Vector3 forward = new Vector3(1, 0, 0);
         private bool turningLeft = false; 
         private bool turningRight = false;
-        
-        public bool TurningLeft
+        private uint _prev;
+
+        public void TurningRight()
         {
-            get => turningLeft;
-            set {
-                turningLeft = value;
-                if (value) {
-                    timer_Elapsed(null, null);
-                    timer.Enabled = true;
-                } else {
-                    timer.Enabled = false;
-                    client.Self.Movement.TurnLeft = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
+            turningRight = true;
+            turningLeft = false;
+            //start turning
+            TurnStart();
         }
 
-        public bool TurningRight
+        public void TurningLeft()
         {
-            get => turningRight;
-            set
-            {
-                turningRight = value;
-                if (value) {
-                    timer_Elapsed(null, null);
-                    timer.Enabled = true;
-                } else {
-                    timer.Enabled = false;
-                    client.Self.Movement.TurnRight = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
+            turningRight = false;
+            turningLeft = true;
+            //start turning
+            TurnStart();
+        }
+        public void TurningStop()
+        {
+            turningRight = false;
+            turningLeft = false;
+            //start turning
+            TurnStop();
         }
 
-        
+        private void TurnStart()
+        {
+            timer_Elapsed(null, null);
+            timer.Enabled = true; //this timer is only required for turning.
+        }
+        private void TurnStop()
+        {
+            timer.Enabled = false;
+            SendMovementPacketIfChanged();
+        }
+
+
         public RaindropMovement(RaindropInstance instance)
         {
             this.instance = instance;
@@ -106,11 +108,18 @@ namespace Raindrop
             if (turningLeft) {
                 client.Self.Movement.TurnLeft = true;
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
-                client.Self.Movement.SendUpdate(true);
+                
+                SendMovementPacketIfChanged();
             } else if (turningRight) {
-                client.Self.Movement.TurnRight = true;
+                // client.Self.Movement.TurnRight = true;
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -delta);
-                client.Self.Movement.SendUpdate(true);
+                
+                SendMovementPacketIfChanged();
+            }
+            else
+            {
+                
+                SendMovementPacketIfChanged();
             }
         }
 
@@ -137,15 +146,6 @@ namespace Raindrop
             client.Self.Movement.LeftNeg = false;
         }
 
-        public void setTurningLeft()
-        {
-            TurningLeft = true;
-        }
-
-        public void setTurningRight()
-        {
-            TurningRight = true;
-        }
 
         // stop moving.
         public void zero2DInput()
@@ -154,7 +154,8 @@ namespace Raindrop
             client.Self.Movement.AtNeg = false;
             client.Self.Movement.LeftPos = false;
             client.Self.Movement.LeftNeg = false;
-            client.Self.Movement.SendUpdate(true);
+            
+            SendMovementPacketIfChanged();
         }
 
         
@@ -162,7 +163,7 @@ namespace Raindrop
         {
             //note: is impossible to be no movement due to that is being handled by zero2DInput.
 
-            uint prev = client.Self.Movement.AgentControls;
+            
             
             bool isUp = arg0.y > 0;
             bool isDown = arg0.y < 0;
@@ -189,9 +190,15 @@ namespace Raindrop
                 setLeftward();
             }
 
+            SendMovementPacketIfChanged();
+        }
+
+        private void SendMovementPacketIfChanged()
+        {
             var present = client.Self.Movement.AgentControls;
-            if (prev != present)
+            if (_prev != present)
             {
+                _prev = client.Self.Movement.AgentControls;
                 client.Self.Movement.SendUpdate(true);
             }
         }

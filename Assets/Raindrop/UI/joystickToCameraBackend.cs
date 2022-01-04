@@ -32,12 +32,17 @@ public class joystickToCameraBackend : MonoBehaviour
             //process vertical camera movment.
             if (horz > 0)
             {
-                instance.Movement.setTurningLeft();
+                instance.Movement.TurningLeft();
             }
             else
             {
-                instance.Movement.setTurningRight();
+                instance.Movement.TurningRight();
             }
+        }
+        else
+        {
+            instance.Movement.TurningStop();
+
         }
         
         

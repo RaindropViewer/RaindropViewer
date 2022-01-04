@@ -39,7 +39,7 @@ namespace Raindrop.Presenters
             objects.TryGetValue(e.Prim.ID, out res);
             if (res != null)
             {
-                Debug.Log("object " + e.Prim.ID.ToString() + "has moved");
+                //Debug.Log("object " + e.Prim.ID.ToString() + "has moved");
                 Debug.LogWarning("object move to be implemented");
             }
         }

@@ -60,9 +60,9 @@ namespace Raindrop
 
         //public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
 
-        public ChatTextManager(RaindropInstance instance, ref string localChat)
+        public ChatTextManager(RaindropInstance instance, ITextPrinter textPrinter)
         {
-            //TextPrinter = textPrinter;
+            TextPrinter = textPrinter;
             textBuffer = new List<ChatBufferItem>(); // a pipe into the string.
 
             
@@ -187,77 +187,22 @@ namespace Raindrop
         // put the buffer item into the chat string.
         public void ProcessBufferItem(ChatBufferItem item, bool addToBuffer)
         {
+            // tell the world that a chat line is added.
+            ChatLineAdded?.Invoke(this, new ChatLineAddedArgs(item));
 
             lock (SyncChat)
             {
-                this.localChat += ((string)(item.From + item.Text)); //ok... it seems, the list of chatbufferitem is like each line of the chat. This helps us iterate thru each line of chat in a sane fashion. i see. This can enable scrolling iteratively, like array.
                 instance.LogClientMessage("chat.txt", item.From + item.Text);
-
-                return; //for now...
-                
                 if (addToBuffer) textBuffer.Add(item);
 
-                if (showTimestamps)
-                {
-                    //if(fontSettings.ContainsKey("Timestamp"))
-                    //{
-                    //    var fontSetting = fontSettings["Timestamp"];
-                    //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                    //    TextPrinter.BackColor = fontSetting.BackColor;
-                    //    TextPrinter.Font = fontSetting.Font;
-                    //    TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
-                    //}
-                    //else
-                    //{
-                        //TextPrinter.ForeColor = SystemColors.GrayText;
-                        //TextPrinter.BackColor = Color.Transparent;
-                        //TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                        //TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
-                    //}
-                }
-
-                //if(fontSettings.ContainsKey("Name"))
-                //{
-                //    var fontSetting = fontSettings["Name"];
-                //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                //    TextPrinter.BackColor = fontSetting.BackColor;
-                //    TextPrinter.Font = fontSetting.Font;
-                //}
-                //else
-                //{
-                    //TextPrinter.ForeColor = SystemColors.WindowText;
-                    //TextPrinter.BackColor = Color.Transparent;
-                    //TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                //}
-
-                if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
-                {
-                    //TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
-                }
-                else
-                {
-                    //TextPrinter.PrintText(item.From);
-                }
-
-                //if(fontSettings.ContainsKey(item.Style.ToString()))
-                //{
-                //    var fontSetting = fontSettings[item.Style.ToString()];
-                //    TextPrinter.ForeColor = fontSetting.ForeColor;
-                //    TextPrinter.BackColor = fontSetting.BackColor;
-                //    TextPrinter.Font = fontSetting.Font;
-                //}
-                //else
-                //{
-                //    TextPrinter.ForeColor = SystemColors.WindowText;
-                //    TextPrinter.BackColor = Color.Transparent;
-                //    TextPrinter.Font = Settings.FontSetting.DefaultFont;
-                //}
-                //TextPrinter.PrintTextLine(item.Text);
+                TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                TextPrinter.PrintText(item.From);
+                TextPrinter.PrintTextLine(item.Text);
             }
-
-            ChatLineAdded?.Invoke(this, new ChatLineAddedArgs(item));
         }
 
+        public ITextPrinter TextPrinter { get; set; }
+        
         //process sending-out of local chat
         internal void ProcessChatInput(string input, ChatType type)
         {

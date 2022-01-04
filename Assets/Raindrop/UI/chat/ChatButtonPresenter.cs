@@ -8,11 +8,16 @@ using UnityEngine.UI;
 namespace Raindrop.Presenters
 {
     //controls and handles input from chat buttons.
+    //this is attached to a chat button
+    [RequireComponent(typeof(Button))]
     public class ChatButtonPresenter : MonoBehaviour
     {
+        //name to display.
         public string nameOfChat;
-        public IMTextManager manager; //it makes sense for a chat tab to hold the chat manager instance.
-        public ChatPresenter chatPane; //it also makes sense that the chat tab holds the right side panel.. i think
+        //the chat button holds the printer for the chat window.
+        public IMTextManager manager; 
+        
+        public ChatPresenter chatPane; 
         public bool isSelected;
 
         // Start is called before the first frame update

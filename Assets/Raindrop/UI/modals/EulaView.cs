@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Raindrop.ServiceLocator;
+using Raindrop.Services;
 using TMPro;
 using UniRx;
 using UnityEngine;
@@ -17,8 +18,7 @@ public class EulaView : MonoBehaviour
     private Toggle EulaToggle;
     public GameObject EulaToggleGO;
 
-    private Button closeBtn;
-    public GameObject closeBtnGO;
+    public Button closeBtn;
 
     private void Start()
     {
@@ -41,6 +41,18 @@ public class EulaView : MonoBehaviour
 
         bool isAcceptedEULA = instance.GlobalSettings["EulaAccepted"];
         onToggleChanged(isAcceptedEULA);
+        
+        closeBtn.onClick.AddListener(closeEula);
+    }
+
+    private void closeEula()
+    {
+        if (instance.GlobalSettings["EulaAccepted"] == null)
+            return;
+        if (instance.GlobalSettings["EulaAccepted"] == false)
+            return;
+        
+        ServiceLocator.Instance.Get<UIService>().canvasManager.resetToInitialScreen();
     }
 
     private void onToggleChanged(bool isEulaAccepted)
@@ -49,12 +61,12 @@ public class EulaView : MonoBehaviour
         
         if (isEulaAccepted)
         {
-            closeBtnGO.SetActive(true);
+            closeBtn.gameObject.SetActive(true);
             return;
         }
         else
         {
-            closeBtnGO.SetActive(false);
+            closeBtn.gameObject.SetActive(false);
         }
         
     }
