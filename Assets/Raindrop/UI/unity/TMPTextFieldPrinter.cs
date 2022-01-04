@@ -94,14 +94,13 @@ namespace Raindrop
         }
 
         #region ITextPrinter Members
-
         public void PrintText(string text)
         {
             rtb.text = rtb.text + text;
 
             //else
             //{
-                FindURLs(text);
+                // FindURLs(text);
             //}
         }
 

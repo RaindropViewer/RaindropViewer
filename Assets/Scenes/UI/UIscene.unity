@@ -1981,8 +1981,7 @@ PrefabInstance:
       objectReference: {fileID: 904771132}
     - target: {fileID: 361051093761253961, guid: b48e30ed103c4324a9e537dd82576993, type: 3}
       propertyPath: onClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: popCanvas
-      objectReference: {fileID: 0}
+      value:PopCanvas      objectReference: {fileID: 0}
     - target: {fileID: 361051093761253961, guid: b48e30ed103c4324a9e537dd82576993, type: 3}
       propertyPath: onClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
       value: pushCanvas

@@ -1,27 +1,6 @@
-/**
- * Radegast Metaverse Client
- * Copyright(c) 2009-2014, Radegast Development Team
- * Copyright(c) 2016-2020, Sjofn, LLC
- * All rights reserved.
- *  
- * Radegast is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.If not, see<https://www.gnu.org/licenses/>.
- */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Drawing;
 using System.Text;
 using Raindrop.Netcom;
 using OpenMetaverse;
@@ -36,14 +15,12 @@ using Raindrop.Core;
 
 namespace Raindrop
 {
-    //if you pass a refernce to the text box, this class will print to it.
-    
-    //class that functions as model. holds data on the local chat.
-    public class ChatTextManager : IDisposable
+    //This class orchestrates the printing into a text box.
+    //it has a text buffer to hold data (optional).
+    public class LocalChatTextManager : IDisposable
     {
         private Regex chatRegex = new Regex(@"^/(\d+)\s*(.*)", RegexOptions.Compiled);
         private int chatPointer;
-
         public event EventHandler<ChatLineAddedArgs> ChatLineAdded;
 
         private RaindropInstance instance;
@@ -55,25 +32,27 @@ namespace Raindrop
         {
             return textBuffer;
         }
-
+        public ITextPrinter TextPrinter { get; set; }
+        
         private bool showTimestamps;
 
         //public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
 
-        public ChatTextManager(RaindropInstance instance, ITextPrinter textPrinter)
+        public LocalChatTextManager(RaindropInstance instance, ITextPrinter textPrinter)
         {
             TextPrinter = textPrinter;
             textBuffer = new List<ChatBufferItem>(); // a pipe into the string.
-
             
             this.instance = instance;
             InitializeConfig();
 
-            this.localChat = localChat;
             // Callbacks
             netcom.ChatReceived += new EventHandler<ChatEventArgs>(netcom_ChatReceived);
             netcom.ChatSent += new EventHandler<ChatSentEventArgs>(netcom_ChatSent);
             netcom.AlertMessageReceived += new EventHandler<AlertMessageEventArgs>(netcom_AlertMessageReceived);
+            client.Self.TeleportProgress += new EventHandler<TeleportEventArgs>(Self_TeleportProgress);
+            
+            PrintStartupMessage();
         }
 
         public void Dispose()
@@ -81,41 +60,18 @@ namespace Raindrop
             netcom.ChatReceived -= new EventHandler<ChatEventArgs>(netcom_ChatReceived);
             netcom.ChatSent -= new EventHandler<ChatSentEventArgs>(netcom_ChatSent);
             netcom.AlertMessageReceived -= new EventHandler<AlertMessageEventArgs>(netcom_AlertMessageReceived);
+            client.Self.TeleportProgress -= new EventHandler<TeleportEventArgs>(Self_TeleportProgress);
         }
 
         private void InitializeConfig()
         {
             Settings s = instance.GlobalSettings;
-
-            //var serializer = new JavaScriptSerializer();
-
+            
             if (s["chat_timestamps"].Type == OSDType.Unknown)
             {
                 s["chat_timestamps"] = OSD.FromBoolean(true);
             }
-            //if (s["chat_fonts"].Type == OSDType.Unknown)
-            //{
-            //    try
-            //    {
-            //        s["chat_fonts"] = JsonConvert.SerializeObject(Settings.DefaultFontSettings);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        //System.Windows.Forms.MessageBox.Show("Failed to save default font settings: " + ex.Message);
-            //        Debug.LogError("Failed to save default font settings: " + ex.Message);
-            //        instance.MainCanvas.modals.showSimpleModalBoxWithActionBtn("Failed to save default font settings: ", ex.Message, "OK");
-            //    }
-            //}
-
-            //try
-            //{
-            //    fontSettings = serializer.Deserialize<Dictionary<string, Settings.FontSetting>>(s["chat_fonts"]);
-            //}
-            //catch (Exception ex)
-            //{
-            //    System.Windows.Forms.MessageBox.Show("Failed to read chat font settings: " + ex.Message);
-            //}
-
+            
             showTimestamps = s["chat_timestamps"].AsBoolean();
 
             s.OnSettingChanged += new Settings.SettingChangedCallback(s_OnSettingChanged);
@@ -128,19 +84,15 @@ namespace Raindrop
                 showTimestamps = e.Value.AsBoolean();
                 ReprintAllText();
             }
-            //else if(e.Key == "chat_fonts")
-            //{
-            //    try
-            //    {
-            //        var serializer = new JavaScriptSerializer();
-            //        fontSettings = serializer.Deserialize<Dictionary<string, Settings.FontSetting>>(e.Value);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        System.Windows.Forms.MessageBox.Show("Failed to read new font settings: " + ex.Message);
-            //    }
-            //    ReprintAllText();
-            //}
+            
+        }
+        
+        void Self_TeleportProgress(object sender, TeleportEventArgs e)
+        {
+            if (e.Status == TeleportStatus.Progress || e.Status == TeleportStatus.Finished)
+            {
+                TextPrinter.PrintTextLine("teleport...");
+            }
         }
 
         private void netcom_ChatSent(object sender, ChatSentEventArgs e)
@@ -174,20 +126,18 @@ namespace Raindrop
                 ChatBufferTextStyle.StartupTitle);
 
             ChatBufferItem ready = new ChatBufferItem(
-                DateTime.Now, "", UUID.Zero, "Ready.", ChatBufferTextStyle.StatusBlue);
+                DateTime.Now, "", UUID.Zero, "Local chat Ready.", ChatBufferTextStyle.StatusBlue);
 
             ProcessBufferItem(title, true);
             ProcessBufferItem(ready, true);
         }
 
         private Object SyncChat = new Object();
-        private string localChat;
 
-
-        // put the buffer item into the chat string.
+        // append the buffer item into the chat.
+        // optionally, append buffer item into buffer list.
         public void ProcessBufferItem(ChatBufferItem item, bool addToBuffer)
         {
-            // tell the world that a chat line is added.
             ChatLineAdded?.Invoke(this, new ChatLineAddedArgs(item));
 
             lock (SyncChat)
@@ -201,14 +151,10 @@ namespace Raindrop
             }
         }
 
-        public ITextPrinter TextPrinter { get; set; }
         
         //process sending-out of local chat
         internal void ProcessChatInput(string input, ChatType type)
         {
-
-            //TextPrinter.ClearText();
-            
             string msg;
             msg = input.Length >= 1000 ? input.Substring(0, 1000) : input;
             //msg = msg.Replace(ChatInputBox.NewlineMarker, Environment.NewLine);
@@ -227,28 +173,14 @@ namespace Raindrop
                 msg = m.Groups[2].Value;
             }
 
-            //if (instance.CommandsManager.IsValidCommand(msg))
-            //{
-            //    instance.CommandsManager.ExecuteCommand(msg);
-            //}
-            //else
-            //{
-            #region RLV
-
-            #endregion
-
             var processedMessage = GestureManager.Instance.PreProcessChatMessage(msg).Trim();
             if (!string.IsNullOrEmpty(processedMessage))
             {
                 netcom.ChatOut(processedMessage, type, ch);
             }
-            //}
-
 
         }
-
-
-
+        
         //Used only for non-public chat
         private void ProcessOutgoingChat(ChatSentEventArgs e)
         {
@@ -301,16 +233,6 @@ namespace Raindrop
                     || (me.Type == MuteType.Object && me.ID == e.SourceID) // Object muted by ID
                     || (me.Type == MuteType.ByName && me.Name == e.FromName) // Object muted by name
                 )) return;
-
-//            if (instance.RLV.Enabled && e.Message.StartsWith("@"))
-//            {
-//                instance.RLV.TryProcessCMD(e);
-//#if !DEBUG
-//                if (!instance.RLV.EnabledDebugCommands) {
-//                    return;
-//                }
-//#endif
-//            }
 
             ChatBufferItem item = new ChatBufferItem {ID = e.SourceID, RawMessage = e};
             StringBuilder sb = new StringBuilder();
@@ -404,9 +326,10 @@ namespace Raindrop
             sb = null;
         }
 
+        //reprint all the text in the printer.
         public void ReprintAllText()
         {
-            //TextPrinter.ClearText();
+            TextPrinter.ClearText();
 
             foreach (ChatBufferItem item in textBuffer)
             {
@@ -418,8 +341,6 @@ namespace Raindrop
         {
             textBuffer.Clear();
         }
-
-        //public ITextPrinter TextPrinter { get; set; }
     }
 
     public class ChatLineAddedArgs : EventArgs

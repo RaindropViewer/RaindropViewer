@@ -185,7 +185,7 @@ namespace Raindrop.Presenters
                     instance.Client.Groups.RequestCurrentGroups();
 
                     uimanager.modalManager.showModalNotification("Logging in process...","Logged in !");
-                    uimanager.canvasManager.pushCanvasWithOrWithoutPop("Game", true); //refactor needed: better way to schedule push and pop as we are facing some issues here.
+                    uimanager.canvasManager.PopAndPush(CanvasType.Game);
                     //instance.UI.canvasManager.popCanvas();
                     LoginButton.interactable = true;
                     break;
