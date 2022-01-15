@@ -164,8 +164,6 @@ namespace Raindrop.Presenters
         public void OnChatBtnClick()
         {
             uimanager.canvasManager.Push(CanvasType.Chat);
-
-
         }
         public void OnMapBtnClick()
         {

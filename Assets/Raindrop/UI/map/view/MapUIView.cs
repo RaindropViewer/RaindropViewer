@@ -11,42 +11,41 @@ using OpenMetaverse;
 using Raindrop.Map;
 using Raindrop.UI;
 using Raindrop.UI.Presenters;
+using UnityEngine.Serialization;
 
 namespace Raindrop.UI.Views
 {
     // UI for the map viewing.
-    public class MapUI : MonoBehaviour
+    // attach to the UI of map viewer.
+    public class MapUIView : MonoBehaviour
     {
-        private MapScenePresenter msp => MapScenePresenter.getInstance();
-        
         // map manager. keeps track of mapsGOs. creates new mapGOs from prefabs. culls those that are no longer visible. fetches those that need to be viewed.
         [SerializeField]
-        public GameObject mapScene_GameObject;
-        private MapSceneView mapSceneRenderer;
+        public MapSceneView mapSceneGraph_Root;
 
+        private MapScenePresenter msp;
+            
         //reset the view to daboom.
         [SerializeField]
-        public GameObject resetButtonGO;
-        private Button button;
-        
+        public Button button;
+
+
         private void Awake()
         {
-            mapSceneRenderer = mapScene_GameObject.GetComponent<MapSceneView>();
+            button.onClick.AddListener(OnClick_ResetView);
 
-            button = resetButtonGO.GetComponent<Button>();
-            button.onClick.AddListener(TaskOnClick);
+            msp = new MapScenePresenter(this, mapSceneGraph_Root);
         }
 
-        private void TaskOnClick()
+        private void OnClick_ResetView()
         {
-            mapSceneRenderer.resetView();
+            mapSceneGraph_Root.resetView();
         }
 
 
         public void setZoom(float value)
         {
-            mapSceneRenderer.setZoom(value);
-
+            mapSceneGraph_Root.setZoom(value);
         }
 
         public MapScenePresenter getPresenter()

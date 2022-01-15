@@ -9,7 +9,7 @@ using UnityEngine;
 public class AddTouchGesturesHandler : MonoBehaviour
 {
 	[SerializeField]
-	private MapUI mapUI;
+	private MapUIView mapUIView;
 	public GameObject mapUIGO;
 
 	[SerializeField]
@@ -94,7 +94,7 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			{
 				Vector3 worldPoint = camera.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
 				ulong regionCoords = Coverters.getRegionFromWorldPoint(worldPoint);
-				mapUI.getPresenter().OnMapClick(regionCoords);
+				mapUIView.getPresenter().OnMapClick(regionCoords);
 				//Debug.Log("tap recognizer fired: " + r);
 			};
 			TouchKit.addGestureRecognizer(recognizer);

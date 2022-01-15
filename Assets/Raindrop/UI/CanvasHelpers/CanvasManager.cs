@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Raindrop.ServiceLocator;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 //helper class that helps to pop, push, stack canvases.
 //singleton.
@@ -15,7 +16,22 @@ public class CanvasManager : MonoBehaviour
     [Tooltip("The canvases that are created and in memory stack.")]
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
 
-    public CanvasType main;
+    public CanvasIdentifier topCanvas
+    {
+        get
+        {
+            try
+            {
+                return activeCanvasStack.Peek();
+            }
+            catch (InvalidOperationException e)
+            {
+                return null;
+            }
+        }
+    }
+
+    public CanvasType initialPage;
     
     private void Awake()
     {
@@ -51,7 +67,7 @@ public class CanvasManager : MonoBehaviour
         else
         {
             canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
-            Push(main);
+            Push(initialPage);
         }
     }
 
@@ -95,17 +111,18 @@ public class CanvasManager : MonoBehaviour
     //pop current, then push the desired canvas.
     public void PopAndPush(CanvasType type)
     {
-        PopCanvas();
-        Push(type);
+       
         
         // CanvasType theCanvasType = getCanvasTypeFromString(_type);
         // if (theCanvasType ==CanvasType.UNKNOWN)
         // {
         //     Debug.LogError("unable to get the canvas of identifer: "+ _type);
-        // }
-        //
-        // popCanvas();
-        // pushCanvas(theCanvasType);
+        // } 
+        if (topCanvas)
+        {
+            PopCanvas();
+        }
+        Push(type);
     }
     
     // pop the current login screen, and push the game view. This is for viewing chats offline.
@@ -133,21 +150,27 @@ public class CanvasManager : MonoBehaviour
         if (desiredCanvas != null)
         {
             desiredCanvas.gameObject.SetActive(true);
-            activeCanvasStack.Push (desiredCanvas);
+            activeCanvasStack.Push(desiredCanvas);
         }
         else { Debug.LogWarning("The desired canvas was not found!" + desiredCanvas.ToString()); }
     }
 
     public void PopCanvas()
     {
-        var topCanvas  = activeCanvasStack.Peek();
         if (! topCanvas)
         {
             Debug.LogWarning("tried to pop empty canvas stack.");
             return;
         }
 
+        //1 remove topmost
         topCanvas.gameObject.SetActive(false); //this lince causes error, as the function was called from the login thread!
         activeCanvasStack.Pop();
+        
+        //2 reactivate the one underneath.
+        if (topCanvas)
+        {
+            topCanvas.gameObject.SetActive(true);
+        }
     }
 }

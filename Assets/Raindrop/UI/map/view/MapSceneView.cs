@@ -63,7 +63,6 @@ namespace Raindrop.UI.Views
         private void Awake()
         {
             cameraView = cameraViewGO.GetComponent<DownwardOrthoCameraView>();
-            mapPoolPresenter = MapScenePresenter.getInstance();
          
         }
 

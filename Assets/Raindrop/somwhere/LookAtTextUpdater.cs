@@ -8,17 +8,17 @@ using UnityEngine;
 public class LookAtTextUpdater : MonoBehaviour
 {
     public GameObject mapUIGO;
-    private MapUI mapUI;
+    private MapUIView _mapUIView;
 
     private TMPro.TextMeshPro tmp;
 
     private void Awake()
     {
-        mapUI = mapUIGO.GetComponent<MapUI>();
+        _mapUIView = mapUIGO.GetComponent<MapUIView>();
         tmp = this.GetComponent<TMPro.TextMeshPro>();
 
         //sub
-        mapUI.getPresenter().MapClicked += bl_UserMapClick; // register with an event
+        _mapUIView.getPresenter().MapClicked += bl_UserMapClick; // register with an event
         //mapUI.StartProcess();
     }
 
@@ -30,12 +30,5 @@ public class LookAtTextUpdater : MonoBehaviour
         {
             this.tmp.SetText(text);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        
     }
 }

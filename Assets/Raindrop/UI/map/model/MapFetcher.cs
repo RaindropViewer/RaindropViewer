@@ -68,10 +68,7 @@ namespace Raindrop.Map.Model
         // obtains the image from URL, decodes it in main thread, the stores data in the appropriate maptile.
         public MapTile GetRegionTileExternal(ulong handle, int zoom)
         {
-            if ((zoom > 4) || (zoom < 1))
-            {
-                return null;
-            }
+            zoom = 1;
 
             if (tryGetMapTile(handle, 1) != null)
             {
@@ -90,7 +87,7 @@ namespace Raindrop.Map.Model
                 regX /= regionSize;
                 regY /= regionSize;
                 //int zoom = 1;
-                MapTile res = null;
+                MapTile res = new MapTile(256,256);
                 downloader.QueueDownlad(
                     new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
                     20 * 1000,
@@ -117,11 +114,10 @@ namespace Raindrop.Map.Model
                                 {
                                     gottenData.Enqueue(new MapData(handle, responseData));
                                 }
-
-                                //MapTile tile = mapTilesManager.setEmptyTile(handle); //Tile is a empty tile right now -- we write to it soon.
-
+                                
+                                
                                 //run jpeg decoding on the main thread, for now.
-                                //mainThreadInstance.Enqueue(DecodeDataToTexAsync(tile, responseData));
+                                mainThreadInstance.Enqueue(DecodeDataToTexAsync(res, responseData));
 
                                 lock (tileRequests)
                                 {
@@ -139,7 +135,7 @@ namespace Raindrop.Map.Model
 
                 );
 
-                return null; // problem: since the callback takes a while to complete, the res is obviously a null when this line is reached.
+                return res; // inside res, it is notready.
 
                 //lock (mapData.sceneTiles)
                 //{
@@ -153,8 +149,13 @@ namespace Raindrop.Map.Model
         {
             try
             {
-                Texture2D _tex = output_tile.getTex();
-                bool success = _tex.LoadImage(responseData);
+                lock (output_tile.getTex())
+                {
+                    Texture2D _tex = output_tile.getTex();
+                    bool success = _tex.LoadImage(responseData); //warn: main thread only.
+                    output_tile.isReady = true;    
+                }
+                
             }
             catch (Exception w)
             {

@@ -29,6 +29,8 @@ public class ModalPresenter : MonoBehaviour
     public Button CloseButton;
     public Button BackgroundButton;
 
+    public CanvasRenderer renderer;
+
     private void Start()
     {
         LinkUIComponents();
@@ -70,8 +72,18 @@ public class ModalPresenter : MonoBehaviour
     {
         titletext.GetComponent<TMP_Text>().text = title;
         contenttext.GetComponent<TMP_Text>().text = content;
-        this.actionText.GetComponent<TMP_Text>().text = actionText;
+        if (actionText == null)
+        {
+            this.actionText.gameObject.SetActive(false);
+        }
+        else
+        {
+            this.actionText.gameObject.SetActive(true);
+            this.actionText.GetComponent<TMP_Text>().text = actionText;
+        }
     }
+    
+    //special form of setModal
     public void setModalNoActions(string title, string content)
     {
         setModal(title, content, null);
@@ -80,5 +92,16 @@ public class ModalPresenter : MonoBehaviour
     public void closeModal()
     {
         gameObject.SetActive(false);
+    }
+
+    public void fadeaway()
+    {
+        // StartCoroutine(SlowFade_Coroutine(1500));
+    }
+    
+
+    private CanvasRenderer getRenderer()
+    {
+        return renderer;
     }
 }

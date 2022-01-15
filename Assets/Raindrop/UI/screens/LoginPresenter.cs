@@ -32,7 +32,7 @@ namespace Raindrop.Presenters
     {
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private UIService uimanager;
+        private UIService uimanager => ServiceLocator.ServiceLocator.Instance.Get<UIService>();
 
 
         #region UI elements - the 'view' in MVP
@@ -44,6 +44,9 @@ namespace Raindrop.Presenters
 
         public TMP_Dropdown locationDropdown;
         private LoginLocationDropdown loginLocationDropdown; //wraps the above
+        
+        
+        public TMP_Text credError;
         #endregion
 
         #region internal representations 
@@ -62,8 +65,11 @@ namespace Raindrop.Presenters
             get; set;
         }
 
-        public ReactiveProperty<string> Login_msg { get; private set; }
-        private ReactiveProperty<bool> btnLoginEnabled;
+        public ReactiveProperty<string> loginMsg = new ReactiveProperty<string>(""); //"" is a magic value that is required to prevent showing the modal immediately on load.
+        private ReactiveProperty<bool> btnLoginEnabled = new ReactiveProperty<bool>(true);
+
+        //is empty string if there is no error.
+        public ReactiveProperty<string> credParserErrorString = new ReactiveProperty<string>();
 
         //public string uninitialised = "(unknown)";
 
@@ -86,8 +92,7 @@ namespace Raindrop.Presenters
 
             //2 load various loginInformation from the settings.
             InitializeConfig();
-             
-
+            
             //GridDropdownGO = this.gameObject.GetComponent<GenericDropdown>().gameObject;
             //genericDropdown = GridDropdownGO.GetComponent<GenericDropdown>();
             //GridDropdownView.DropdownSelectionChanged += GenericDropdown_DropdownSelectionChanged;
@@ -95,17 +100,27 @@ namespace Raindrop.Presenters
             //3 hookup reactive UIs.
             LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick()); //when clicked, runs this method.
 
-            btnLoginEnabled = new ReactiveProperty<bool>(true);
             btnLoginEnabled.AsObservable().Subscribe(_ => LoginButton.gameObject.SetActive(_)); //update the login button availabilty according to this boolean.
-            
-            usernameField.onValueChanged.AsObservable().Subscribe(_ => Username = _); //change username property.
-            passwordField.onValueChanged.AsObservable().Subscribe(_ => Password = _);
+
+            usernameField.onValueChanged.AsObservable().Subscribe(_ =>
+            {
+                Username = _;
+                credParserErrorString.Value = "";
+            });  //change username property.
+            passwordField.onValueChanged.AsObservable().Subscribe(_ =>
+            {
+                Password = _;
+                
+                credParserErrorString.Value = "";
+            });  //change password.
 
             RememberCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbRememberBool = _); //when toggle checkbox, set boolean to the same value as the toggle-state
             TOSCheckbox.OnValueChangedAsObservable().Subscribe(_ => cbTOStrue = _); //when toggle checkbox, set boolean to the same value as the toggle-state
 
-            Login_msg.AsObservable()./*Where(_ => ! _.Equals(uninitialised)).*/Subscribe(_ => UpdateModalText(_)); //no bug?
+            loginMsg.AsObservable().Where(_ => ! _.Equals("")).Subscribe(_ => UpdateLoginModalContent("Logging in process...", _));
 
+            credParserErrorString.AsObservable().Subscribe(_ => OnCredParseError(_));
+            
             //gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
             //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
 
@@ -113,21 +128,41 @@ namespace Raindrop.Presenters
 
             //4subscribe to events.
             AddNetcomEvents();
-
-            //get uimanager service
-            uimanager = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
-
         }
 
-        private void UpdateModalText(string _)
+        // show the error text.
+        private void OnCredParseError(string _)
         {
-            if (_ == null)
-                return;
+            credError.text = _;
+            if (String.IsNullOrEmpty(_))
+            {
+                credError.gameObject.SetActive(false);
+            }
+            else
+            {
+                credError.gameObject.SetActive(true);
+            }
+        }
+
+        //updates the text in the login modal.
+        private void UpdateLoginModalContent(string header, string message)
+        {
             if (uimanager == null)
                 return;
             if (!uimanager.ready)
                 return;
-            uimanager.modalManager.setVisibleLoggingInModal(_);
+
+            if (header == "")
+            {
+                header = "Logging in... ";
+            }
+            uimanager.modalManager.setLoginModalText(header, message);
+        }
+
+        
+        private void Close_LoginModal_Slow()
+        {
+            uimanager.modalManager.fadeLoginModal();
         }
 
         private void AddNetcomEvents()
@@ -149,53 +184,44 @@ namespace Raindrop.Presenters
 
         public void netcom_ClientLoginStatus(object sender, LoginProgressEventArgs e)
         {
+            string header = "Logging in process...";
+            
             switch (e.Status)
             {
                 case LoginStatus.ConnectingToLogin:
-                    Login_msg.GetType().GetProperty("Value").SetValue(Login_msg, "Connecting to login server...");
-                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
-                    //lblLoginStatus.ForeColor = Color.Black;
+                    loginMsg.Value += "Connecting to login server...";
                     break;
 
                 case LoginStatus.ConnectingToSim:
-                    Login_msg.Value = ("Connecting to region...");
-                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
-                    //lblLoginStatus.ForeColor = Color.Black;
+                    loginMsg.Value += ("Connecting to region...");
                     break;
 
                 case LoginStatus.Redirecting:
-                    Login_msg.Value = "Redirecting...";
-                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
-                    //lblLoginStatus.ForeColor = Color.Black;
+                    loginMsg.Value += "Redirecting...";
                     break;
 
                 case LoginStatus.ReadingResponse:
-                    Login_msg.Value = "Reading response...";
-                    uimanager.modalManager.showModalNotification("Logging in process...", Login_msg.Value);
-                    //lblLoginStatus.ForeColor = Color.Black;
+                    loginMsg.Value += "Reading response...";
                     break;
 
                 case LoginStatus.Success:
-                    Login_msg.Value = "Logged in as " + netcom.LoginOptions.FullName;
-                    //lblLoginStatus.ForeColor = Color.FromArgb(0, 128, 128, 255);
-                    //proLogin.Visible = false;
+                    loginMsg.Value += "Logged in as " + netcom.LoginOptions.FullName;
 
-                    //btnLogin.Text = "Logout";
                     btnLoginEnabled.Value = false;
-                    instance.Client.Groups.RequestCurrentGroups();
+                    // instance.Client.Groups.RequestCurrentGroups();
 
-                    uimanager.modalManager.showModalNotification("Logging in process...","Logged in !");
+                    Close_LoginModal_Slow();
+
                     uimanager.canvasManager.PopAndPush(CanvasType.Game);
                     //instance.UI.canvasManager.popCanvas();
                     LoginButton.interactable = true;
                     break;
 
                 case LoginStatus.Failed: 
-                    //lblLoginStatus.ForeColor = Color.Red;
                     if (e.FailReason == "tos")
                     {
-                        Login_msg.Value = "Must agree to Terms of Service before logging in";
-                        uimanager.modalManager.showModalNotification("Logging in failed",Login_msg.Value);
+                        loginMsg.Value = "Must agree to Terms of Service before logging in";
+                        uimanager.modalManager.showModalNotification("Logging in failed",loginMsg.Value);
                         //pnlTos.Visible = true;
                         //txtTOS.Text = e.Message.Replace("\n", "\r\n");
                         btnLoginEnabled.Value = true;
@@ -203,22 +229,19 @@ namespace Raindrop.Presenters
                     }
                     else
                     {
-                        Login_msg.Value = e.Message;
-                        uimanager.modalManager.showModalNotification("Logging in failed", Login_msg.Value);
+                        loginMsg.Value = e.Message;
+                        uimanager.modalManager.showModalNotification("Logging in failed", loginMsg.Value);
                         btnLoginEnabled.Value = true;
                         LoginButton.interactable = true;
                     }
-                    //proLogin.Visible = false;
-
-                    //btnLogin.Text = "Retry";
                     break;
             }
         }
 
         public void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
-            Login_msg.Value = "logged out.";
-            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
+            loginMsg.Value = "logged out.";
+            uimanager.modalManager.showModalNotification("Login status", loginMsg.Value);
             //pnlLoginPrompt.Visible = true;
             //pnlLoggingIn.Visible = false;
 
@@ -230,23 +253,15 @@ namespace Raindrop.Presenters
         {
             btnLoginEnabled.Value = false;
 
-            Login_msg.Value = "Logging out...";
-            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
-            //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
-
-            //proLogin.Visible = true;
+            loginMsg.Value = "Logging out...";
+            // uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
         }
 
         public void netcom_ClientLoggingIn(object sender, OverrideEventArgs e)
         {
-            Login_msg.Value = "Logging in...";
-            uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
-            //lblLoginStatus.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
-
-            //proLogin.Visible = true;
-            //pnlLoggingIn.Visible = true;
-            //pnlLoginPrompt.Visible = false;
-
+            loginMsg.Value = "Start to Logging in...";
+            // uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
+            
             btnLoginEnabled.Value = false;
         }
           
@@ -255,11 +270,11 @@ namespace Raindrop.Presenters
         private void initialiseFields()
         {
             //reset user and pw fields
-            Username = INIT_USERNAME;
-            Password = INIT_PASSWORD;
+            // Username = INIT_USERNAME;
+            // Password = INIT_PASSWORD;
 
             //login status message for the modal 
-            Login_msg = new ReactiveProperty<string>("...");
+            // Login_msg = new ReactiveProperty<string>("");
             
         }
 
@@ -325,21 +340,86 @@ namespace Raindrop.Presenters
         }
 
 
+        // slowly turns the button back on again.
+        IEnumerator EnableButtonCoroutine(float delay)
+        {
+            yield return new WaitForSeconds(delay / 1000f);
+            LoginButton.interactable = true;
+        }
+        
+        // 1. open the login status modal.
+        // 2. create a timeout timer -> on time out, allow user to close the login status modal.
         public void OnLoginBtnClick()
         {
             LoginButton.interactable = false;
             //instance.MediaManager.PlayUISound(UISounds.Click);
-            //sanity 
-            if (Username == INIT_USERNAME || Password == INIT_PASSWORD)
-            {
-                Debug.LogError("Either username and password is not defined!");
 
-                LoginButton.interactable = true;
+            //guard username
+            string parsedFirstname = "";
+            string parsedLastname = "";
+            bool isValidUser = splitUserName(Username, out parsedFirstname, out parsedLastname);
+            if (!isValidUser)
+            {
+                credParserErrorString.Value = "bad username. Allowable examples: Kitty Graves , FlyingFox Resident , FlyingFox ";
+                Debug.LogError(" username error; invalid username input : " + Username);
+                StartCoroutine(EnableButtonCoroutine(1500));
                 return;
             }
+            
+            //guard password
+            if (Password.Length <= 0)
+            {                
+                credParserErrorString.Value = "bad password";
+                Debug.LogError(" password error!");
+                StartCoroutine(EnableButtonCoroutine(1500));
+                return;
+            }
+            
+            //do login.
+            BeginLogin(parsedFirstname, parsedLastname, Password);
+        }
 
-            BeginLogin();
+        // input: ***REMOVED*** resident
+        //
+        // result:
+        // first: ***REMOVED***    last: resident
+        // return: true if success.
+        private bool splitUserName(string username, out string firstname, out string lastname)
+        {
+            //split by the dot or space character.
+            string[] parts = System.Text.RegularExpressions.Regex.Split(username.Trim(), @"[. ]+");
 
+            if (parts.Length == 2)
+            {
+                firstname = parts[0];
+                lastname = parts[1];
+            }
+            else if (parts.Length == 1)
+            {
+                firstname = username.Trim();
+                lastname = "Resident";
+                //first name might be empty string ""
+            }
+            else
+            {
+                firstname = "";
+                lastname = "";
+                credParserErrorString.Value = "bad username";
+                Debug.Log("bad username:  " + username );
+                return false;
+            }
+
+            if (firstname == "")
+            {
+                firstname = "";
+                lastname = "";
+                credParserErrorString.Value = "bad username";
+                Debug.Log("bad username:  " + username );
+                return false;
+                
+            }
+            
+            return true;
         }
 
         public void OnLogoutBtnClick()
@@ -358,32 +438,20 @@ namespace Raindrop.Presenters
         #region Login functions
 
 
-        private void BeginLogin()
+        private void BeginLogin(string first, string last, string password)
         {
-            string username = Username;
-
-            string[] parts = System.Text.RegularExpressions.Regex.Split(username.Trim(), @"[. ]+");
-
+            
             _ = netcom;
 
-            if (parts.Length == 2)
-            {
-                netcom.LoginOptions.FirstName = parts[0];
-                netcom.LoginOptions.LastName = parts[1];
-            }
-            else
-            {
-                netcom.LoginOptions.FirstName = username.Trim();
-                netcom.LoginOptions.LastName = "Resident";
-            }
+            netcom.LoginOptions.FirstName = first;
+            netcom.LoginOptions.LastName = last;
 
-            netcom.LoginOptions.Password = Password;
+            netcom.LoginOptions.Password = password;
             netcom.LoginOptions.Channel = "Channel"; // Channel
             netcom.LoginOptions.Version = "Version"; // Version
             netcom.AgreeToTos = cbTOStrue;
 
             //startlocation parsing
-
 
             switch (locationDropdown.value)
             {

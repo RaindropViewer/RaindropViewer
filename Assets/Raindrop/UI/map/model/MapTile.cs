@@ -16,6 +16,8 @@ namespace Raindrop.Map.Model
 
         private ulong gridHandle;
 
+        public bool isReady = false; 
+
         private static Texture2D emptyTexture = Texture2D.redTexture;
 
         public MapTile(int width, int height)

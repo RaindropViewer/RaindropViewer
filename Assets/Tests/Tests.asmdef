@@ -5,7 +5,9 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "LibreMetaverseAssembly",
-        "RaindropUnity"
+        "RaindropUnity",
+        "LeanGUI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

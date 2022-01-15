@@ -31,8 +31,11 @@
 using System;
 using System.Timers;
 using OpenMetaverse;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Quaternion = OpenMetaverse.Quaternion;
 using Vector2 = UnityEngine.Vector2;
+using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop
 {
@@ -48,7 +51,6 @@ namespace Raindrop
         private Timer timer;
         private Vector3 forward = new Vector3(1, 0, 0);
         private bool isTurning = false; 
-        // private bool turningRight = false;
         private uint _prev;
 
         public void SetTurningRight()
@@ -210,5 +212,13 @@ namespace Raindrop
                 client.Self.Movement.SendUpdate(true);
             }
         }
+
+        // user's direct input processed here.
+        public void setCameraInputs(object zero)
+        {
+            
+            
+        }
     }
+
 }

@@ -13,8 +13,8 @@ namespace Raindrop
     // equivalent to a chat window with all the tabs and chats the user is chatting in.
     public class ChatPresenterManager
     { 
-        public LocalChatTextManager LocalLocalChat { get; private set; } 
-        public List<IMTextManager> IMChats { get; private set; } 
+        public LocalChatTextManager LocalChatManager { get; private set; } 
+        public List<IMTextManager> IMChatManagers { get; private set; } 
 
         RaindropInstance instance;
 
@@ -29,26 +29,26 @@ namespace Raindrop
             this.instance = instance;
             TextPrinter = textPrinter;
             
-            RegisterClientEvents(instance);
+            //make managers that we depend on.
+            LocalChatManager = new LocalChatTextManager(instance, TextPrinter);
+            IMChatManagers = new List<IMTextManager>();
 
-            //make the chat manager. (seems like we destroy it on disconnection.)
-            LocalLocalChat = new LocalChatTextManager(instance, TextPrinter);
-            IMChats = new List<IMTextManager>();
+            RegisterClientEvents(instance);
         }
 
         private void RegisterClientEvents(RaindropInstance instance)
         {
             instance.Client.Network.SimConnected += Network_SimConnected;
             instance.Client.Network.Disconnected += Network_Disconnected;
-            LocalLocalChat.ChatLineAdded += LocalChatManager_ChatLineAdded;
+            LocalChatManager.ChatLineAdded += LocalChatManager_ChatLineAdded;
         }
 
         public ITextPrinter TextPrinter { get; set; }
 
         public void Dispose()
         {
-            LocalLocalChat = null;
-            IMChats = new List<IMTextManager>();
+            LocalChatManager = null;
+            IMChatManagers = new List<IMTextManager>();
         }
 
         private void Network_Disconnected(object sender, OpenMetaverse.DisconnectedEventArgs e)
@@ -56,16 +56,16 @@ namespace Raindrop
             Logger.Log("Network_Disconnected", Helpers.LogLevel.Info);
 
             //wind down chatmanager
-            LocalLocalChat.Dispose();
-            LocalLocalChat = null;
+            LocalChatManager.Dispose();
+            LocalChatManager = null;
         }
         
         private void LocalChatManager_ChatLineAdded(object sender, ChatLineAddedArgs chatLineAddedArgs)
         {
             Logger.Log("new message in local chat!", Helpers.LogLevel.Info);
 
-            if (LocalLocalChat == null)
-                LocalLocalChat = new LocalChatTextManager(instance, TextPrinter);
+            if (LocalChatManager == null)
+                LocalChatManager = new LocalChatTextManager(instance, TextPrinter);
             Logger.Log("creating local chat in memory.", Helpers.LogLevel.Info);
 
             printToMainChat("todo");
@@ -76,8 +76,8 @@ namespace Raindrop
             //create local chat.
             Logger.Log("Simulator Connected", Helpers.LogLevel.Info);
 
-            if (LocalLocalChat == null)
-                LocalLocalChat = new LocalChatTextManager(instance, TextPrinter);
+            if (LocalChatManager == null)
+                LocalChatManager = new LocalChatTextManager(instance, TextPrinter);
             Logger.Log("creating local chat in memory.", Helpers.LogLevel.Info);
 
             printToMainChat("Simulator Connected");
@@ -86,7 +86,7 @@ namespace Raindrop
             UUID agentID; //todo.
             // ah ok, so it seems use (A xor B) = C , where A is us and B is target, because this represents a link between us.
             // we send C to let the lindens know its between A and B. abit strange TBH.
-            IMChats.Add(new IMTextManager(instance, null,IMTextManagerType.Agent,  instance.Client.Self.AgentID ^ agentID, "cutie nuki"));
+            IMChatManagers.Add(new IMTextManager(instance, null,IMTextManagerType.Agent,  instance.Client.Self.AgentID ^ agentID, "cutie nuki"));
         }
 
         public void printToMainChat(string message)
@@ -102,7 +102,7 @@ namespace Raindrop
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
                 //process printing in main thread.
-                LocalLocalChat.ProcessBufferItem(line, true);
+                LocalChatManager.ProcessBufferItem(line, true);
             });
         }
     }

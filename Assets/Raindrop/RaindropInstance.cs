@@ -314,6 +314,7 @@ namespace Raindrop
 
             _names = new NameManager(this);
             Cof = new CurrentOutfitFolder(this);
+            
 
             //ui_manager = new UIManager(this);
             //mainCanvas.InitializeControls();

@@ -14,54 +14,31 @@ public class ModalManager : MonoBehaviour
     
     [Tooltip("The generic modal gameobject")]
     [SerializeField]
-    public GameObject GenericModal;
-    // [SerializeField]
-    // public GameObject EulaModal;
-    [SerializeField]
-    public GameObject LoginStatusModal;
+    public ModalPresenter genericModalPresenter;
     
     Thread mainThread;
-    //pool of modals.
-    private ModalPresenter genericModalPresenter;
     // private ModalPresenter eulaModalPresenter;
+    [SerializeField]
     private ModalPresenter loginStatusModal;
 
     
 
     private void Awake()
     {
-        //find yo modals in scene.
-        //foreach(modalPresenter _ in FindObjectsOfType<modalPresenter>())
-        //{
-
-        //    genericModal.Add(_);
-        //    _.closeModal();
-        //}
-
-        //if (FindObjectsOfType<modalPresenter>().Length != 0)
-        //{
-        //    genericModal = FindObjectsOfType<modalPresenter>()[0];
-        //    genericModal.closeModal();
-        //}
-        
-        linkModals();
-
-        // GameObject GenericModal = Instantiate(GenericModalPrefab) as GameObject;
-        // GenericModal.transform.SetParent(this.transform);
-        // modalPresenter = GenericModal.GetComponent<modalPresenter>();
-
+        CheckModals();
 
         mainThread = System.Threading.Thread.CurrentThread;
     }
 
-    private void linkModals()
+    private void CheckModals()
     {
-
-
-        genericModalPresenter = GenericModal.GetComponent<ModalPresenter>();
         if (genericModalPresenter == null)
         {
             Debug.LogError("cannot find the gneric modal");
+        }
+        if (loginStatusModal == null)
+        {
+            Debug.LogError("cannot find the login modal");
         }
         
     }
@@ -128,33 +105,33 @@ public class ModalManager : MonoBehaviour
 
 
     //by default obviously this must be visible; we are updating the login status.
-    public void setVisibleLoggingInModal(string content)
-    {
-        string title = "Logging in status...";
-
-        if (isOnMainThread())
-        {
-            if (loginStatusModal != null)
-            {
-                loginStatusModal.setModalNoActions(title, content);
-                loginStatusModal.gameObject.SetActive(true);
-            }
-            else
-            {
-                Debug.LogWarning("unable to get the modalPresenter object!");
-            }
-        }
-        else
-        {
-
-            UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                //Debug.Log(" dispatching of showing modal");
-                setVisibleLoggingInModal(content);
-            });
-        }
-
-
-    }
+    // public void setVisibleLoggingInModal(string content)
+    // {
+    //     string title = "Logging in status...";
+    //
+    //     if (isOnMainThread())
+    //     {
+    //         if (loginStatusModal != null)
+    //         {
+    //             loginStatusModal.setModalNoActions(title, content);
+    //             loginStatusModal.gameObject.SetActive(true);
+    //         }
+    //         else
+    //         {
+    //             Debug.LogWarning("unable to get the modalPresenter object!");
+    //         }
+    //     }
+    //     else
+    //     {
+    //
+    //         UnityMainThreadDispatcher.Instance().Enqueue(() => {
+    //             //Debug.Log(" dispatching of showing modal");
+    //             setVisibleLoggingInModal(content);
+    //         });
+    //     }
+    //
+    //
+    // }
 
 
     private bool isOnMainThread()
@@ -175,7 +152,49 @@ public class ModalManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("unable to get the modalPresenter object!");
+            Debug.LogWarning("unable to get the modalPresenter object!");
         }
     }
+    
+    public void setLoginModalText(string title, string content)
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.setModal(
+                title,
+                content, 
+                "OK"
+                );
+            showLoginModal();
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the loginStatusModal object!");
+        }
+    }
+
+    private void showLoginModal()
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the login modal object!");
+        }
+    }
+
+    public void fadeLoginModal()
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.fadeaway();
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the login modal object!");
+        }
+    }
+
 }

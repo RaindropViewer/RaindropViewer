@@ -145,7 +145,7 @@ namespace Raindrop.Presenters
             //call the ProcessChatInput in the respective manager class.
             if (/*chatList.getSelected() == "local chat"*/ true)
             {
-                _chatPresenterManager.LocalLocalChat.ProcessChatInput(input, type);
+                _chatPresenterManager.LocalChatManager.ProcessChatInput(input, type);
 
             } 
             //else
@@ -155,8 +155,6 @@ namespace Raindrop.Presenters
             //    chatHistory.Add(cbxInput.Text);
             //    chatPointer = chatHistory.Count;
             //}
-            netcom.ChatOut(inputString, ChatType.Normal, 0);
-
         }
 
         private void ClearChatInput()

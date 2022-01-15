@@ -21,20 +21,27 @@ namespace Raindrop.UI.Model
 
     class MapModel
     {
+        // i fetch images.
         private MapFetcher mapFetcher;
+        // i cache images to disk.
         private MapCache mapCache;
 
+        #region globalrefs
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
         bool Active => instance.Client.Network.Connected;
-            
+        #endregion
+
+        #region instance vars
         //the current zoom level that the user is requesting.
         // 1 - one 256^2 texture is 1 sim.
         // ...
         // 4 - one 256^2 texture is 8*8 sims.
         public int zoomLevel;
 
+        #endregion
+        
         public MapModel()
         {
             //mapFetcher = UtilsUnity.ServiceLocator.Instance.Get<MapFetcher>();

@@ -15,22 +15,20 @@ using Raindrop.UI.Model;
 
 namespace Raindrop.UI.Presenters
 {
-    /// <summary>
-    /// Presenter
-    /// I am used by 
-    /// 1. mapUI (go)
-    /// 2. mapScene (go)
-    /// I do not have an update loop. I am driven by the above 2 players.
-    /// </summary>
+    //some key ideas:
+    /* if my finger is clicking the map, I have intention to navigate and pan the map.
+     * if my finger is not clicking the map, I have no intention to do anything with the map.
+     *
+     * if i tap the map, the informaiton of the coordinate i tap will be displayed as a card.
+     *
+     * i only fetch the map if my camera is shooting at it.
+     * 
+     */
 
     public class MapScenePresenter
     {
-        private static MapScenePresenter _Instance;
-        //private MapSceneView mapSceneView;
         private MapModel mapModel;
-        private bool needRepaint;
 
-        GridLayer visibleRanges;
 
         public event EventHandler<string> MapClicked;
         public virtual void OnMapClick(ulong regionCoords) //protected virtual method
@@ -39,35 +37,13 @@ namespace Raindrop.UI.Presenters
             MapClicked?.Invoke(this, regionCoords.ToString() + "to implement sim name and pos as string in event. ");
         }
 
-        public static MapScenePresenter getInstance()
-        {
-            return _Instance ?? (_Instance = new MapScenePresenter());
-        }
-
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
-        private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private GridClient client { get { return instance.Client; } }
-        bool Active => instance.Client.Network.Connected;
-
-
-        private MapScenePresenter(/*MapSceneView mapSceneView*/)
+        public MapScenePresenter(MapUIView mapUIView, MapSceneView mapSceneView)
         {
             //this.mapSceneView = mapSceneView;
 
 
             //mapFetcher = ServiceLocator.ServiceLocator.Instance.Get<MapBackend>();
             mapModel = new MapModel();
-        }
-
-        public void setViewAt(Vector2 at)
-        {
-
-
-        }
-
-        public void reset()
-        {
-            throw new NotImplementedException();
         }
 
 

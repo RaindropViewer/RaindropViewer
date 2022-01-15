@@ -10,7 +10,7 @@ namespace Raindrop.UI.Views
     {
         private Slider slider;
         public GameObject mapUIGO;
-        private MapUI mapUI;
+        private MapUIView _mapUIView;
 
         // Start is called before the first frame update
         void Start()
@@ -20,7 +20,7 @@ namespace Raindrop.UI.Views
 
         void Awake()
         {
-            mapUI = mapUIGO.GetComponent<MapUI>();
+            _mapUIView = mapUIGO.GetComponent<MapUIView>();
             slider = gameObject.GetComponent<Slider>();
             if (slider != null)
             {
@@ -30,9 +30,9 @@ namespace Raindrop.UI.Views
         }
         public void ListenerMethod(float value)
         {
-            if (mapUI != null)
+            if (_mapUIView != null)
             {
-                mapUI.setZoom(value);
+                _mapUIView.setZoom(value);
             }
         }
 
