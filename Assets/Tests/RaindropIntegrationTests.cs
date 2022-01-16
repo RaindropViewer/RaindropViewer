@@ -31,9 +31,6 @@ namespace Raindrop.Tests
     [TestFixture()]
     public class RaindropIntegrationTests
     {
-        private bool loggedin;
-        private bool testfail = false;
-
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
 

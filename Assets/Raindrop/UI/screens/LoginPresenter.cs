@@ -49,10 +49,7 @@ namespace Raindrop.Presenters
         public TMP_Text credError;
         #endregion
 
-        #region internal representations 
-
-        private readonly string INIT_USERNAME = "username";
-        private readonly string INIT_PASSWORD = "password";
+        #region internal representations
         private Settings s;
 
         public string Username

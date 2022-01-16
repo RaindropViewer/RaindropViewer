@@ -30,26 +30,34 @@ namespace Raindrop.Presenters
         {
             mainThread = System.Threading.Thread.CurrentThread;
             //instance.Client.Objects.ObjectUpdate += ObjectsOnObjectUpdate; //prims, foilage, attachments (for those that are static and we-just-saw-it)
-            instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate; //prims, avatars (for those that move often and hap-hazardly)
+            //instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate; //prims, avatars (for those that move often and hap-hazardly)
         }
 
         private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
         {
-            GameObject obj;
-            lock (objectsLock)
-            {
-                objects.TryGetValue(e.Prim.ID, out obj);
-                
-                if (obj != null)
+            // if (isOnMainThread())
+            // {
+                lock (objectsLock)
                 {
-                    SetPrimTransformsOnMainThread(e.Prim, obj);
-                }
-                else
-                {
-                    objects[e.Prim.ID] = RezNewObject(e.Prim);
-
-                }
-            }
+                    GameObject obj;
+                    objects.TryGetValue(e.Prim.ID, out obj);
+                    if (obj != null)
+                    {
+                        SetPrimTransformsOnMainThread(e.Prim, obj);
+                    }
+                    else
+                    {
+                        RezNewObjectOnMainThread(e.Prim);
+                        objects[e.Prim.ID] = obj;
+                    }
+                }  
+            // } else
+            // {
+            //     UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            //     {
+            //         ObjectsOnTerseObjectUpdate(sender, e);
+            //     });
+            // }
         }
         
         private void ObjectsOnObjectUpdate(object sender, PrimEventArgs e)
@@ -92,7 +100,7 @@ namespace Raindrop.Presenters
 
                 if (primGO == null)
                 {
-                    primGO = RezNewObject(e.Prim);
+                    RezNewObjectOnMainThread(e.Prim);
                 }
                 else
                 {
@@ -103,10 +111,29 @@ namespace Raindrop.Presenters
             }
         }
 
-        private GameObject RezNewObject(Primitive e)
+
+        private void RezNewObjectOnMainThread(Primitive e)
         {
-            GameObject primGO = new GameObject();
-            // Debug.Log("newly seen obj. rezzing " + e.Prim.ID);
+            
+            Debug.LogError("fixme");
+            // GameObject go = new GameObject();
+            // if (isOnMainThread())
+            // {
+            //      RezNewObject(e, out go);
+            //      
+            // } else
+            // {
+            //     UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            //     {
+            //         RezNewObjectOnMainThread(e, out goo);
+            //     });
+            // }
+            // goo = go;
+        }
+
+        //make sure to run this only on Main thread.
+        private void RezNewObject(Primitive e, out GameObject go)
+        {
             if (e.Text != "" || e.Text != null)
             {
                 // Debug.Log("prim has no props. " + e.Prim.ID); //this is for most prims.
@@ -116,20 +143,10 @@ namespace Raindrop.Presenters
                 Debug.Log("prim has property, but no name . " + e.ID); //i have never seen this before.
             }
 
-            
-            if (isOnMainThread())
-            {
-                primGO = CreatePrimGameObject(e);
-                objects[e.ID] = primGO;
-                return primGO;
-            } else
-            {
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    RezNewObject(e);
-                });
-            }
-            return primGO;
+            go = CreatePrimGameObject(e);
+            //objects[e.ID] = primGO;
+            //return primGO;
+            return;
         }
 
 
