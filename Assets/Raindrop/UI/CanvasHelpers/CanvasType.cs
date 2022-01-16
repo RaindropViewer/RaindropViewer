@@ -7,5 +7,8 @@
     Map,
     Eula,
     Settings,
-    UNKNOWN
+    Avatar,
+    Inventory,
+    UNKNOWN,
+    NONE //use this if you want to pop only.
 }
