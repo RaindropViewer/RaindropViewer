@@ -5,12 +5,15 @@ using Raindrop.Presenters;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lean.Gui;
 using NUnit.Framework.Internal;
 using OpenMetaverse.Assets;
+using OpenMetaverse.Imaging;
+using OpenMetaverse.ImportExport.Collada14;
 using Raindrop.Services;
 using TMPro;
 using UnityEditor.PackageManager;
@@ -45,11 +48,92 @@ namespace Raindrop.Tests
         [TearDown]
         public void TearDown()
         {
-            netcom.Logout();
+            // if (netcom.IsLoggedIn)
+            // {
+            //     netcom.Logout();
+            // }
             Application.Quit();
         }
 
-        
+        // decode a j2p into a managed image. convert it to t2d. save it to disk. 
+        // the goal is to make sure the image is not upside down.
+        [UnityTest]
+        public IEnumerator decode_j2p_variant1()
+        {
+            //decode
+            var relax_b = File.ReadAllBytes("C:\\Users\\Alexis\\Pictures\\menhara.jp2");
+            ManagedImage im;
+            OpenJPEG.DecodeToImage(relax_b, out im);
+            
+            //convert to unityland
+            Texture2D t2d;
+            t2d = im.ExportTex2D();
+            
+            //print.
+            var bytes = t2d.EncodeToJPG(100);
+            System.IO.File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "relax.jpg"), bytes);
+
+            
+            yield break;
+        }
+
+        [UnityTest]
+        // managedimage -> texture2d -> managed image test
+        /* 1. create managedimage 2x2 red-blue-green- black image by code.
+         * 2. call convert to texture2d.
+         * 3. print to screen.
+         * 4. convert back to managed image.
+         * 5. print to disk.
+         */ //weird ass test
+        public IEnumerator ManagedImage_Texture2D_conversions()
+        {
+            //1 load the image using unity's texture 2d (known to be correct.).
+            var tex = new Texture2D(1024,1024);
+            var b = File.ReadAllBytes("C:\\Users\\Alexis\\Pictures\\menhara.jpg");
+            tex.LoadImage(b);
+                // OpenMetaverse.Imaging.LoadTGAClass.LoadTGA(
+                // "C:\\Users\\Alexis\\Pictures\\menhara.tga");
+                
+                
+            
+            //1b. check image loading integrity.
+            // var bytesa = tex.EncodeToJPG(100);
+            // System.IO.File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "menhara_from_t2d.jpg"), bytesa);
+            // mi.Blue[2] = 0xFF; 
+            // mi.Red[0] = 0xFF; 
+            // mi.Green[1] = 0xFF;
+            // // mi.Blue = new byte[]{0x00,0x00,0xFF,0x00}; 
+            // mi.Red = new byte[]{0xFF,0x00,0x00,0x00}; 
+            // mi.Green = new byte[]{0x00,0xFF,0x00,0x00}; 
+            
+            //2 print mi to disk in some easy to read format.
+            // error! this image is written to disk upside down!.
+            ManagedImage mi = new ManagedImage(tex);
+            var tgaBytes = mi.ExportTGA();
+            Debug.Log("writing to "+ Path.Combine(Application.persistentDataPath, "managed_image_export.tga").ToString());
+            System.IO.File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "managed_image_export.tga"), tgaBytes);
+
+            //3. convert to t2d and show on screen.
+            Texture2D t2d = mi.ExportTex2D();
+            // plane.make
+            // plane.show(t2d)
+            
+            var bytes = t2d.EncodeToJPG(100);
+            System.IO.File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "managed_image_to_texture2d.jpg"), bytes);
+
+            yield return new WaitForSeconds(1);
+            
+            //4. convert back to tga, save it as a 2nd file.
+            ManagedImage mi2 = new ManagedImage(t2d);
+            // error:this method writes a up-side down image.
+            var tgaBytes2 = mi2.ExportTGA();
+            System.IO.File.WriteAllBytes(Path.Combine(Application.persistentDataPath, "smallPic2.tga"), tgaBytes2);
+            
+            Assert.Pass();
+            yield break;
+        }
+
+
         [UnityTest]
         //login UI-backend-UI test
         /* 1. [UI] enter creds, press login button
