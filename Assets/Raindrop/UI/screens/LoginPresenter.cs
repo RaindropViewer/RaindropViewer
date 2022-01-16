@@ -422,17 +422,6 @@ namespace Raindrop.Presenters
             return true;
         }
 
-        public void OnLogoutBtnClick()
-        {
-
-            Debug.Log("logout btn");
-
-            // Logout of simulator
-            //globalRef.MainRaindropInstance.Client.Network.Logout();
-
-            netcom.Logout();
-        }
-
         #endregion
 
         #region Login functions
