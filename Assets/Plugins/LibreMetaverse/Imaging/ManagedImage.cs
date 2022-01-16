@@ -460,39 +460,29 @@ namespace OpenMetaverse.Imaging
                 }
             }
 
-            Texture2D b = new Texture2D(Width, Height);
+            Texture2D b = new Texture2D(Width, Height,TextureFormat.ARGB32,false);
             b.hideFlags = HideFlags.HideAndDontSave; //this helps us delete this texture later?
 
-            var mip0Data = b.GetPixelData<Color32>(1);
+            var mip0Data = b.GetPixelData<Color32>(0);
 
             if (mip0Data.Length != Width * Height)
             {
-                Debug.LogError("mip0 data size (of texture) not match the data size of array!");
-                
+                Debug.LogError("mip0 data size (of texture) not match the data size of array! "
+                               + (mip0Data.Length).ToString() + " vs "+ (Width * Height).ToString()
+                               );
             } 
 
+            //copy managedinage bytes into the nativearray
             for (int i = 0; i < mip0Data.Length; i++)
             {
                 var blue = raw[i * 4 + 0];
                 var green = raw[i * 4 + 1];
                 var red = raw[i * 4 + 2];
                 var alpha = raw[i * 4 + 3];
-                mip0Data[i] = new Color32(red, green, blue, alpha);
+                mip0Data[i] = new Color32(alpha, red, green, blue);
             }
 
-            //Bitmap b = new Bitmap(
-            //            Width,
-            //            Height,
-            //            PixelFormat.Format32bppArgb);
-
-            //BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-            //    ImageLockMode.WriteOnly,
-            //    PixelFormat.Format32bppArgb);
-
-            //System.Runtime.InteropServices.Marshal.Copy(raw, 0, bd.Scan0, Width * Height * 4);
-
-            //b.UnlockBits(bd);
-
+            b.LoadRawTextureData(mip0Data);
             b.Apply(false);
             return b;
         }
