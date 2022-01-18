@@ -45,7 +45,6 @@ namespace Raindrop.Services.Bootstrap
         {
             // LinkUnityObjects();
 
-            StartLogger();
             
             //0. start servicelocator pattern.
             StartServiceLocator();
@@ -53,6 +52,7 @@ namespace Raindrop.Services.Bootstrap
             //1. main instance.
             CreateAndRegister_RaindropInstance();
             
+            StartLogger();
             //2. construct raindrop instance and register it
             var client = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client;
             
