@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC.
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without 
@@ -132,7 +133,7 @@ namespace OpenMetaverse
             set 
             {
                 UpdateNodeFor(value);
-                _RootNode = Items[value.UUID];
+                RootNode = Items[value.UUID];
             }
         }
 
@@ -145,28 +146,25 @@ namespace OpenMetaverse
             set
             {
                 UpdateNodeFor(value);
-                _LibraryRootNode = Items[value.UUID];
+                LibraryRootNode = Items[value.UUID];
             }
         }
 
-        private InventoryNode _LibraryRootNode;
-        private InventoryNode _RootNode;
-        
         /// <summary>
         /// The root node of the avatars inventory
         /// </summary>
-        public InventoryNode RootNode => _RootNode;
+        public InventoryNode RootNode { get; private set; }
 
         /// <summary>
         /// The root node of the default shared library
         /// </summary>
-        public InventoryNode LibraryRootNode => _LibraryRootNode;
+        public InventoryNode LibraryRootNode { get; private set; }
 
-        public UUID Owner { get; }
+        public UUID Owner { get; private set; }
 
         private GridClient Client;
         //private InventoryManager Manager;
-        public Dictionary<UUID, InventoryNode> Items = new Dictionary<UUID, InventoryNode>();
+        public Dictionary<UUID, InventoryNode> Items;
 
         public Inventory(GridClient client, InventoryManager manager)
             : this(client, manager, client.Self.AgentID) { }
@@ -226,8 +224,10 @@ namespace OpenMetaverse
                 if (item.ParentUUID != UUID.Zero && !Items.TryGetValue(item.ParentUUID, out itemParent))
                 {
                     // OK, we have no data on the parent, let's create a fake one.
-                    InventoryFolder fakeParent = new InventoryFolder(item.ParentUUID);
-                    fakeParent.DescendentCount = 1; // Dear god, please forgive me.
+                    InventoryFolder fakeParent = new InventoryFolder(item.ParentUUID)
+                    {
+                        DescendentCount = 1 // Dear god, please forgive me.
+                    };
                     itemParent = new InventoryNode(fakeParent);
                     Items[item.ParentUUID] = itemParent;
                     // Unfortunately, this breaks the nice unified tree
@@ -235,13 +235,6 @@ namespace OpenMetaverse
                     // As soon as we get the parent, the tree repairs itself.
                     //Logger.DebugLog("Attempting to update inventory child of " +
                     //    item.ParentUUID.ToString() + " when we have no local reference to that folder", Client);
-
-                    if (Client.Settings.FETCH_MISSING_INVENTORY)
-                    {
-                        // Fetch the parent
-                        List<UUID> fetchreq = new List<UUID>(1) {item.ParentUUID};
-
-                    }
                 }
 
                 InventoryNode itemNode;
@@ -349,7 +342,7 @@ namespace OpenMetaverse
                     BinaryFormatter bformatter = new BinaryFormatter();
                     lock (Items)
                     {
-                        Logger.Log("Caching " + Items.Count.ToString() + " inventory items to " + filename, Helpers.LogLevel.Info);
+                        Logger.Log($"Caching {Items.Count} inventory items to {filename}", Helpers.LogLevel.Info);
                         foreach (KeyValuePair<UUID, InventoryNode> kvp in Items)
                         {
                             bformatter.Serialize(stream, kvp.Value);
@@ -359,7 +352,7 @@ namespace OpenMetaverse
 	        }
             catch (Exception e)
             {
-                Logger.Log("Error saving inventory cache to disk :"+e.Message,Helpers.LogLevel.Error);
+                Logger.Log("Error saving inventory cache to disk", Helpers.LogLevel.Error, e);
             }
         }
 
@@ -367,7 +360,7 @@ namespace OpenMetaverse
         /// Loads in inventory cache file into the inventory structure. Note only valid to call after login has been successful.
         /// </summary>
         /// <param name="filename">Name of the cache file to load</param>
-        /// <returns>The number of inventory items sucessfully reconstructed into the inventory node tree</returns>
+        /// <returns>The number of inventory items successfully reconstructed into the inventory node tree</returns>
         public int RestoreFromDisk(string filename)
         {
             List<InventoryNode> nodes = new List<InventoryNode>();
@@ -381,10 +374,9 @@ namespace OpenMetaverse
                 using (Stream stream = File.Open(filename, FileMode.Open))
                 {
                     BinaryFormatter bformatter = new BinaryFormatter();
-
                     while (stream.Position < stream.Length)
                     {
-                        OpenMetaverse.InventoryNode node = (InventoryNode)bformatter.Deserialize(stream);
+                        var node = (InventoryNode)bformatter.Deserialize(stream);
                         nodes.Add(node);
                         item_count++;
                     }
@@ -392,11 +384,11 @@ namespace OpenMetaverse
             }
             catch (Exception e)
             {
-                Logger.Log("Error accessing inventory cache file :" + e.Message, Helpers.LogLevel.Error);
+                Logger.Log("Error accessing inventory cache file", Helpers.LogLevel.Error, e);
                 return -1;
             }
 
-            Logger.Log("Read " + item_count.ToString() + " items from inventory cache file", Helpers.LogLevel.Info);
+            Logger.Log($"Read {item_count} items from inventory cache file", Helpers.LogLevel.Info);
 
             item_count = 0;
             List<InventoryNode> del_nodes = new List<InventoryNode>(); //nodes that we have processed and will delete
@@ -478,7 +470,7 @@ namespace OpenMetaverse
                 del_nodes.Clear();
             }
 
-            Logger.Log("Reassembled " + item_count.ToString() + " items from inventory cache file", Helpers.LogLevel.Info);
+            Logger.Log($"Reassembled {item_count} items from inventory cache file", Helpers.LogLevel.Info);
             return item_count;
         }
 
@@ -506,9 +498,10 @@ namespace OpenMetaverse
                 {
                     // Log a warning if there is a UUID mismatch, this will cause problems
                     if (value.UUID != uuid)
-                        Logger.Log("Inventory[uuid]: uuid " + uuid.ToString() + " is not equal to value.UUID " +
-                            value.UUID.ToString(), Helpers.LogLevel.Warning, Client);
-
+                    {
+                        Logger.Log($"Inventory[uuid]: uuid {uuid} is not equal to value.UUID {value.UUID}",
+                            Helpers.LogLevel.Warning, Client);
+                    }
                     UpdateNodeFor(value);
                 }
                 else

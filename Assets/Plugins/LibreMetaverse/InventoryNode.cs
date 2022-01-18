@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC.
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without
@@ -34,13 +35,12 @@ namespace OpenMetaverse
     {
         private InventoryBase data;
         private InventoryNode parent;
-        private UUID parentID; //used for de-seralization 
+        private UUID parentID; //used for deseralization
         private InventoryNodeDictionary nodes;
         private bool needsUpdate = true;
         [NonSerialized]
         private object tag;
 
-        /// <summary></summary>
         public InventoryBase Data
         {
             get => data;
@@ -54,24 +54,35 @@ namespace OpenMetaverse
             set => tag = value;
         }
 
-        /// <summary></summary>
         public InventoryNode Parent
         {
             get => parent;
             set => parent = value;
         }
 
-        /// <summary></summary>
-        public UUID ParentID => parentID;
+        public UUID ParentID
+        {
+            get => parentID;
+            private set => parentID = value;
+        }
 
-        /// <summary></summary>
         public InventoryNodeDictionary Nodes
         {
-            get { return nodes ?? (nodes = new InventoryNodeDictionary(this)); }
+            get => nodes ?? (nodes = new InventoryNodeDictionary(this));
             set => nodes = value;
         }
 
-        public System.DateTime ModifyTime
+        /// <summary>
+        /// For inventory folder nodes specifies weather the folder needs to be
+        /// refreshed from the server
+        /// </summary>
+        public bool NeedsUpdate
+        {
+            get => needsUpdate;
+            set => needsUpdate = value;
+        }
+
+        public DateTime ModifyTime
         {
             get
             {
@@ -95,16 +106,6 @@ namespace OpenMetaverse
         public void Sort()
         {
             Nodes.Sort();
-        }
-
-        /// <summary>
-        /// For inventory folder nodes specifies weather the folder needs to be
-        /// refreshed from the server
-        /// </summary>
-        public bool NeedsUpdate
-        {
-            get { return needsUpdate; }
-            set { needsUpdate = value; }
         }
 
         public InventoryNode()
@@ -151,8 +152,8 @@ namespace OpenMetaverse
             Type type = (Type)info.GetValue("Type", typeof(Type));
          
 	    // Construct a new inventory object based on the Type stored in Type
-            System.Reflection.ConstructorInfo ctr = type.GetConstructor(new Type[] {typeof(SerializationInfo),typeof(StreamingContext)});
-            data = (InventoryBase) ctr.Invoke(new Object[] { info, ctxt });
+            System.Reflection.ConstructorInfo ctr = type.GetConstructor(new[] {typeof(SerializationInfo),typeof(StreamingContext)});
+            if (ctr != null) data = (InventoryBase)ctr.Invoke(new object[] { info, ctxt });
         }
 
         public override string ToString()

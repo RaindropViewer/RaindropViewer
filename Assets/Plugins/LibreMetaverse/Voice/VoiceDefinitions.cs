@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC.
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without
@@ -26,10 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Xml.Serialization;
+using OpenMetaverse;
 
-namespace OpenMetaverse.Voice
+namespace LibreMetaverse.Voice
 {
     public partial class VoiceGateway
     {
@@ -424,16 +425,14 @@ namespace OpenMetaverse.Voice
         #region Connector Delegates
         public class VoiceConnectorEventArgs : VoiceResponseEventArgs
         {
-            private readonly string m_Version;
-            private readonly string m_ConnectorHandle;
-            public string Version { get { return m_Version; } }
-            public string Handle { get { return m_ConnectorHandle; } }
+            public string Version { get; }
+            public string Handle { get; }
 
             public VoiceConnectorEventArgs(int rcode, int scode, string text, string version, string handle) :
                 base(ResponseType.ConnectorCreate, rcode, scode, text)
             {
-                m_Version = version;
-                m_ConnectorHandle = handle;
+                Version = version;
+                Handle = handle;
             }
         }
 
@@ -443,16 +442,14 @@ namespace OpenMetaverse.Voice
         #region Aux Event Args
         public class VoiceDevicesEventArgs : VoiceResponseEventArgs
         {
-            private readonly string m_CurrentDevice;
-            private readonly List<string> m_Available;
-            public string CurrentDevice { get { return m_CurrentDevice; } }
-            public List<string> Devices { get { return m_Available; } }
+            public string CurrentDevice { get; }
+            public List<string> Devices { get; }
 
             public VoiceDevicesEventArgs(ResponseType type, int rcode, int scode, string text, string current, List<string> avail) :
                 base(type, rcode, scode, text)
             {
-                m_CurrentDevice = current;
-                m_Available = avail;
+                CurrentDevice = current;
+                Devices = avail;
             }
         }
 
@@ -478,13 +475,12 @@ namespace OpenMetaverse.Voice
         #region Account Event Args
         public class VoiceAccountEventArgs : VoiceResponseEventArgs
         {
-            private readonly string m_AccountHandle;
-            public string AccountHandle { get { return m_AccountHandle; } }
+            public string AccountHandle { get; }
 
             public VoiceAccountEventArgs(int rcode, int scode, string text, string ahandle) :
                 base(ResponseType.AccountLogin, rcode, scode, text)
             {
-                this.m_AccountHandle = ahandle;
+                this.AccountHandle = ahandle;
             }
         }
 
@@ -612,7 +608,7 @@ namespace OpenMetaverse.Voice
             public string RequestId;
             [XmlAttribute("action")]
             public string Action;
-            public string ReturnCode;
+            public int ReturnCode;
             public VoiceResponseResults Results;
             public VoiceInputXml InputXml;
         }
@@ -630,7 +626,7 @@ namespace OpenMetaverse.Voice
         public class VoiceResponseResults
         {
             public string VersionID;
-            public string StatusCode;
+            public int StatusCode;
             public string StatusString;
             public string ConnectorHandle;
             public string AccountHandle;

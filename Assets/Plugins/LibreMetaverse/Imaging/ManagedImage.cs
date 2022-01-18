@@ -144,24 +144,24 @@ namespace OpenMetaverse.Imaging
                 Alpha = new byte[pixelCount];
 
                 //BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                //    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                //    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);				
+				/*
+                unsafe
+                {
+                    byte* pixel = (byte*)bd.Scan0;
 
-                //unsafe
-                //{
-                //    byte* pixel = (byte*)bd.Scan0;
-
-                //    for (int i = 0; i < pixelCount; i++)
-                //    {
-                //        // GDI+ gives us BGRA and we need to turn that in to RGBA
-                //        Blue[i] = *(pixel++);
-                //        Green[i] = *(pixel++);
-                //        Red[i] = *(pixel++);
-                //        Alpha[i] = *(pixel++);
-                //    }
-                //}
-
-                //bitmap.UnlockBits(bd);
-
+                    for (int i = 0; i < pixelCount; i++)
+                    {
+                        // GDI+ gives us BGRA and we need to turn that in to RGBA
+                        Blue[i] = *(pixel++);
+                        Green[i] = *(pixel++);
+                        Red[i] = *(pixel++);
+                        Alpha[i] = *(pixel++);
+                    }
+                }
+				
+				*/
+			
                 for (int i = 0; i < pixelCount; i++)
                 {
                     Color32 bit = tex.GetPixel(i%Width , i / Width);
@@ -171,7 +171,10 @@ namespace OpenMetaverse.Imaging
                     Alpha[i] = bit.a;
 
                 }
+                //bitmap.UnlockBits(bd);
             }
+			// this 16bit grayscale image format is commented-out for Raindrop and we need to investigate what its used for; can we just ignore it?
+			// unity does not seem to support 16bit grayscale
             //else if (tex.format == TextureFormat.Alpha8)  // PixelFormat.Format16bppGrayScale --- 16 bits per pixel. The color information specifies 65536 shades of gray.
             //{
             //    Channels = ImageChannels.Gray;
@@ -215,6 +218,7 @@ namespace OpenMetaverse.Imaging
 
                 }
             }
+			// can we remove the following? this Format32bppRgb is a ridiculous format.
 			else if (tex.format == TextureFormat.RGB24) // PixelFormat.Format32bppRgb) --- The remaining 8 bits are not used.
             {
 				Channels = ImageChannels.Color;

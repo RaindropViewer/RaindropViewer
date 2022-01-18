@@ -28,10 +28,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Xml;
 using System.Threading;
-using OpenMetaverse;
 
 namespace OpenMetaverse.Assets
 {
@@ -435,7 +433,10 @@ namespace OpenMetaverse.Assets
             xtw.WriteElementString("SnapshotID", parcel.SnapshotID.ToString());
             xtw.WriteElementString("UserLocation", parcel.UserLocation.ToString());
             xtw.WriteElementString("UserLookAt", parcel.UserLookAt.ToString());
-            xtw.WriteElementString("Dwell", "0");
+            xtw.WriteElementString("Dwell", parcel.Dwell.ToString());
+            xtw.WriteElementString("SeeAVs", parcel.SeeAVs.ToString());
+            xtw.WriteElementString("AnyAVSounds", parcel.AnyAVSounds.ToString());
+            xtw.WriteElementString("GroupAVSounds", parcel.GroupAVSounds.ToString());
             xtw.WriteElementString("OtherCleanTime", Convert.ToString(parcel.OtherCleanTime));
 
             xtw.WriteEndElement();
@@ -534,9 +535,8 @@ namespace OpenMetaverse.Assets
 
                 if (prim.Textures.FaceTextures != null)
                 {
-                    for (int i = 0; i < prim.Textures.FaceTextures.Length; i++)
+                    foreach (var face in prim.Textures.FaceTextures)
                     {
-                        Primitive.TextureEntryFace face = prim.Textures.FaceTextures[i];
                         if (face != null)
                             textureList[face.TextureID] = face.TextureID;
                     }

@@ -27,7 +27,6 @@
 using System;
 using System.Threading;
 using OpenMetaverse.Packets;
-using UnityEngine;
 
 namespace OpenMetaverse
 {
@@ -378,10 +377,7 @@ namespace OpenMetaverse
                 }
             }
             /// <summary>The current value of the agent control flags</summary>
-            public uint AgentControls
-            {
-                get { return agentControls; }
-            }
+            public uint AgentControls { get; private set; }
 
             /// <summary>Gets or sets the interval in milliseconds at which
             /// AgentUpdate packets are sent to the current simulator. Setting
@@ -421,11 +417,7 @@ namespace OpenMetaverse
             }
 
             /// <summary>Reset movement controls every time we send an update</summary>
-            public bool AutoResetControls
-            {
-                get { return autoResetControls; }
-                set { autoResetControls = value; }
-            }
+            public bool AutoResetControls { get; set; }
 
             #endregion Properties
 
@@ -460,13 +452,11 @@ namespace OpenMetaverse
 
             private bool alwaysRun;
             private GridClient Client;
-            private uint agentControls;
             private int duplicateCount;
             private AgentState lastState;
             /// <summary>Timer for sending AgentUpdate packets</summary>
             private Timer updateTimer;
             private int updateInterval;
-            private bool autoResetControls;
 
             /// <summary>Default constructor</summary>
             public AgentMovement(GridClient client)
@@ -599,8 +589,6 @@ namespace OpenMetaverse
             /// <param name="simulator">Simulator to send the update to</param>
             public void SendUpdate(bool reliable, Simulator simulator)
             {
-                Debug.Log("sending movement packet.");
-                
                 // Since version 1.40.4 of the Linden simulator, sending this update
                 // causes corruption of the agent position in the simulator
                 if (simulator != null && (!simulator.AgentMovementComplete))
@@ -612,7 +600,7 @@ namespace OpenMetaverse
                 Vector3 zAxis = Camera.UpAxis;
 
                 // Attempted to sort these in a rough order of how often they might change
-                if (agentControls == 0 &&
+                if (AgentControls == 0 &&
                     yAxis == LastCameraYAxis &&
                     origin == LastCameraCenter &&
                     State == lastState &&
@@ -655,13 +643,13 @@ namespace OpenMetaverse
                     update.AgentData.CameraUpAxis = zAxis;
                     update.AgentData.Far = Camera.Far;
                     update.AgentData.State = (byte)State;
-                    update.AgentData.ControlFlags = agentControls;
+                    update.AgentData.ControlFlags = AgentControls;
                     update.AgentData.Flags = (byte)Flags;
 
                     Client.Network.SendPacket(update, simulator);
-                    Logger.DebugLog("sent packet of agent movement!");
+                    Logger.DebugLog("sent out a packet of agent movement!");
 
-                    if (autoResetControls) {
+                    if (AutoResetControls) {
                         ResetControlFlags();
                     }
                 }
@@ -714,20 +702,20 @@ namespace OpenMetaverse
 
             private bool GetControlFlag(ControlFlags flag)
             {
-                return (agentControls & (uint)flag) != 0;
+                return (AgentControls & (uint)flag) != 0;
             }
 
             private void SetControlFlag(ControlFlags flag, bool value)
             {
-                if (value) agentControls |= (uint)flag;
-                else agentControls &= ~((uint)flag);
+                if (value) AgentControls |= (uint)flag;
+                else AgentControls &= ~((uint)flag);
             }
 
             public void ResetControlFlags()
             {
                 // Reset all of the flags except for persistent settings like
                 // away, fly, mouselook, and crouching
-                agentControls &=
+                AgentControls &=
                     (uint)(ControlFlags.AGENT_CONTROL_AWAY |
                     ControlFlags.AGENT_CONTROL_FLY |
                     ControlFlags.AGENT_CONTROL_MOUSELOOK |

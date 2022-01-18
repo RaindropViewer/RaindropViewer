@@ -58,18 +58,9 @@ namespace LibreMetaverse.PrimMesher
         //<Deprecated : Sculptie from image file>
         //public SculptMesh(string fileName, int sculptType, int lod, int viewerMode, int mirror, int invert)
         //{
-        //    //var bitmap = (Bitmap) Image.FromFile(fileName);
-        //    var myreader = new BMPLoader();
-        //    BMPImage myimg = myreader.LoadBMP(fileName);
-        //    Texture2D tex = myimg.ToTexture2D();
-        //    Texture2D fakebmp = new Texture2D(tex);
-
-        //    _SculptMesh(fakebmp, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
-        //    //bitmap.Dispose();
-
-        //    fakebmp.delete();
-
-
+        //    var bitmap = (Bitmap) Image.FromFile(fileName);
+        //    _SculptMesh(bitmap, (SculptType) sculptType, lod, viewerMode != 0, mirror != 0, invert != 0);
+        //    bitmap.Dispose();
         //}
 
         /// <summary>
