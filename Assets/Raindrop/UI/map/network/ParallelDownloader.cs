@@ -74,7 +74,7 @@ namespace Raindrop.Network
                     {
                         QueuedItem item = queue.Dequeue(); //checlk this
 
-                        var req = CapsBase.DownloadStringAsync(
+                        var req = CapsBase.GetStringAsync(
                             item.address,
                             null,
                             item.millisecondsTimeout,
