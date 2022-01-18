@@ -30,7 +30,7 @@ namespace Raindrop.Presenters
         private GridClient client { get { return instance.Client; } }
 
         private UIService uimanager;
-        private Settings s;
+        private Settings s; //todo. init this.
 
         bool Active => instance.Client.Network.Connected;
 
