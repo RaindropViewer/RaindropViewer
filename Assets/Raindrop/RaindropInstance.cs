@@ -356,7 +356,6 @@ namespace Raindrop
             client.Self.Movement.UpdateInterval = 2500; //2.5 seconds?
 
             RegisterClientEvents(client);
-            SetClientTag();
         }
 
         public string ComputeCacheName(string cacheDir, UUID assetID)
@@ -404,18 +403,6 @@ namespace Raindrop
             client.Network.LoginProgress -= new EventHandler<LoginProgressEventArgs>(Network_LoginProgress);
         }
 
-        public void SetClientTag()
-        {
-            throw new NotImplementedException("this method was removed.");
-            // if (GlobalSettings["send_rad_client_tag"])
-            // {
-            //     _client.Settings.CLIENT_IDENTIFICATION_TAG = new UUID("b748af88-58e2-995b-cf26-9486dea8e830");
-            // }
-            // else
-            // {
-            //     _client.Settings.CLIENT_IDENTIFICATION_TAG = UUID.Zero;
-            // }
-        }
         private void GetWorldTimeZone()
         {
             try
