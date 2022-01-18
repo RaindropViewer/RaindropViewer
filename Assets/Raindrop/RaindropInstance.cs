@@ -335,7 +335,7 @@ namespace Raindrop
             client.Settings.ALWAYS_DECODE_OBJECTS = true;
             client.Settings.OBJECT_TRACKING = true;
             client.Settings.ENABLE_SIMSTATS = true;
-            client.Settings.FETCH_MISSING_INVENTORY = true;
+            // client.Settings.FETCH_MISSING_INVENTORY = true;
             client.Settings.SEND_AGENT_THROTTLE = true;
             client.Settings.SEND_AGENT_UPDATES = true;
             client.Settings.STORE_LAND_PATCHES = true;
@@ -406,14 +406,15 @@ namespace Raindrop
 
         public void SetClientTag()
         {
-            if (GlobalSettings["send_rad_client_tag"])
-            {
-                _client.Settings.CLIENT_IDENTIFICATION_TAG = new UUID("b748af88-58e2-995b-cf26-9486dea8e830");
-            }
-            else
-            {
-                _client.Settings.CLIENT_IDENTIFICATION_TAG = UUID.Zero;
-            }
+            throw new NotImplementedException("this method was removed.");
+            // if (GlobalSettings["send_rad_client_tag"])
+            // {
+            //     _client.Settings.CLIENT_IDENTIFICATION_TAG = new UUID("b748af88-58e2-995b-cf26-9486dea8e830");
+            // }
+            // else
+            // {
+            //     _client.Settings.CLIENT_IDENTIFICATION_TAG = UUID.Zero;
+            // }
         }
         private void GetWorldTimeZone()
         {

@@ -25,6 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using OpenMetaverse.Imaging;
 
 namespace OpenMetaverse.Assets
@@ -77,10 +78,12 @@ namespace OpenMetaverse.Assets
         /// </summary>
         public override void Encode()
         {
-            using (var writer = new OpenJpegDotNet.IO.Writer(Image.ExportTex2D()))
-            {
-                AssetData = writer.Encode();
-            }
+            throw new NotImplementedException();
+
+            // using (var writer = new OpenJpegDotNet.IO.Writer(Image.ExportTex2D()))
+            // {
+            //     AssetData = writer.Encode();
+            // }
         }
 
         /// <summary>
@@ -98,7 +101,9 @@ namespace OpenMetaverse.Assets
             {
                 // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
                 if (!reader.ReadHeader()) { return false; }
-                Image = new ManagedImage(reader.DecodeToBitmap());
+
+                throw new NotImplementedException();
+                // Image = new ManagedImage(reader.DecodeToBitmap());
             }
 
             if ((Image.Channels & ManagedImage.ImageChannels.Color) != 0)
