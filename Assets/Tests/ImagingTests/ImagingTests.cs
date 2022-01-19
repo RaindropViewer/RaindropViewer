@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
+using OpenMetaverse.Imaging;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -46,11 +47,12 @@ namespace Raindrop.Tests.ImagingTests
             [Test]
             public void readBytes_ImagePath()
             {
-                Assert.True(BetterStreamingAssets.FileExists(_inputImageSubPath));
+                BetterStreamingAssets.Initialize(); //fuck, this is easy to forget.
+                Assert.True(BetterStreamingAssets.FileExists(_inputImageSubPath), "SA file not exist : \n " + _inputImageSubPath);
 
                 byte[] thebytes = BetterStreamingAssets.ReadAllBytes(_inputImageSubPath);
 
-                Assert.True(thebytes.Length > 0);
+                Assert.True(thebytes.Length > 0, "File is empty size");
             }
 
             //can read and decode the jp2 from streamingassets. then save to local caching directory.
@@ -67,7 +69,7 @@ namespace Raindrop.Tests.ImagingTests
                 Assert.True(thebytes.Length > 0);
                 
                 
-                var texture = Raindrop.Imaging.LoadT2DWithoutMipMaps(thebytes);
+                var texture = T2D.LoadT2DWithoutMipMaps(thebytes);
 
                 Assert.True(texture.height > 5); //todo   so arbitrary
                 

@@ -97,14 +97,17 @@ namespace OpenMetaverse.Assets
 
             this.Components = 0;
 
-            using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
-            {
-                // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
-                if (!reader.ReadHeader()) { return false; }
-
-                throw new NotImplementedException();
-                // Image = new ManagedImage(reader.DecodeToBitmap());
-            }
+            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
+            var texture = Imaging.T2D.LoadT2DWithoutMipMaps(AssetData);
+            Image = new ManagedImage(texture);
+            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
+            // {
+            //     // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
+            //     if (!reader.ReadHeader()) { return false; }
+            //
+            //     throw new NotImplementedException();
+            //     // Image = new ManagedImage(reader.DecodeToBitmap());
+            // }
 
             if ((Image.Channels & ManagedImage.ImageChannels.Color) != 0)
                 Components += 3;

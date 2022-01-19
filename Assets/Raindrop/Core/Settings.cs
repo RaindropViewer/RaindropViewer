@@ -39,8 +39,6 @@ using OpenMetaverse.StructuredData;
 //using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using System.ComponentModel;
-using SixLabors.ImageSharp;
-using Color = SixLabors.ImageSharp.Color;
 using Formatting = System.Xml.Formatting;
 //using Font = Catnip.Drawing.Font;
 using Logger = OpenMetaverse.Logger;
@@ -163,11 +161,6 @@ namespace Raindrop
             //[JsonIgnore]
             //public Font Font;
 
-            [JsonIgnore]
-            public Color ForeColor;
-
-            [JsonIgnore]
-            public Color BackColor;
 
 
             public String Name;
