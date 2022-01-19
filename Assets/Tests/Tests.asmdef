@@ -7,14 +7,17 @@
         "LibreMetaverseAssembly",
         "RaindropUnity",
         "LeanGUI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "AsyncImageLoader.Runtime",
+        "Better"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "OpenJpegDotNet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
