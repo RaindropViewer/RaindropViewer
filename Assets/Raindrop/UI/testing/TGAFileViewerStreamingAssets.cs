@@ -3,25 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Better.StreamingAssets;
+using System;
 
 public class TGAFileViewerStreamingAssets : MonoBehaviour
 {
     [SerializeField]
     private string pathToTGAFolder;
     [SerializeField]
+    public bool useThreads; //run the extraction and GPU pumping in non-mainthread.
+
+    [SerializeField]
     public GameObject rawImageGO;
     private RawImageView iv;
     [SerializeField]
-    public GameObject textGO;
+    public GameObject textPathGO;
+    [SerializeField]
+    public GameObject texttime1GO;
+    [SerializeField]
+    public GameObject texttime2GO;
+
     [SerializeField]
     public List<string> filesInStreamingAssets;//= new List<string> { "openmetaverse_data/blush_alpha.tga" };
     
     //private List<FileInfo> fileList;
     public int currentFileIndex = 0;
     private float timeStart;
-    private int imagesCount = 5;
+    private int imagesCount;
 
-    private string[] paths;
+    public string[] paths;
     private byte[] poolItemBytes; //a object just to pool memory?
 
     private void Awake()
@@ -38,6 +47,7 @@ public class TGAFileViewerStreamingAssets : MonoBehaviour
         {
             throw new System.Exception("Imageview is fucked"); // fix exception type plz
         }
+          
 
         //check if the path is exist.
         if (!BetterStreamingAssets.DirectoryExists(pathToTGAFolder))
@@ -49,7 +59,7 @@ public class TGAFileViewerStreamingAssets : MonoBehaviour
         //get all files.
         
         paths = BetterStreamingAssets.GetFiles(pathToTGAFolder, "*.tga", SearchOption.AllDirectories);
-
+        imagesCount = paths.Length;
 
         ////get list of .tgas
         //DirectoryInfo d = new DirectoryInfo(pathToTGAFolder);
@@ -63,7 +73,7 @@ public class TGAFileViewerStreamingAssets : MonoBehaviour
 
         currentFileIndex++;
         currentFileIndex %= imagesCount;
-        ReadAndSetImage(currentFileIndex);
+        ReadAndSetImageOpenStream(currentFileIndex);
 
 
         return;
@@ -74,36 +84,66 @@ public class TGAFileViewerStreamingAssets : MonoBehaviour
         currentFileIndex--;
         currentFileIndex += imagesCount; //not sure if necessary -- prevent negative modulo
         currentFileIndex %= imagesCount;
-        ReadAndSetImage(currentFileIndex);
+        ReadAndSetImageOpenStream(currentFileIndex);
          
 
         return;
     }
 
-    private void ReadAndSetImage(int _currentFileIndex)
+    private void ReadAndSetImageOpenStream(int _currentFileIndex)
     {
         string filepath = paths[_currentFileIndex];
-        textGO.GetComponent<TextView>().setText(filepath);
 
         float timeStart = Time.realtimeSinceStartup;
+        float timeEndStreamOpen;
         Texture2D tex;
         using (var stream = BetterStreamingAssets.OpenRead(filepath))
         {
-             tex = OpenMetaverse.Imaging.LoadTGAClass.LoadTGA(stream);
+            timeEndStreamOpen = Time.realtimeSinceStartup;
+            tex = OpenMetaverse.Imaging.LoadTGAClass.LoadTGA(stream);
         }
 
         //StreamAssetsReader.read(filepath, poolItemBytes); // new allocation deep inside here.
         //var tex = OpenMetaverse.Imaging.LoadTGAClass.LoadTGA(poolItemBytes);
-        float timeEnd = Time.realtimeSinceStartup;
+        float timeEndTex = Time.realtimeSinceStartup;
         if (tex == null)
         {
             Debug.Log("reading of TGA at path " + filepath + " failed");
             return;
         }
-        Debug.Log("reading of TGA at path " + filepath + " SUCCESS! \nTook: " + (timeEnd - timeStart) + "seconds");
-
+        
 
         iv.setRawImage(tex);
+        setTextPath(filepath);
+        setTextTime1(timeEndStreamOpen - timeStart);
+        setTextTime2(timeEndTex - timeStart);
+    }
+
+    private void setTextTime2(float v)
+    {
+        var text = texttime2GO.GetComponent<TextView>();
+        if (text != null)
+        {
+            text.setText((v * 1000).ToString() + " ms");
+        }
+    }
+
+    private void setTextTime1(float v)
+    {
+        var text = texttime1GO.GetComponent<TextView>();
+        if (text != null)
+        {
+            text.setText((v*1000).ToString() + " ms");
+        }
+    }
+
+    private void setTextPath(string filepath)
+    {
+        var text = textPathGO.GetComponent<TextView>();
+        if (text != null)
+        {
+            text.setText(filepath);
+        }
     }
 
 

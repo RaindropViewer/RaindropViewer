@@ -5,7 +5,10 @@
     Game,
     Chat,
     Map,
-    EULA_modal,
+    Eula,
     Settings,
-    UNKNOWN
+    Avatar,
+    Inventory,
+    UNKNOWN,
+    NONE //use this if you want to pop only.
 }

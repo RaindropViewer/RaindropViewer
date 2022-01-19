@@ -29,8 +29,6 @@ using System;
 //using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 //using Rectangle = System.Drawing.Rectangle;
-using Catnip.Drawing;
-using Catnip.Drawing.Imaging;
 using Unity.Collections;
 using UnityEngine;
 

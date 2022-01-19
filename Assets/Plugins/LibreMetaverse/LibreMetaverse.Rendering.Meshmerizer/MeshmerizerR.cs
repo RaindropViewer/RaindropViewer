@@ -1,4 +1,6 @@
 /* Copyright (c) 2008 Robert Adams
+ * Copyright (c) 2021-2022, Sjofn LLC. All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
@@ -37,9 +39,7 @@ using System.Collections.Generic;
 using System.IO;
 using OpenMetaverse.StructuredData;
 using LibreMetaverse.PrimMesher;
-using OMV = OpenMetaverse;
-using OMVR = OpenMetaverse.Rendering;
-using Catnip.Drawing;
+//using Catnip.Drawing;
 using UnityEngine;
 
 namespace OpenMetaverse.Rendering
@@ -48,7 +48,7 @@ namespace OpenMetaverse.Rendering
     /// Meshing code based on the Idealist Viewer (20081213).
     /// </summary>
     [RendererName("MeshmerizerR")]
-    public class MeshmerizerR : OMVR.IRendering
+    public class MeshmerizerR : IRendering
     {
         /// <summary>
         /// Generates a basic mesh structure from a primitive
@@ -57,9 +57,9 @@ namespace OpenMetaverse.Rendering
         /// <param name="prim">Primitive to generate the mesh from</param>
         /// <param name="lod">Level of detail to generate the mesh at</param>
         /// <returns>The generated mesh or null on failure</returns>
-        public OMVR.SimpleMesh GenerateSimpleMesh(OMV.Primitive prim, OMVR.DetailLevel lod)
+        public SimpleMesh GenerateSimpleMesh(Primitive prim, DetailLevel lod)
         {
-            LibreMetaverse.PrimMesher.PrimMesh newPrim = GeneratePrimMesh(prim, lod, false);
+            PrimMesh newPrim = GeneratePrimMesh(prim, lod, false);
             if (newPrim == null)
                 return null;
 
@@ -86,6 +86,44 @@ namespace OpenMetaverse.Rendering
             return mesh;
         }
 
+
+        /// <summary>
+        /// Generates a basic mesh structure from a primitive, adding normals data.
+        /// A 'SimpleMesh' is just the prim's overall shape with no material information.
+        /// </summary>
+        /// <param name="prim">Primitive to generate the mesh from</param>
+        /// <param name="lod">Level of detail to generate the mesh at</param>
+        /// <returns>The generated mesh or null on failure</returns>
+        public SimpleMesh GenerateSimpleMeshWithNormals(Primitive prim, DetailLevel lod) {
+            PrimMesh newPrim = GeneratePrimMesh(prim, lod, true);
+	        if(newPrim == null)
+		        return null;
+
+            SimpleMesh mesh = new SimpleMesh {
+                Path = new Path(),
+                Prim = prim,
+                Profile = new Profile(),
+                Vertices = new List<Vertex>(newPrim.coords.Count)
+            };
+            
+	        for(int i = 0; i < newPrim.coords.Count; i++) {
+                Coord c = newPrim.coords[i];
+		        // Also saving the normal within the vertice
+                Coord n = newPrim.normals[i];
+		        mesh.Vertices.Add(new Vertex {Position = new Vector3(c.X, c.Y, c.Z), Normal = new Vector3(n.X, n.Y, n.Z)});
+	        }
+
+	        mesh.Indices = new List<ushort>(newPrim.faces.Count * 3);
+	        foreach(var face in newPrim.faces) {
+                mesh.Indices.Add((ushort) face.v1);
+                mesh.Indices.Add((ushort) face.v2);
+                mesh.Indices.Add((ushort) face.v3);
+            }
+
+	        return mesh;
+        }
+
+
         /// <summary>
         /// Generates a basic mesh structure from a sculpted primitive.
         /// 'SimpleMesh's have a single mesh and no faces or material information.
@@ -94,7 +132,9 @@ namespace OpenMetaverse.Rendering
         /// <param name="sculptTexture">Sculpt texture</param>
         /// <param name="lod">Level of detail to generate the mesh at</param>
         /// <returns>The generated mesh or null on failure</returns>
-        public SimpleMesh GenerateSimpleSculptMesh(Primitive prim, Texture2D sculptTexture, DetailLevel lod)
+        public SimpleMesh GenerateSimpleSculptMesh(	Primitive prim, 
+													Texture2D sculptTexture, 
+													DetailLevel lod)
         {
             var faceted = GenerateFacetedSculptMesh(prim, sculptTexture, lod);
 
@@ -130,41 +170,41 @@ namespace OpenMetaverse.Rendering
         /// <returns>The generated mesh</returns >
         public FacetedMesh GenerateFacetedMesh(Primitive prim, DetailLevel lod)
         {
-            bool isSphere = ((OMV.ProfileCurve)(prim.PrimData.profileCurve & 0x07) == OMV.ProfileCurve.HalfCircle);
-            LibreMetaverse.PrimMesher.PrimMesh newPrim = GeneratePrimMesh(prim, lod, true);
+            bool isSphere = ((ProfileCurve)(prim.PrimData.profileCurve & 0x07) == ProfileCurve.HalfCircle);
+            PrimMesh newPrim = GeneratePrimMesh(prim, lod, true);
             if (newPrim == null)
                 return null;
 
-            // copy the vertex information into OMVR.IRendering structures
-            var omvrmesh = new OMVR.FacetedMesh
+            // copy the vertex information into IRendering structures
+            var omvrmesh = new FacetedMesh
             {
-                Faces = new List<OMVR.Face>(),
+                Faces = new List<Face>(),
                 Prim = prim,
-                Profile = new OMVR.Profile
+                Profile = new Profile
                 {
-                    Faces = new List<OMVR.ProfileFace>(),
-                    Positions = new List<OMV.Vector3>()
+                    Faces = new List<ProfileFace>(),
+                    Positions = new List<Vector3>()
                 },
-                Path = new OMVR.Path {Points = new List<OMVR.PathPoint>()}
+                Path = new Path {Points = new List<PathPoint>()}
             };
             var indexer = newPrim.GetVertexIndexer();
 
             for (int i = 0; i < indexer.numPrimFaces; i++)
             {
-                OMVR.Face oface = new OMVR.Face
+                Face oface = new Face
                 {
-                    Vertices = new List<OMVR.Vertex>(),
+                    Vertices = new List<Vertex>(),
                     Indices = new List<ushort>(),
                     TextureFace = prim.Textures.GetFace((uint) i)
                 };
 
                 for (int j = 0; j < indexer.viewerVertices[i].Count; j++)
                 {
-                    var vert = new OMVR.Vertex();
+                    var vert = new Vertex();
                     var m = indexer.viewerVertices[i][j];
                     vert.Position = new Vector3(m.v.X, m.v.Y, m.v.Z);
                     vert.Normal = new Vector3(m.n.X, m.n.Y, m.n.Z);
-                    vert.TexCoord = new OMV.Vector2(m.uv.U, 1.0f - m.uv.V);
+                    vert.TexCoord = new Vector2(m.uv.U, 1.0f - m.uv.V);
                     oface.Vertices.Add(vert);
                 }
 
@@ -189,25 +229,27 @@ namespace OpenMetaverse.Rendering
         /// routine since all the context for finding teh texture is elsewhere.
         /// </summary>
         /// <returns>The faceted mesh or null if can't do it</returns>
-        public OMVR.FacetedMesh GenerateFacetedSculptMesh(Primitive prim, Texture2D scupltTexture, DetailLevel lod)
+        public FacetedMesh GenerateFacetedSculptMesh(	Primitive prim, 
+														Texture2D scupltTexture, 
+														DetailLevel lod)
         {
             LibreMetaverse.PrimMesher.SculptMesh.SculptType smSculptType;
             switch (prim.Sculpt.Type)
             {
                 case SculptType.Cylinder:
-                    smSculptType = LibreMetaverse.PrimMesher.SculptMesh.SculptType.cylinder;
+                    smSculptType = SculptMesh.SculptType.cylinder;
                     break;
                 case SculptType.Plane:
-                    smSculptType = LibreMetaverse.PrimMesher.SculptMesh.SculptType.plane;
+                    smSculptType = SculptMesh.SculptType.plane;
                     break;
                 case SculptType.Sphere:
-                    smSculptType = LibreMetaverse.PrimMesher.SculptMesh.SculptType.sphere;
+                    smSculptType = SculptMesh.SculptType.sphere;
                     break;
                 case SculptType.Torus:
-                    smSculptType = LibreMetaverse.PrimMesher.SculptMesh.SculptType.torus;
+                    smSculptType = SculptMesh.SculptType.torus;
                     break;
                 default:
-                    smSculptType = LibreMetaverse.PrimMesher.SculptMesh.SculptType.plane;
+                    smSculptType = SculptMesh.SculptType.plane;
                     break;
             }
             // The lod for sculpties is the resolution of the texture passed.
@@ -216,40 +258,40 @@ namespace OpenMetaverse.Rendering
             int mesherLod = 32; // number used in Idealist viewer
             switch (lod)
             {
-                case OMVR.DetailLevel.Highest:
+                case DetailLevel.Highest:
                     break;
-                case OMVR.DetailLevel.High:
+                case DetailLevel.High:
                     break;
-                case OMVR.DetailLevel.Medium:
+                case DetailLevel.Medium:
                     mesherLod /= 2;
                     break;
-                case OMVR.DetailLevel.Low:
+                case DetailLevel.Low:
                     mesherLod /= 4;
                     break;
             }
-            LibreMetaverse.PrimMesher.SculptMesh newMesh =
-                new LibreMetaverse.PrimMesher.SculptMesh(scupltTexture, smSculptType, mesherLod, true, prim.Sculpt.Mirror, prim.Sculpt.Invert);
+            SculptMesh newMesh =
+                new SculptMesh(scupltTexture, smSculptType, mesherLod, true, prim.Sculpt.Mirror, prim.Sculpt.Invert);
 
             int numPrimFaces = 1;       // a scuplty has only one face
 
-            // copy the vertex information into OMVR.IRendering structures
-            FacetedMesh omvrmesh = new OMVR.FacetedMesh
+            // copy the vertex information into IRendering structures
+            FacetedMesh omvrmesh = new FacetedMesh
             {
-                Faces = new List<OMVR.Face>(),
+                Faces = new List<Face>(),
                 Prim = prim,
-                Profile = new OMVR.Profile
+                Profile = new Profile
                 {
-                    Faces = new List<OMVR.ProfileFace>(),
-                    Positions = new List<OMV.Vector3>()
+                    Faces = new List<ProfileFace>(),
+                    Positions = new List<Vector3>()
                 },
-                Path = new OMVR.Path {Points = new List<OMVR.PathPoint>()}
+                Path = new Path {Points = new List<PathPoint>()}
             };
 
             for (int ii = 0; ii < numPrimFaces; ii++)
             {
-                Face oface = new OMVR.Face
+                Face oface = new Face
                 {
-                    Vertices = new List<OMVR.Vertex>(),
+                    Vertices = new List<Vertex>(),
                     Indices = new List<ushort>(),
                     TextureFace = prim.Textures.GetFace((uint) ii)
                 };
@@ -257,7 +299,7 @@ namespace OpenMetaverse.Rendering
 
                 for (int j = 0; j < faceVertices; j++)
                 {
-                    var vert = new OMVR.Vertex
+                    var vert = new Vertex
                     {
                         Position = new Vector3(newMesh.coords[j].X, newMesh.coords[j].Y, newMesh.coords[j].Z),
                         Normal = new Vector3(newMesh.normals[j].X, newMesh.normals[j].Y, newMesh.normals[j].Z),
@@ -286,12 +328,16 @@ namespace OpenMetaverse.Rendering
 
         /// <summary>
         /// Apply texture coordinate modifications from a
-        /// <seealso cref="TextureEntryFace"/> to a list of vertices
+        /// <seealso cref="OpenMetaverse.Primative.TextureEntryFace"/> to a list of vertices
         /// </summary>
         /// <param name="vertices">Vertex list to modify texture coordinates for</param>
         /// <param name="center">Center-point of the face</param>
         /// <param name="teFace">Face texture parameters</param>
-        public void TransformTexCoords(List<OMVR.Vertex> vertices, OMV.Vector3 center, OMV.Primitive.TextureEntryFace teFace, Vector3 primScale)
+        /// <param name="primScale">Prim scale vector</param>
+        public void TransformTexCoords(	List<Vertex> vertices, 
+										Vector3 center,
+										Primitive.TextureEntryFace teFace, 
+										Vector3 primScale)
         {
             // compute trig stuff up front
             float cosineAngle = (float)Math.Cos(teFace.Rotation);
@@ -346,7 +392,7 @@ namespace OpenMetaverse.Rendering
         //          var facetedMesh = MeshSubMeshAsFacetedMesh(prim, meshParts["medium_lod"]):
         // 3. Get a simple mesh from one of the submeshes (good if just getting a physics version):
         //      OSDMap meshParts = UnpackMesh(meshData);
-        //      OMV.Mesh flatMesh = MeshSubMeshAsSimpleMesh(prim, meshParts["physics_mesh"]);
+        //      Mesh flatMesh = MeshSubMeshAsSimpleMesh(prim, meshParts["physics_mesh"]);
         //
         // "physics_convex" is specially formatted so there is another routine to unpack
         //              that section:
@@ -364,9 +410,9 @@ namespace OpenMetaverse.Rendering
         /// routine since all the context for finding the data is elsewhere.
         /// </summary>
         /// <returns>The faceted mesh or null if can't do it</returns>
-        public OMVR.FacetedMesh GenerateFacetedMeshMesh(OMV.Primitive prim, byte[] meshData)
+        public FacetedMesh GenerateFacetedMeshMesh(Primitive prim, byte[] meshData)
         {
-            OMVR.FacetedMesh ret = null;
+            FacetedMesh ret = null;
             OSDMap meshParts = UnpackMesh(meshData);
             if (meshParts != null)
             {
@@ -391,18 +437,18 @@ namespace OpenMetaverse.Rendering
 
         // A version of GenerateFacetedMeshMesh that takes LOD spec so it's similar in calling convention of
         //    the other Generate* methods.
-        public OMVR.FacetedMesh GenerateFacetedMeshMesh(OMV.Primitive prim, byte[] meshData, OMVR.DetailLevel lod) {
-            OMVR.FacetedMesh ret = null;
+        public FacetedMesh GenerateFacetedMeshMesh(Primitive prim, byte[] meshData, DetailLevel lod) {
+            FacetedMesh ret = null;
             string partName = null;
             switch (lod)
             {
-                case OMVR.DetailLevel.Highest:
+                case DetailLevel.Highest:
                     partName = "high_lod"; break;
-                case OMVR.DetailLevel.High:
+                case DetailLevel.High:
                     partName = "medium_lod"; break;
-                case OMVR.DetailLevel.Medium:
+                case DetailLevel.Medium:
                     partName = "low_lod"; break;
-                case OMVR.DetailLevel.Low:
+                case DetailLevel.Low:
                     partName = "lowest_lod"; break;
             }
             if (partName != null)
@@ -424,7 +470,7 @@ namespace OpenMetaverse.Rendering
         }
 
         // Convert a compressed submesh buffer into a FacetedMesh.
-        public FacetedMesh MeshSubMeshAsFacetedMesh(OMV.Primitive prim, byte[] compressedMeshData)
+        public FacetedMesh MeshSubMeshAsFacetedMesh(Primitive prim, byte[] compressedMeshData)
         {
             FacetedMesh ret = null;
             OSD meshOSD = Helpers.DecompressOSD(compressedMeshData);
@@ -443,24 +489,27 @@ namespace OpenMetaverse.Rendering
 
 
         // Convert a compressed submesh buffer into a SimpleMesh.
-        public OMVR.SimpleMesh MeshSubMeshAsSimpleMesh(OMV.Primitive prim, byte[] compressedMeshData)
+        public SimpleMesh MeshSubMeshAsSimpleMesh(Primitive prim, byte[] compressedMeshData)
         {
-            OMVR.SimpleMesh ret = null;
+            SimpleMesh ret = null;
             OSD meshOSD = Helpers.DecompressOSD(compressedMeshData);
 
             OSDArray meshFaces = meshOSD as OSDArray;
             if (meshOSD != null)
             {
                 ret = new SimpleMesh();
-                foreach (OSD subMesh in meshFaces)
+                if (meshFaces != null)
                 {
-                    AddSubMesh(subMesh, ref ret);
+                    foreach (OSD subMesh in meshFaces)
+                    {
+                        AddSubMesh(subMesh, ref ret);
+                    }
                 }
             }
             return ret;
         }
 
-        public List<List<Vector3>> MeshSubMeshAsConvexHulls(OMV.Primitive prim, byte[] compressedMeshData)
+        public List<List<Vector3>> MeshSubMeshAsConvexHulls(Primitive prim, byte[] compressedMeshData)
         {
             List<List<Vector3>> hulls = new List<List<Vector3>>();
             try {
@@ -529,7 +578,7 @@ namespace OpenMetaverse.Rendering
         }
 
         // Add the submesh to the passed SimpleMesh
-        private void AddSubMesh(OSD subMeshOsd, ref OMVR.SimpleMesh holdingMesh) {
+        private void AddSubMesh(OSD subMeshOsd, ref SimpleMesh holdingMesh) {
             if (subMeshOsd is OSDMap subMeshMap)
             {
                 // As per http://wiki.secondlife.com/wiki/Mesh/Mesh_Asset_Format, some Mesh Level
@@ -544,7 +593,7 @@ namespace OpenMetaverse.Rendering
         }
 
         // Add the submesh to the passed FacetedMesh as a new face.
-        private void AddSubMesh(OMV.Primitive prim, int faceIndex, OSD subMeshOsd, ref OMVR.FacetedMesh holdingMesh) {
+        private void AddSubMesh(Primitive prim, int faceIndex, OSD subMeshOsd, ref FacetedMesh holdingMesh) {
             if (subMeshOsd is OSDMap subMesh)
             {
                 // As per http://wiki.secondlife.com/wiki/Mesh/Mesh_Asset_Format, some Mesh Level
@@ -673,13 +722,11 @@ namespace OpenMetaverse.Rendering
             return indices;
         }
 
-        /// <summary>
-        /// Decodes mesh asset.
+        /// <summary>Decodes mesh asset.</summary>
         /// <returns>OSDMap of all of the submeshes in the mesh. The value of the submesh name
         /// is the uncompressed data for that mesh.
         /// The OSDMap is made up of the asset_header section (which includes a lot of stuff)
-        /// plus each of the submeshes unpacked into compressed byte arrays.
-        /// </returns>
+        /// plus each of the submeshes unpacked into compressed byte arrays.</returns>
         public OSDMap UnpackMesh(byte[] assetData)
         {
             OSDMap meshData = new OSDMap();
@@ -723,7 +770,7 @@ namespace OpenMetaverse.Rendering
 
         // Local routine to create a mesh from prim parameters.
         // Collects parameters and calls PrimMesher to create all the faces of the prim.
-        private LibreMetaverse.PrimMesher.PrimMesh GeneratePrimMesh(Primitive prim, DetailLevel lod, bool viewerMode)
+        private PrimMesh GeneratePrimMesh(Primitive prim, DetailLevel lod, bool viewerMode)
         {
             Primitive.ConstructionData primData = prim.PrimData;
             int sides = 4;
@@ -734,14 +781,14 @@ namespace OpenMetaverse.Rendering
 
             bool isSphere = false;
 
-            if ((ProfileCurve)(primData.profileCurve & 0x07) == OMV.ProfileCurve.Circle)
+            if ((ProfileCurve)(primData.profileCurve & 0x07) == ProfileCurve.Circle)
             {
                 switch (lod)
                 {
-                    case OMVR.DetailLevel.Low:
+                    case DetailLevel.Low:
                         sides = 6;
                         break;
-                    case OMVR.DetailLevel.Medium:
+                    case DetailLevel.Medium:
                         sides = 12;
                         break;
                     default:
@@ -749,18 +796,18 @@ namespace OpenMetaverse.Rendering
                         break;
                 }
             }
-            else if ((ProfileCurve)(primData.profileCurve & 0x07) == OMV.ProfileCurve.EqualTriangle)
+            else if ((ProfileCurve)(primData.profileCurve & 0x07) == ProfileCurve.EqualTriangle)
                 sides = 3;
-            else if ((ProfileCurve)(primData.profileCurve & 0x07) == OMV.ProfileCurve.HalfCircle)
+            else if ((ProfileCurve)(primData.profileCurve & 0x07) == ProfileCurve.HalfCircle)
             {
                 // half circle, prim is a sphere
                 isSphere = true;
                 switch (lod)
                 {
-                    case OMVR.DetailLevel.Low:
+                    case DetailLevel.Low:
                         sides = 6;
                         break;
-                    case OMVR.DetailLevel.Medium:
+                    case DetailLevel.Medium:
                         sides = 12;
                         break;
                     default:
@@ -858,7 +905,7 @@ namespace OpenMetaverse.Rendering
 
             for (int j = 0; j < faceVertices; j++)
             {
-                var vert = new OMVR.Vertex
+                var vert = new Vertex
                 {
                     Position = new Vector3(newMesh.coords[j].X, newMesh.coords[j].Y, newMesh.coords[j].Z),
                     Normal = new Vector3(newMesh.normals[j].X, newMesh.normals[j].Y, newMesh.normals[j].Z),

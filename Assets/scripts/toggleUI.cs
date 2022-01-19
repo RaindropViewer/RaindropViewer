@@ -2,28 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Toggle))]
 public class toggleUI : MonoBehaviour
 {
-    private bool state;
-
-    [SerializeField] private Button button;
-    [SerializeField] public GameObject UI;
+    [SerializeField] private Toggle toggle;
+    [SerializeField] public GameObject targetToToggle;
 
     private void Awake()
-    { 
-    }
-
-    public void toggle()
     {
-        if (UI.activeInHierarchy)
+        if (targetToToggle == null)
         {
-            UI.SetActive(false);
-        } else
-        {
-            UI.SetActive(true);
+            return;
         }
-    }
 
+        if (toggle == null)
+        {
+            toggle = this.GetComponent<Toggle>();
+        }
+        
+        toggle.onValueChanged.AddListener(_ => targetToToggle.SetActive(_));
+    }
 }

@@ -26,8 +26,8 @@ namespace Lean.Gui
 		public enum BoundaryType
 		{
 			None,
-			Pivot,
-			Position
+			FlipPivot,
+			ShiftPosition
 		}
 
 		public enum ActivationType
@@ -49,7 +49,10 @@ namespace Lean.Gui
 		/// <summary>Move the attached Transform when the tooltip is open?</summary>
 		public bool Move { set { move = value; } get { return move; } } [SerializeField] private bool move = true;
 
-		/// <summary>This allows you to control how the tooltip will behave when it goes outside the screen bounds.</summary>
+		/// <summary>This allows you to control how the tooltip will behave when it goes outside the screen bounds.
+		/// FlipPivot = If the tooltip goes outside one of the screen boundaries, flip its pivot point on that axis so it goes the other way.
+		/// ShiftPosition = If the tooltip goes outside of the screen boundaries, shift its position until it's back inside.
+		/// NOTE: If <b>FlipPivot</b> is used and the tooltip is larger than the screen size, then it will revert to <b>ShiftPosition</b>.</summary>
 		public BoundaryType Boundary { set { boundary = value; } get { return boundary; } } [SerializeField] private BoundaryType boundary;
 
 		/// <summary>This allows you to perform a transition when this tooltip appears.
@@ -161,28 +164,49 @@ namespace Lean.Gui
 			{
 				cachedRectTransform.GetWorldCorners(corners);
 
-				var min = Vector2.Min(corners[0], Vector2.Min(corners[1], Vector2.Min(corners[2], corners[3])));
-				var max = Vector2.Max(corners[0], Vector2.Max(corners[1], Vector2.Max(corners[2], corners[3])));
+				var min       = Vector2.Min(corners[0], Vector2.Min(corners[1], Vector2.Min(corners[2], corners[3])));
+				var max       = Vector2.Max(corners[0], Vector2.Max(corners[1], Vector2.Max(corners[2], corners[3])));
+				var pivot     = cachedRectTransform.pivot;
+				var position  = cachedRectTransform.position;
+				var boundaryX = boundary;
+				var boundaryY = boundary;
 
-				if (boundary == BoundaryType.Pivot)
+				// If the tooltip cannot be flipped at its current position & size, revert to Boundary = Position?
+				if (boundary == BoundaryType.FlipPivot)
 				{
-					var pivot = cachedRectTransform.pivot;
+					var size = max - min;
 
+					if (finalPoint.x - size.x < 0 && finalPoint.x + size.x > Screen.width)
+					{
+						boundaryX = BoundaryType.ShiftPosition;
+					}
+
+					if (finalPoint.y - size.y < 0 && finalPoint.y + size.y > Screen.height)
+					{
+						boundaryY = BoundaryType.ShiftPosition;
+					}
+				}
+
+				if (boundaryX == BoundaryType.FlipPivot)
+				{
 					if (min.x < 0.0f) pivot.x = 0.0f; else if (max.x > Screen.width ) pivot.x = 1.0f;
-					if (min.y < 0.0f) pivot.y = 0.0f; else if (max.y > Screen.height) pivot.y = 1.0f;
-
-					cachedRectTransform.pivot = pivot;
 				}
-
-				if (boundary == BoundaryType.Position)
+				else if (boundaryX == BoundaryType.ShiftPosition)
 				{
-					var position = cachedRectTransform.position;
-
 					if (min.x < 0.0f) position.x -= min.x; else if (max.x > Screen.width ) position.x -= max.x - Screen.width;
-					if (min.y < 0.0f) position.y -= min.y; else if (max.y > Screen.height) position.y -= max.y - Screen.height;
-
-					cachedRectTransform.position = position;
 				}
+
+				if (boundaryY == BoundaryType.FlipPivot)
+				{
+					if (min.y < 0.0f) pivot.y = 0.0f; else if (max.y > Screen.height) pivot.y = 1.0f;
+				}
+				else if (boundaryY == BoundaryType.ShiftPosition)
+				{
+					if (min.y < 0.0f) position.y -= min.y; else if (max.y > Screen.height) position.y -= max.y - Screen.height;
+				}
+
+				cachedRectTransform.pivot    = pivot;
+				cachedRectTransform.position = position;
 			}
 		}
 
@@ -238,7 +262,7 @@ namespace Lean.Gui.Editor
 			if (Any(tgts, t => t.Move == true))
 			{
 				BeginIndent();
-					Draw("boundary", "This allows you to control how the tooltip will behave when it goes outside the screen bounds.");
+					Draw("boundary", "This allows you to control how the tooltip will behave when it goes outside the screen bounds.\n\nFlipPivot = If the tooltip goes outside one of the screen boundaries, flip its pivot point on that axis so it goes the other way.\n\nShiftPosition = If the tooltip goes outside of the screen boundaries, shift its position until it's back inside.\n\nNOTE: If <b>FlipPivot</b> is used and the tooltip is larger than the screen size, then it will revert to <b>ShiftPosition</b>.");
 				EndIndent();
 			}
 

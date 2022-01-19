@@ -32,9 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using System.Threading;
-
 using OpenMetaverse;
-
 //using Radegast.Automation;
 using Raindrop.Netcom;
 
@@ -86,7 +84,7 @@ namespace Raindrop
         internal static Random rnd = new Random();
         private System.Threading.Timer lookAtTimer;
 
-        public float FOVVerticalAngle = Utils.TWO_PI - 0.05f;
+        public float FOVVerticalAngle = OpenMetaverse.Utils.TWO_PI - 0.05f;
 
         /// <summary>
         /// Passes walk state
@@ -315,7 +313,7 @@ namespace Raindrop
         public static Vector3d ToVector3D(ulong handle, Vector3 pos)
         {
             uint globalX, globalY;
-            Utils.LongToUInts(handle, out globalX, out globalY);
+            OpenMetaverse.Utils.LongToUInts(handle, out globalX, out globalY);
 
             return new Vector3d(
                 (double)globalX + (double)pos.X,
@@ -478,7 +476,7 @@ namespace Raindrop
 
         public void SetRandomHeading()
         {
-            client.Self.Movement.UpdateFromHeading(Utils.TWO_PI * rnd.NextDouble(), true);
+            client.Self.Movement.UpdateFromHeading(OpenMetaverse.Utils.TWO_PI * rnd.NextDouble(), true);
             LookInFront();
         }
 
@@ -540,9 +538,9 @@ namespace Raindrop
 
         void netcom_ClientConnected(object sender, EventArgs e)
         {
-            if (!instance.GlobalSettings.ContainsKey("draw_distance"))
+            if (true /*!instance.GlobalSettings.ContainsKey("draw_distance")*/) //todo
             {
-                instance.GlobalSettings["draw_distance"] = 48;
+                instance.GlobalSettings["draw_distance"] = 20;
             }
 
             client.Self.Movement.Camera.Far = instance.GlobalSettings["draw_distance"];
@@ -984,7 +982,7 @@ namespace Raindrop
         static public Vector3d GlobalPosition(Simulator sim, Vector3 pos)
         {
             uint globalX, globalY;
-            Utils.LongToUInts(sim.Handle, out globalX, out globalY);
+            OpenMetaverse.Utils.LongToUInts(sim.Handle, out globalX, out globalY);
 
             return new Vector3d(
                 (double)globalX + (double)pos.X,

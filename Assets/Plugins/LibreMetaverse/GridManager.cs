@@ -382,13 +382,16 @@ namespace OpenMetaverse
         #endregion Delegates
 
         /// <summary>Unknown</summary>
-        public float SunPhase { get { return sunPhase; } }
-		/// <summary>Current direction of the sun</summary>
-        public Vector3 SunDirection { get { return sunDirection; } }
+        public float SunPhase { get; private set; }
+
+        /// <summary>Current direction of the sun</summary>
+        public Vector3 SunDirection { get; private set; }
+
         /// <summary>Current angular velocity of the sun</summary>
-        public Vector3 SunAngVelocity { get { return sunAngVelocity; } }
+        public Vector3 SunAngVelocity { get; private set; }
+
         /// <summary>Microseconds since the start of SL 4-hour day</summary>
-        public ulong TimeOfDay { get { return timeOfDay; } }
+        public ulong TimeOfDay { get; private set; }
 
         /// <summary>A dictionary of all the regions, indexed by region name</summary>
         internal Dictionary<string, GridRegion> Regions = new Dictionary<string, GridRegion>();
@@ -396,10 +399,6 @@ namespace OpenMetaverse
         internal Dictionary<ulong, GridRegion> RegionsByHandle = new Dictionary<ulong, GridRegion>();
 
 		private GridClient Client;
-        private float sunPhase;
-        private Vector3 sunDirection;
-        private Vector3 sunAngVelocity;
-        private ulong timeOfDay;
 
         /// <summary>
         /// Constructor
@@ -430,7 +429,7 @@ namespace OpenMetaverse
                 OSDMap body = new OSDMap {["Flags"] = OSD.FromInteger((int) layer)};
 
                 request.OnComplete += new CapsClient.CompleteCallback(MapLayerResponseHandler);
-                request.BeginGetResponse(body, OSDFormat.Xml, Client.Settings.CAPS_TIMEOUT);
+                request.PostRequestAsync(body, OSDFormat.Xml, Client.Settings.CAPS_TIMEOUT);
             }
         }
 
@@ -624,9 +623,9 @@ namespace OpenMetaverse
 
             if (m_GridLayer != null)
             {
-                for (int i = 0; i < layerData.Count; i++)
+                foreach (var data in layerData)
                 {
-                    OSDMap thisLayerData = (OSDMap)layerData[i];
+                    OSDMap thisLayerData = (OSDMap)data;
 
                     GridLayer layer;
                     layer.Bottom = thisLayerData["Bottom"].AsInteger();
@@ -635,7 +634,7 @@ namespace OpenMetaverse
                     layer.Right = thisLayerData["Right"].AsInteger();
                     layer.ImageID = thisLayerData["ImageID"].AsUUID();
 
-                    OnGridLayer(new GridLayerEventArgs(layer));                    
+                    OnGridLayer(new GridLayerEventArgs(layer));
                 }
             }
 
@@ -695,18 +694,18 @@ namespace OpenMetaverse
                 GridItemType type = (GridItemType)reply.RequestData.ItemType;
                 List<MapItem> items = new List<MapItem>();
 
-                for (int i = 0; i < reply.Data.Length; i++)
+                foreach (var data in reply.Data)
                 {
-                    string name = Utils.BytesToString(reply.Data[i].Name);
+                    string name = Utils.BytesToString(data.Name);
 
                     switch (type)
                     {
                         case GridItemType.AgentLocations:
                             MapAgentLocation location = new MapAgentLocation();
-                            location.GlobalX = reply.Data[i].X;
-                            location.GlobalY = reply.Data[i].Y;
+                            location.GlobalX = data.X;
+                            location.GlobalY = data.Y;
                             location.Identifier = name;
-                            location.AvatarCount = reply.Data[i].Extra;
+                            location.AvatarCount = data.Extra;
                             items.Add(location);
                             break;
                         case GridItemType.Classified:
@@ -715,28 +714,28 @@ namespace OpenMetaverse
                             break;
                         case GridItemType.LandForSale:
                             MapLandForSale landsale = new MapLandForSale();
-                            landsale.GlobalX = reply.Data[i].X;
-                            landsale.GlobalY = reply.Data[i].Y;
-                            landsale.ID = reply.Data[i].ID;
+                            landsale.GlobalX = data.X;
+                            landsale.GlobalY = data.Y;
+                            landsale.ID = data.ID;
                             landsale.Name = name;
-                            landsale.Size = reply.Data[i].Extra;
-                            landsale.Price = reply.Data[i].Extra2;
+                            landsale.Size = data.Extra;
+                            landsale.Price = data.Extra2;
                             items.Add(landsale);
                             break;
                         case GridItemType.MatureEvent:
                             MapMatureEvent matureEvent = new MapMatureEvent();
-                            matureEvent.GlobalX = reply.Data[i].X;
-                            matureEvent.GlobalY = reply.Data[i].Y;
+                            matureEvent.GlobalX = data.X;
+                            matureEvent.GlobalY = data.Y;
                             matureEvent.Description = name;
-                            matureEvent.Flags = (DirectoryManager.EventFlags)reply.Data[i].Extra2;
+                            matureEvent.Flags = (DirectoryManager.EventFlags)data.Extra2;
                             items.Add(matureEvent);
                             break;
                         case GridItemType.PgEvent:
                             MapPGEvent PGEvent = new MapPGEvent();
-                            PGEvent.GlobalX = reply.Data[i].X;
-                            PGEvent.GlobalY = reply.Data[i].Y;
+                            PGEvent.GlobalX = data.X;
+                            PGEvent.GlobalY = data.Y;
                             PGEvent.Description = name;
-                            PGEvent.Flags = (DirectoryManager.EventFlags)reply.Data[i].Extra2;
+                            PGEvent.Flags = (DirectoryManager.EventFlags)data.Extra2;
                             items.Add(PGEvent);
                             break;
                         case GridItemType.Popular:
@@ -745,26 +744,26 @@ namespace OpenMetaverse
                             break;
                         case GridItemType.Telehub:
                             MapTelehub teleHubItem = new MapTelehub();
-                            teleHubItem.GlobalX = reply.Data[i].X;
-                            teleHubItem.GlobalY = reply.Data[i].Y;
+                            teleHubItem.GlobalX = data.X;
+                            teleHubItem.GlobalY = data.Y;
                             items.Add(teleHubItem);
                             break;
                         case GridItemType.AdultLandForSale:
                             MapAdultLandForSale adultLandsale = new MapAdultLandForSale();
-                            adultLandsale.GlobalX = reply.Data[i].X;
-                            adultLandsale.GlobalY = reply.Data[i].Y;
-                            adultLandsale.ID = reply.Data[i].ID;
+                            adultLandsale.GlobalX = data.X;
+                            adultLandsale.GlobalY = data.Y;
+                            adultLandsale.ID = data.ID;
                             adultLandsale.Name = name;
-                            adultLandsale.Size = reply.Data[i].Extra;
-                            adultLandsale.Price = reply.Data[i].Extra2;
+                            adultLandsale.Size = data.Extra;
+                            adultLandsale.Price = data.Extra2;
                             items.Add(adultLandsale);
                             break;
                         case GridItemType.AdultEvent:
                             MapAdultEvent adultEvent = new MapAdultEvent();
-                            adultEvent.GlobalX = reply.Data[i].X;
-                            adultEvent.GlobalY = reply.Data[i].Y;
-                            adultEvent.Description = Utils.BytesToString(reply.Data[i].Name);
-                            adultEvent.Flags = (DirectoryManager.EventFlags)reply.Data[i].Extra2;
+                            adultEvent.GlobalX = data.X;
+                            adultEvent.GlobalY = data.Y;
+                            adultEvent.Description = Utils.BytesToString(data.Name);
+                            adultEvent.Flags = (DirectoryManager.EventFlags)data.Extra2;
                             items.Add(adultEvent);
                             break;
                         default:
@@ -784,10 +783,10 @@ namespace OpenMetaverse
         {
             SimulatorViewerTimeMessagePacket time = (SimulatorViewerTimeMessagePacket)e.Packet;
             
-            sunPhase = time.TimeInfo.SunPhase;
-            sunDirection = time.TimeInfo.SunDirection;
-            sunAngVelocity = time.TimeInfo.SunAngVelocity;
-            timeOfDay = time.TimeInfo.UsecSinceStart;
+            SunPhase = time.TimeInfo.SunPhase;
+            SunDirection = time.TimeInfo.SunDirection;
+            SunAngVelocity = time.TimeInfo.SunAngVelocity;
+            TimeOfDay = time.TimeInfo.UsecSinceStart;
             // TODO: Does anyone have a use for the time stuff?
         }
 
@@ -857,72 +856,59 @@ namespace OpenMetaverse
 
     public class CoarseLocationUpdateEventArgs : EventArgs
     {
-        private readonly Simulator m_Simulator;
-        private readonly List<UUID> m_NewEntries;
-        private readonly List<UUID> m_RemovedEntries;
-
-        public Simulator Simulator { get { return m_Simulator; } }
-        public List<UUID> NewEntries { get { return m_NewEntries; } }
-        public List<UUID> RemovedEntries { get { return m_RemovedEntries; } }
+        public Simulator Simulator { get; }
+        public List<UUID> NewEntries { get; }
+        public List<UUID> RemovedEntries { get; }
 
         public CoarseLocationUpdateEventArgs(Simulator simulator, List<UUID> newEntries, List<UUID> removedEntries)
         {
-            this.m_Simulator = simulator;
-            this.m_NewEntries = newEntries;
-            this.m_RemovedEntries = removedEntries;
+            this.Simulator = simulator;
+            this.NewEntries = newEntries;
+            this.RemovedEntries = removedEntries;
         }
     }
 
     public class GridRegionEventArgs : EventArgs
     {
-        private readonly GridRegion m_Region;
-        public GridRegion Region { get { return m_Region; } }
+        public GridRegion Region { get; }
 
         public GridRegionEventArgs(GridRegion region)
         {
-            this.m_Region = region;
+            this.Region = region;
         }
     }
 
     public class GridLayerEventArgs : EventArgs
     {
-        private readonly GridLayer m_Layer;
-
-        public GridLayer Layer { get { return m_Layer; } }
+        public GridLayer Layer { get; }
 
         public GridLayerEventArgs(GridLayer layer)
         {
-            this.m_Layer = layer;
+            this.Layer = layer;
         }
     }
 
     public class GridItemsEventArgs : EventArgs
     {
-        private readonly GridItemType m_Type;
-        private readonly List<MapItem> m_Items;
-
-        public GridItemType Type { get { return m_Type; } }
-        public List<MapItem> Items { get { return m_Items; } }
+        public GridItemType Type { get; }
+        public List<MapItem> Items { get; }
 
         public GridItemsEventArgs(GridItemType type, List<MapItem> items)
         {
-            this.m_Type = type;
-            this.m_Items = items;
+            this.Type = type;
+            this.Items = items;
         }
     }
 
     public class RegionHandleReplyEventArgs : EventArgs
     {
-        private readonly UUID m_RegionID;
-        private readonly ulong m_RegionHandle;
-
-        public UUID RegionID { get { return m_RegionID; } }
-        public ulong RegionHandle { get { return m_RegionHandle; } }
+        public UUID RegionID { get; }
+        public ulong RegionHandle { get; }
 
         public RegionHandleReplyEventArgs(UUID regionID, ulong regionHandle)
         {
-            this.m_RegionID = regionID;
-            this.m_RegionHandle = regionHandle;
+            this.RegionID = regionID;
+            this.RegionHandle = regionHandle;
         }
     }
 

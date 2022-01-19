@@ -31,191 +31,76 @@
 using System;
 using System.Timers;
 using OpenMetaverse;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Quaternion = OpenMetaverse.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop
 {
+    // this class periodically updated the user movement to the backend.
+    //      the backend (Agent Managerr Movement.cs) has a timer that sends the
+    //      movment at 2.5 s per movement packet.
+    
+    //to have fancy movements, we can add extend this class. (orbit, 3rd person camera movements...)
     public class RaindropMovement : IDisposable
     {
         private RaindropInstance instance;
         private GridClient client { get { return instance.Client; } }
         private Timer timer;
         private Vector3 forward = new Vector3(1, 0, 0);
-        private bool turningLeft = false;
-        private bool turningRight = false;
-        private bool movingForward = false;
-        private bool movingBackward = false;
-        private bool movingLeftward = false;
-        private bool movingRightward = false;
-        //private bool modified = false;
+        private bool isTurning = false; 
+        private uint _prev;
 
-        public bool TurningLeft
+        public void SetTurningRight()
         {
-            get
-            {
-                return turningLeft;
-            }
-            set
-            {
-                //modified = true;
-                turningLeft = value;
-                if (value)
-                {
-                    timer_Elapsed(null, null);
-                    timer.Enabled = true;
-                }
-                else
-                {
-                    timer.Enabled = false;
-                    client.Self.Movement.TurnLeft = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = true;
+            client.Self.Movement.TurnLeft = false;
+            
+            //start turning
+            isTurning = true;
+            //TurnStart();
         }
 
-        public bool TurningRight
+        public void SetTurningLeft()
         {
-            get
-            {
-                return turningRight;
-            }
-            set
-            {
-                //modified = true;
-                turningRight = value;
-                if (value)
-                {
-                    timer_Elapsed(null, null);
-                    timer.Enabled = true;
-                }
-                else
-                {
-                    timer.Enabled = false;
-                    client.Self.Movement.TurnRight = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = false;
+            client.Self.Movement.TurnLeft = true;
+            
+            isTurning = true;
+            //start turning
+            //TurnStart();
+        }
+        public void SetTurningStop()
+        {
+            //change mvmtpacket
+            client.Self.Movement.TurnRight = false;
+            client.Self.Movement.TurnLeft = false;
+            
+            isTurning = false;
+            //stop turning
+            //TurnStop();
         }
 
-        public bool MovingForward
+        private void TurnStart()
         {
-            get
-            {
-                return movingForward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingForward);
-                if (nochange) { return;  }
-
-                movingForward = value;
-                if (value)
-                {
-                    client.Self.Movement.AtPos = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.AtPos = false;
-                    client.Self.Movement.SendUpdate(true);
-                }
-            }
+            timer_Elapsed(null, null);
+            timer.Enabled = true; //this timer is only required for turning.
+        }
+        private void TurnStop()
+        {
+            timer.Enabled = false;
+            SendMovementPacketIfChanged();
         }
 
-        public bool MovingBackward
-        {
-            get
-            {
-                return movingBackward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingBackward);
-                if (nochange) { return; }
-
-                movingBackward = value;
-                if (value)
-                {
-                    client.Self.Movement.AtNeg = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.AtNeg = false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
-        
-        public bool MovingLeftward
-        {
-            get
-            {
-                return movingLeftward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingLeftward);
-                if (nochange) { return; }
-
-                movingLeftward = value;
-                if (value)
-                {
-                    client.Self.Movement.LeftPos = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.LeftPos = false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
-        
-        public bool MovingRight
-        {
-            get
-            {
-                return movingRightward;
-            }
-            set
-            {
-                //modified = true;
-
-                //obviously you dont send packets if no change...
-                bool nochange = (value == movingRightward);
-                if (nochange) { return; }
-
-                movingRightward = value;
-                if (value)
-                {
-                    client.Self.Movement.LeftNeg = true;
-                    client.Self.Movement.SendUpdate(true);
-                }
-                else
-                {
-                    client.Self.Movement.LeftNeg= false;
-                    client.Self.Movement.SendUpdate(true);
-
-                }
-            }
-        }
 
         public RaindropMovement(RaindropInstance instance)
         {
             this.instance = instance;
-            timer = new System.Timers.Timer(1000);
+            timer = new System.Timers.Timer(100); //seems like turn left and right will have 100 timer.
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             timer.Enabled = false;
         }
@@ -227,23 +112,113 @@ namespace Raindrop
             timer = null;
         }
 
+        //handle the turning that causes new rotation per second.
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Debug.Log("movement timer ");
-            OpenMetaverse.Logger.DebugLog("movement timer ");
             float delta = (float)timer.Interval / 1000f;
-            if (turningLeft)
-            {
-                client.Self.Movement.TurnLeft = true;
+            if (isTurning) {
                 client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
-                client.Self.Movement.SendUpdate(true);
+                
+                SendMovementPacketIfChanged();
+            } 
+            else
+            { //not turning
+                SendMovementPacketIfChanged();
             }
-            else if (turningRight)
+        }
+
+        //tell the movement machine that we are moving forward.
+        public void setForward()
+        {
+            client.Self.Movement.AtPos = true;
+            client.Self.Movement.AtNeg = false;
+        }
+        public void setBackward()
+        {
+            client.Self.Movement.AtPos = false;
+            client.Self.Movement.AtNeg = true;
+        }
+
+        public void setRightward()
+        {
+            client.Self.Movement.LeftPos = false;
+            client.Self.Movement.LeftNeg = true;
+        }
+        public void setLeftward()
+        {
+            client.Self.Movement.LeftPos = true;
+            client.Self.Movement.LeftNeg = false;
+        }
+
+
+        // stop moving.
+        public void zero2DInput()
+        {
+            client.Self.Movement.AtPos = false;
+            client.Self.Movement.AtNeg = false;
+            client.Self.Movement.LeftPos = false;
+            client.Self.Movement.LeftNeg = false;
+            
+            SendMovementPacketIfChanged();
+        }
+
+        
+        public void set2DInput(Vector2 arg0)
+        {
+            //note: is impossible to be no movement due to that is being handled by zero2DInput.
+
+            bool isUp = arg0.y > 0;
+            bool isDown = arg0.y < 0;
+            bool isNoVert = !isUp && !isDown;
+            
+            bool isRight = arg0.x > 0;
+            bool isLeft = arg0.x < 0;
+            bool isNoHorz = !isLeft && !isRight;
+
+            if (isUp) 
             {
-                client.Self.Movement.TurnRight = true;
-                client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -delta);
+                setForward();
+            }
+            if (isDown)
+            {
+                setBackward();
+            }
+            if (isRight)
+            {
+                setRightward();
+            }
+            if (isLeft)
+            {
+                setLeftward();
+            }
+
+            SendMovementPacketIfChanged();
+        }
+
+        // this is a safer method to send packets, as it makes sure we don't send non-helpful information.
+        private void SendMovementPacketIfChanged()
+        {
+            //hacky: moving means send. not moving, then have to check if changes has occured.
+            if (isTurning)
+            {
+                client.Self.Movement.SendUpdate(true);
+                return;
+            }
+            
+            var present = client.Self.Movement.AgentControls;
+            if (_prev != present)
+            {
+                _prev = client.Self.Movement.AgentControls;
                 client.Self.Movement.SendUpdate(true);
             }
         }
+
+        // user's direct input processed here.
+        public void setCameraInputs(object zero)
+        {
+            
+            
+        }
     }
+
 }

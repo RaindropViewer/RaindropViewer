@@ -8534,7 +8534,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 904771132}
         m_TargetAssemblyTypeName: CanvasManager, RaindropUnity
-        m_MethodName: popCanvas
+        m_MethodName: PopCanvas
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

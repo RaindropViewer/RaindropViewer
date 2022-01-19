@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 9160917217469581314}
   - component: {fileID: 9160917217469581315}
   - component: {fileID: 9160917217469581312}
+  - component: {fileID: 2200992579668676165}
   m_Layer: 5
   m_Name: ChatButton
   m_TagString: Untagged
@@ -129,7 +130,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9160917217469581326}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
   m_Name: 
@@ -142,6 +143,21 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2200992579668676165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160917217469581326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3519366cc6f6159448e93458bcd34783, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameOfChat: 
+  chatPane: {fileID: 0}
+  isSelected: 0
 --- !u!1 &9160917218642360352
 GameObject:
   m_ObjectHideFlags: 0
@@ -234,8 +250,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

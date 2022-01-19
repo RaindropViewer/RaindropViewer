@@ -263,7 +263,7 @@ namespace Raindrop
         private string GetAgentName(UUID agentID, ResolveType nameType)
         {
             RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            string name = RaindropInstance.INCOMPLETE_NAME;
+            string name = RaindropInstance.IncompleteName;
 
             using (ManualResetEvent gotName = new ManualResetEvent(false))
             {
@@ -300,7 +300,7 @@ namespace Raindrop
                     return agentID.ToString();
                 }
 
-                if (name == RaindropInstance.INCOMPLETE_NAME)
+                if (name == RaindropInstance.IncompleteName)
                 {
                     gotName.WaitOne(instance.GlobalSettings["resolve_uri_time"], false);
                 }
@@ -319,7 +319,7 @@ namespace Raindrop
         private string GetGroupName(UUID groupID)
         {
             RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            string name = RaindropInstance.INCOMPLETE_NAME;
+            string name = RaindropInstance.IncompleteName;
 
             using (ManualResetEvent gotName = new ManualResetEvent(false))
             {
@@ -338,7 +338,7 @@ namespace Raindrop
 
                 instance.Client.Groups.GroupNamesReply += handler;
                 instance.Client.Groups.RequestGroupName(groupID);
-                if (name == RaindropInstance.INCOMPLETE_NAME)
+                if (name == RaindropInstance.IncompleteName)
                 {
                     gotName.WaitOne(instance.GlobalSettings["resolve_uri_time"], false);
                 }
@@ -357,7 +357,7 @@ namespace Raindrop
         private string GetParcelName(UUID parcelID)
         {
             RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            string name = RaindropInstance.INCOMPLETE_NAME;
+            string name = RaindropInstance.IncompleteName;
             
             using (ManualResetEvent gotName = new ManualResetEvent(false))
             {
@@ -376,7 +376,7 @@ namespace Raindrop
 
                 instance.Client.Parcels.ParcelInfoReply += handler;
                 instance.Client.Parcels.RequestParcelInfo(parcelID);
-                if (name == RaindropInstance.INCOMPLETE_NAME)
+                if (name == RaindropInstance.IncompleteName)
                 {
                     gotName.WaitOne(instance.GlobalSettings["resolve_uri_time"], false);
                 }

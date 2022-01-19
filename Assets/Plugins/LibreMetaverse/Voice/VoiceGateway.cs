@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC.
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without
@@ -31,8 +32,9 @@ using System.Net.Sockets;
 using System.Diagnostics;
 using System.Threading;
 using System.Text;
+using OpenMetaverse;
 
-namespace OpenMetaverse.Voice
+namespace LibreMetaverse.Voice
 {
     public partial class VoiceGateway
     {
@@ -50,9 +52,9 @@ namespace OpenMetaverse.Voice
         public event DaemonDisconnectedCallback OnDaemonDisconnected;
         public event DaemonCouldntConnectCallback OnDaemonCouldntConnect;
 
-        public bool DaemonIsRunning { get { return daemonIsRunning; } }
-        public bool DaemonIsConnected { get { return daemonIsConnected; } }
-        public int RequestId { get { return requestId; } }
+        public bool DaemonIsRunning => daemonIsRunning;
+        public bool DaemonIsConnected => daemonIsConnected;
+        public int RequestId => requestId;
 
         protected Process daemonProcess;
         protected ManualResetEvent daemonLoopSignal = new ManualResetEvent(false);
@@ -232,7 +234,7 @@ namespace OpenMetaverse.Voice
             if (daemonIsConnected)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append(String.Format("<Request requestId=\"{0}\" action=\"{1}\"", requestId++, action));
+                sb.Append($"<Request requestId=\"{requestId++}\" action=\"{action}\"");
                 if (string.IsNullOrEmpty(requestXML))
                 {
                     sb.Append(" />");
@@ -267,10 +269,9 @@ namespace OpenMetaverse.Voice
 
         public static string MakeXML(string name, string text)
         {
-            if (string.IsNullOrEmpty(text))
-                return string.Format("<{0} />", name);
-            else
-                return string.Format("<{0}>{1}</{0}>", name, text);
+            return string.IsNullOrEmpty(text) 
+                ? string.Format("<{0} />", name) 
+                : string.Format("<{0}>{1}</{0}>", name, text);
         }
 
         private void daemonPipe_OnReceiveLine(string line)
@@ -299,26 +300,23 @@ namespace OpenMetaverse.Voice
                     // These first responses carry useful information beyond simple status,
                     // so they each have a specific Event.
                     case "Connector.Create.1":
-                        if (OnConnectorCreateResponse != null)
-                        {
-                            OnConnectorCreateResponse(
-                                rsp.InputXml.Request,
-                                new VoiceConnectorEventArgs(
-                                    int.Parse(rsp.ReturnCode),
-                                    int.Parse(rsp.Results.StatusCode),
-                                    rsp.Results.StatusString,
-                                    rsp.Results.VersionID,
-                                    rsp.Results.ConnectorHandle));
-                        }
+                        OnConnectorCreateResponse?.Invoke(
+                            rsp.InputXml.Request,
+                            new VoiceConnectorEventArgs(
+                                rsp.ReturnCode,
+                                rsp.Results.StatusCode,
+                                rsp.Results.StatusString,
+                                rsp.Results.VersionID,
+                                rsp.Results.ConnectorHandle));
                         break;
                     case "Aux.GetCaptureDevices.1":
-                        inputDevices = new List<string>();
+                        CaptureDevices = new List<string>();
 
                         if (rsp.Results.CaptureDevices.Count == 0 || rsp.Results.CurrentCaptureDevice == null)
                             break;
 
                         foreach (CaptureDevice device in rsp.Results.CaptureDevices)
-                            inputDevices.Add(device.Device);
+                            CaptureDevices.Add(device.Device);
                         currentCaptureDevice = rsp.Results.CurrentCaptureDevice.Device;
  
                         if (OnAuxGetCaptureDevicesResponse != null && rsp.Results.CaptureDevices.Count > 0)
@@ -327,21 +325,21 @@ namespace OpenMetaverse.Voice
                                 rsp.InputXml.Request,
                                 new VoiceDevicesEventArgs(
                                     ResponseType.GetCaptureDevices,
-                                    int.Parse(rsp.ReturnCode),
-                                    int.Parse(rsp.Results.StatusCode),
+                                    rsp.ReturnCode,
+                                    rsp.Results.StatusCode,
                                     rsp.Results.StatusString,
                                     rsp.Results.CurrentCaptureDevice.Device,
-                                    inputDevices));
+                                    CaptureDevices));
                         }
                         break;
                     case "Aux.GetRenderDevices.1":
-                        outputDevices = new List<string>();
+                        PlaybackDevices = new List<string>();
 
                         if (rsp.Results.RenderDevices.Count == 0 || rsp.Results.CurrentRenderDevice == null)
                             break;
 						
                         foreach (RenderDevice device in rsp.Results.RenderDevices)
-                            outputDevices.Add(device.Device);
+                            PlaybackDevices.Add(device.Device);
 
 
                         currentPlaybackDevice = rsp.Results.CurrentRenderDevice.Device;
@@ -352,11 +350,11 @@ namespace OpenMetaverse.Voice
                                 rsp.InputXml.Request,
                                 new VoiceDevicesEventArgs(
                                     ResponseType.GetCaptureDevices,
-                                    int.Parse(rsp.ReturnCode),
-                                    int.Parse(rsp.Results.StatusCode),
+                                    rsp.ReturnCode,
+                                    rsp.Results.StatusCode,
                                     rsp.Results.StatusString,
                                     rsp.Results.CurrentRenderDevice.Device,
-                                    outputDevices));
+                                    PlaybackDevices));
                         }
                         break;
 
@@ -365,8 +363,8 @@ namespace OpenMetaverse.Voice
                         {
                             OnAccountLoginResponse(rsp.InputXml.Request,
                                 new VoiceAccountEventArgs(
-                                    int.Parse(rsp.ReturnCode),
-                                    int.Parse(rsp.Results.StatusCode),
+                                    rsp.ReturnCode,
+                                    rsp.Results.StatusCode,
                                     rsp.Results.StatusString,
                                     rsp.Results.AccountHandle));
                         }
@@ -378,8 +376,8 @@ namespace OpenMetaverse.Voice
                             OnSessionCreateResponse(
                                 rsp.InputXml.Request,
                                 new VoiceSessionEventArgs(
-                                    int.Parse(rsp.ReturnCode),
-                                    int.Parse(rsp.Results.StatusCode),
+                                    rsp.ReturnCode,
+                                    rsp.Results.StatusCode,
                                     rsp.Results.StatusString,
                                     rsp.Results.SessionHandle));
                         }
@@ -456,8 +454,8 @@ namespace OpenMetaverse.Voice
                     OnVoiceResponse(rsp.InputXml.Request,
                         new VoiceResponseEventArgs(
                             genericResponse,
-                            int.Parse(rsp.ReturnCode),
-                            int.Parse(rsp.Results.StatusCode),
+                            rsp.ReturnCode,
+                            rsp.Results.StatusCode,
                             rsp.Results.StatusString));
                 }
             }
@@ -478,15 +476,12 @@ namespace OpenMetaverse.Voice
                 {
                     case "LoginStateChangeEvent":
                     case "AccountLoginStateChangeEvent":
-                        if (OnAccountLoginStateChangeEvent != null)
-                        {
-                            OnAccountLoginStateChangeEvent(this,
-                                new AccountLoginStateChangeEventArgs(
-                                    evt.AccountHandle,
-                                    int.Parse(evt.StatusCode),
-                                    evt.StatusString,
-                                    (LoginState)int.Parse(evt.State)));
-                        }
+                        OnAccountLoginStateChangeEvent?.Invoke(this,
+                            new AccountLoginStateChangeEventArgs(
+                                evt.AccountHandle,
+                                int.Parse(evt.StatusCode),
+                                evt.StatusString,
+                                (LoginState)int.Parse(evt.State)));
                         break;
 
                     case "SessionNewEvent":

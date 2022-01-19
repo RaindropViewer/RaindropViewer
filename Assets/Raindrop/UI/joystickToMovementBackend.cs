@@ -6,77 +6,48 @@ using Raindrop;
 using OpenMetaverse;
 using Raindrop.Netcom;
 using Lean.Gui;
+using Raindrop.ServiceLocator;
+using Vector2 = UnityEngine.Vector2;
 
 //make the joystick position drive the user's movement (u,d,l,r) :)
 public class joystickToMovementBackend : MonoBehaviour
 {
     public LeanJoystick variableJoystick;
     public GameObject theJoystickInScene;
-    private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    public float joyThresh = 0.7f;
+    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
     private RaindropNetcom netcom { get { return instance.Netcom; } }
     private GridClient client { get { return instance.Client; } }
 
     bool Active => instance.Client.Network.Connected;
 
-    void Awake()
+    void Start()
     {
         if (theJoystickInScene.GetComponent<LeanJoystick>() == null)
         {
             Debug.LogError("the joystick object is not found!");
         } 
         variableJoystick = theJoystickInScene.GetComponent<LeanJoystick>();
+
+        //set zero.
+        OnJoyUp();
+        
+        variableJoystick.OnUp.AddListener(OnJoyUp);
+        variableJoystick.OnSet.AddListener(OnJoySet);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnJoySet(Vector2 arg0)
     {
-        //if (! Active)
-        //{
-        //    return;
-        //}
+        instance.Movement.set2DInput(arg0);
+    } 
 
-        ////do not flood! no setting unless changed.
-        //float vert = variableJoystick.ScaledValue.y;
-        //float horz = variableJoystick.ScaledValue.x;
-
-        //float thresh = 0.7f;
-        //if (vert > thresh)
-        //{
-        //    instance.Movement.MovingBackward = false;
-        //    instance.Movement.MovingForward = true;
-
-        //}
-        //else if (vert < -thresh)
-        //{
-        //    instance.Movement.MovingBackward = true;
-        //    instance.Movement.MovingForward = false;
-
-        //}
-        //else
-        //{
-        //    instance.Movement.MovingBackward = false;
-        //    instance.Movement.MovingForward = false;
-
-        //}
-
-        //if (horz > thresh)
-        //{
-        //    instance.Movement.TurningLeft = false;
-        //    instance.Movement.TurningRight = true;
-
-        //}
-        //else if (horz < -thresh)
-        //{
-        //    instance.Movement.TurningLeft = true;
-        //    instance.Movement.TurningRight = false;
-
-        //}
-        //else
-        //{
-        //    instance.Movement.TurningLeft = false;
-        //    instance.Movement.TurningRight = false;
-
-        //}
-
+    // no more sideways movment.
+    private void OnJoyUp()
+    {
+        if (! Active)
+        {
+            return;
+        }
+        instance.Movement.zero2DInput();
     }
 }

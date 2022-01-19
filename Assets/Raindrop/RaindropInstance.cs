@@ -36,35 +36,25 @@ using System.Threading;
 //using Radegast.Commands;
 using Raindrop.Netcom;
 using Raindrop.Media;
+using Raindrop.UI.Notification;
 using OpenMetaverse;
+using Raindrop.ServiceLocator;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
-using ServiceLocator;
 
 namespace Raindrop
 {
+    // The singleton instance of the game client.
     public class RaindropInstance : IGameService
     {
-        #region OnRadegastFormCreated
-        //Actually this event is never subscribed to!
-        //public event Action<RadegastForm> RadegastFormCreated;
-        ///// <summary>
-        ///// Triggers the RadegastFormCreated event.
-        ///// this method is called directly by the 'form' when the UI is loaded. the payload is the actual form - eg: formProfile
-        ///// </summary>
-        //public virtual void OnRadegastFormCreated(RadegastForm radForm)
-        //{
-        //    if (RadegastFormCreated != null) RadegastFormCreated(radForm);
-        //}
-        #endregion
+        //composition of many things...
+        
+        private GridClient _client; //backend monolith API
+        private RaindropNetcom _netcom;
 
-        private GridClient client;
-        private RaindropNetcom netcom;
-        //private Renderer renderer;
-
-        private StateManager state;
-        private string app_data_dir;
-        private string streaming_assets_dir;
+        private StateManager _state;
+        private string _appDataDir;
+        private string _streamingAssetsDir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
         //private UIManager ui_manager;
@@ -82,24 +72,24 @@ namespace Raindrop
         /// <summary>
         /// Manages retrieving avatar names
         /// </summary>
-        public NameManager Names { get { return names; } }
-        private NameManager names;
+        public NameManager Names { get { return _names; } }
+        private NameManager _names;
 
         /// <summary>
         /// When was Radegast started (UTC)
         /// </summary>
-        public readonly DateTime StartupTimeUTC;
+        public readonly DateTime StartupTimeUtc;
 
         /// <summary>
         /// Time zone of the current world (currently hard coded to US Pacific time)
         /// </summary>
         public TimeZoneInfo WordTimeZone;
 
-        private string userDir;
+        private string _userDir;
         /// <summary>
         /// System (not grid!) user's dir
         /// </summary>
-        public string UserDir { get { return userDir; } }
+        public string UserDir { get { return _userDir; } }
 
         /// <summary>
         /// Grid client's user dir for settings and logs
@@ -109,9 +99,9 @@ namespace Raindrop
         {
             get
             {
-                if (client != null && client.Self != null && !string.IsNullOrEmpty(client.Self.Name))
+                if (_client != null && _client.Self != null && !string.IsNullOrEmpty(_client.Self.Name))
                 {
-                    return Path.Combine(userDir, client.Self.Name);
+                    return Path.Combine(_userDir, _client.Self.Name);
                 }
                 else
                 {
@@ -122,40 +112,40 @@ namespace Raindrop
 
         public string InventoryCacheFileName { get { return Path.Combine(ClientDir, "inventory.cache"); } }
 
-        private string globalLogFile;
-        public string GlobalLogFile { get { return globalLogFile; } }
+        private string _globalLogFile;
+        public string GlobalLogFile { get { return _globalLogFile; } }
 
-        private bool monoRuntime;
-        public bool MonoRuntime { get { return monoRuntime; } }
+        private bool _monoRuntime;
+        public bool MonoRuntime { get { return _monoRuntime; } }
 
-        private Dictionary<UUID, Group> groups = new Dictionary<UUID, Group>();
-        public Dictionary<UUID, Group> Groups { get { return groups; } }
+        private Dictionary<UUID, Group> _groups = new Dictionary<UUID, Group>();
+        public Dictionary<UUID, Group> Groups { get { return _groups; } }
 
-        private Settings globalSettings;
+        private Settings _globalSettings;
         /// <summary>
         /// Global settings for the entire application
         /// </summary>
-        public Settings GlobalSettings { get { return globalSettings; } }
+        public Settings GlobalSettings { get { return _globalSettings; } }
 
-        private Settings clientSettings;
+        private Settings _clientSettings;
         /// <summary>
         /// Per client settings
         /// </summary>
-        public Settings ClientSettings { get { return clientSettings; } }
+        public Settings ClientSettings { get { return _clientSettings; } }
 
-        public const string INCOMPLETE_NAME = "Loading...";
+        public const string IncompleteName = "Loading...";
 
-        public readonly bool advancedDebugging = false;
+        public readonly bool AdvancedDebugging = false;
 
         //private PluginManager pluginManager;
         ///// <summary> Handles loading plugins and scripts</summary>
         //public PluginManager PluginManager { get { return pluginManager; } }
 
-        private MediaManager mediaManager;
+        private MediaManager _mediaManager;
         /// <summary>
         /// Radegast media manager for playing streams and in world sounds
         /// </summary>
-        public MediaManager MediaManager { get { return mediaManager; } }
+        public MediaManager MediaManager { get { return _mediaManager; } }
 
 
         //private CommandsManager commandsManager;
@@ -169,11 +159,11 @@ namespace Raindrop
         /// </summary>
         //public ContextActionsManager ContextActionManager { get; private set; }
 
-        private RaindropMovement movement;
+        private RaindropMovement _movement;
         /// <summary>
         /// Allows key emulation for moving avatar around
         /// </summary>
-        public RaindropMovement Movement { get { return movement; } }
+        public RaindropMovement Movement { get { return _movement; } }
 
         //private InventoryClipboard inventoryClipboard;
         ///// <summary>
@@ -198,15 +188,15 @@ namespace Raindrop
         ///// </summary>
         //public RLVManager RLV { get { return rlv; } }
 
-        private GridManager gridManager;
+        private GridManager _gridManager;
         /// <summary>Manages default params for different grids</summary>
-        public GridManager GridManger { get { return gridManager; } }
+        public GridManager GridManger { get { return _gridManager; } }
 
 
         /// <summary>
         /// Current Outfit Folder (appearnce) manager
         /// </summary>
-        public CurrentOutfitFolder COF;
+        public CurrentOutfitFolder Cof;
 
         /// <summary>
         /// Did we report crash to the grid login service
@@ -225,51 +215,51 @@ namespace Raindrop
 
         #region ClientChanged event
         /// <summary>The event subscribers, null of no subscribers</summary>
-        private EventHandler<ClientChangedEventArgs> m_ClientChanged;
+        private EventHandler<ClientChangedEventArgs> _mClientChanged;
 
         ///<summary>Raises the ClientChanged Event</summary>
         /// <param name="e">A ClientChangedEventArgs object containing
         /// the old and the new client</param>
         protected virtual void OnClientChanged(ClientChangedEventArgs e)
         {
-            EventHandler<ClientChangedEventArgs> handler = m_ClientChanged;
+            EventHandler<ClientChangedEventArgs> handler = _mClientChanged;
             if (handler != null)
                 handler(this, e);
         }
 
         /// <summary>Thread sync lock object</summary>
-        private readonly object m_ClientChangedLock = new object();
+        private readonly object _mClientChangedLock = new object();
 
         /// <summary>Raised when the GridClient object in the main Radegast instance is changed</summary>
         public event EventHandler<ClientChangedEventArgs> ClientChanged
         {
-            add { lock (m_ClientChangedLock) { m_ClientChanged += value; } }
-            remove { lock (m_ClientChangedLock) { m_ClientChanged -= value; } }
+            add { lock (_mClientChangedLock) { _mClientChanged += value; } }
+            remove { lock (_mClientChangedLock) { _mClientChanged -= value; } }
         }
         #endregion ClientChanged event
 
         #region InventoryClipboardUpdated event
         /// <summary>The event subscribers, null of no subscribers</summary>
-        private EventHandler<EventArgs> m_InventoryClipboardUpdated;
+        private EventHandler<EventArgs> _mInventoryClipboardUpdated;
 
         ///<summary>Raises the InventoryClipboardUpdated Event</summary>
         /// <param name="e">A EventArgs object containing
         /// the old and the new client</param>
         protected virtual void OnInventoryClipboardUpdated(EventArgs e)
         {
-            EventHandler<EventArgs> handler = m_InventoryClipboardUpdated;
+            EventHandler<EventArgs> handler = _mInventoryClipboardUpdated;
             if (handler != null)
                 handler(this, e);
         }
 
         /// <summary>Thread sync lock object</summary>
-        private readonly object m_InventoryClipboardUpdatedLock = new object();
+        private readonly object _mInventoryClipboardUpdatedLock = new object();
 
         /// <summary>Raised when the GridClient object in the main Radegast instance is changed</summary>
         public event EventHandler<EventArgs> InventoryClipboardUpdated
         {
-            add { lock (m_InventoryClipboardUpdatedLock) { m_InventoryClipboardUpdated += value; } }
-            remove { lock (m_InventoryClipboardUpdatedLock) { m_InventoryClipboardUpdated -= value; } }
+            add { lock (_mInventoryClipboardUpdatedLock) { _mInventoryClipboardUpdated += value; } }
+            remove { lock (_mInventoryClipboardUpdatedLock) { _mInventoryClipboardUpdated -= value; } }
         }
         #endregion InventoryClipboardUpdated event
 
@@ -278,27 +268,27 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client0)
         {
+            _appDataDir = Application.persistentDataPath;
+            _streamingAssetsDir = Application.streamingAssetsPath;
 
-
-            app_data_dir = Application.persistentDataPath;
-            streaming_assets_dir = Application.streamingAssetsPath;
+            InitializeLoggingAndConfig();
 
             if (!System.Diagnostics.Debugger.IsAttached)
             {
-                Debug.LogError("no debugger detected. ");
+                Debug.LogWarning("no debugger detected. ");
                 //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
                 //Application.ThreadException += HandleThreadException;
             }
 
-            client = client0;
+            _client = client0;
 
             // Initialize current time zone, and mark when we started
             GetWorldTimeZone();
-            StartupTimeUTC = DateTime.UtcNow;
+            StartupTimeUtc = DateTime.UtcNow;
 
             // Are we running mono?
-            monoRuntime = Type.GetType("Mono.Runtime") != null;
-            if (monoRuntime)
+            _monoRuntime = Type.GetType("Mono.Runtime") != null;
+            if (_monoRuntime)
             {
                 Logger.Log("Mono runtime is detected. This should not happen except in the editor.", Helpers.LogLevel.Warning);
             }
@@ -306,24 +296,25 @@ namespace Raindrop
             //Keyboard = new Keyboard();
             //Application.AddMessageFilter(Keyboard);
 
-            netcom = new RaindropNetcom(this);
-            state = new StateManager(this);
-            mediaManager = new MediaManager(this);
+            _netcom = new RaindropNetcom(this);
+            _state = new StateManager(this);
+            //_mediaManager = new MediaManager(this);
+            
             //commandsManager = new CommandsManager(this);
             //ContextActionManager = new ContextActionsManager(this);
             //RegisterContextActions();
-            movement = new RaindropMovement(this);
+            _movement = new RaindropMovement(this);
 
-            InitializeLoggingAndConfig();
-            InitializeClient(client);
+            InitializeClient(_client);
 
             //rlv = new RLVManager(this);
-            gridManager = new GridManager();
-            Debug.Log(streaming_assets_dir);
-            gridManager.LoadGrids(streaming_assets_dir);
+            _gridManager = new GridManager();
+            Debug.Log(_streamingAssetsDir);
+            _gridManager.LoadGrids(_streamingAssetsDir);
 
-            names = new NameManager(this);
-            COF = new CurrentOutfitFolder(this);
+            _names = new NameManager(this);
+            Cof = new CurrentOutfitFolder(this);
+            
 
             //ui_manager = new UIManager(this);
             //mainCanvas.InitializeControls();
@@ -344,14 +335,14 @@ namespace Raindrop
             client.Settings.ALWAYS_DECODE_OBJECTS = true;
             client.Settings.OBJECT_TRACKING = true;
             client.Settings.ENABLE_SIMSTATS = true;
-            client.Settings.FETCH_MISSING_INVENTORY = true;
+            // client.Settings.FETCH_MISSING_INVENTORY = true;
             client.Settings.SEND_AGENT_THROTTLE = true;
             client.Settings.SEND_AGENT_UPDATES = true;
             client.Settings.STORE_LAND_PATCHES = true;
 
             client.Settings.USE_ASSET_CACHE = true;
-            client.Settings.ASSET_CACHE_DIR = Path.Combine(userDir, "cache");
-            Debug.Log("Userdir:" + userDir);
+            client.Settings.ASSET_CACHE_DIR = Path.Combine(_userDir, "cache");
+            Debug.Log("Userdir:" + _userDir);
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
@@ -362,10 +353,9 @@ namespace Raindrop
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
 
             client.Self.Movement.AutoResetControls = false;
-            client.Self.Movement.UpdateInterval = 2500;
+            client.Self.Movement.UpdateInterval = 2500; //2.5 seconds?
 
             RegisterClientEvents(client);
-            SetClientTag();
         }
 
         public string ComputeCacheName(string cacheDir, UUID assetID)
@@ -397,8 +387,8 @@ namespace Raindrop
             client.Groups.GroupLeaveReply += new EventHandler<GroupOperationEventArgs>(Groups_GroupsChanged);
             client.Groups.GroupDropped += new EventHandler<GroupDroppedEventArgs>(Groups_GroupsChanged);
             client.Groups.GroupJoinedReply += new EventHandler<GroupOperationEventArgs>(Groups_GroupsChanged);
-            if (netcom != null)
-                netcom.ClientConnected += new EventHandler<EventArgs>(netcom_ClientConnected);
+            if (_netcom != null)
+                _netcom.ClientConnected += new EventHandler<EventArgs>(netcom_ClientConnected);
             client.Network.LoginProgress += new EventHandler<LoginProgressEventArgs>(Network_LoginProgress);
         }
 
@@ -408,22 +398,11 @@ namespace Raindrop
             client.Groups.GroupLeaveReply -= new EventHandler<GroupOperationEventArgs>(Groups_GroupsChanged);
             client.Groups.GroupDropped -= new EventHandler<GroupDroppedEventArgs>(Groups_GroupsChanged);
             client.Groups.GroupJoinedReply -= new EventHandler<GroupOperationEventArgs>(Groups_GroupsChanged);
-            if (netcom != null)
-                netcom.ClientConnected -= new EventHandler<EventArgs>(netcom_ClientConnected);
+            if (_netcom != null)
+                _netcom.ClientConnected -= new EventHandler<EventArgs>(netcom_ClientConnected);
             client.Network.LoginProgress -= new EventHandler<LoginProgressEventArgs>(Network_LoginProgress);
         }
 
-        public void SetClientTag()
-        {
-            if (GlobalSettings["send_rad_client_tag"])
-            {
-                client.Settings.CLIENT_IDENTIFICATION_TAG = new UUID("b748af88-58e2-995b-cf26-9486dea8e830");
-            }
-            else
-            {
-                client.Settings.CLIENT_IDENTIFICATION_TAG = UUID.Zero;
-            }
-        }
         private void GetWorldTimeZone()
         {
             try
@@ -462,36 +441,36 @@ namespace Raindrop
 
         public void Reconnect()
         {
-            //TabConsole.DisplayNotificationInChat("Attempting to reconnect...", ChatBufferTextStyle.StatusDarkBlue);
-            Logger.Log("Attempting to reconnect", Helpers.LogLevel.Info, client);
-            GridClient oldClient = client;
-            client = new GridClient();
+            Notification.DisplayNotification("Attempting to reconnect...", ChatBufferTextStyle.StatusDarkBlue);
+            Logger.Log("Attempting to reconnect", Helpers.LogLevel.Info, _client);
+            GridClient oldClient = _client;
+            _client = new GridClient();
             UnregisterClientEvents(oldClient);
-            InitializeClient(client);
-            OnClientChanged(new ClientChangedEventArgs(oldClient, client));
-            netcom.Login();
+            InitializeClient(_client);
+            OnClientChanged(new ClientChangedEventArgs(oldClient, _client));
+            _netcom.Login();
         }
 
         public void CleanUp()
         {
             MarkEndExecution();
 
-            if (COF != null)
+            if (Cof != null)
             {
-                COF.Dispose();
-                COF = null;
+                Cof.Dispose();
+                Cof = null;
             }
 
-            if (names != null)
+            if (_names != null)
             {
-                names.Dispose();
-                names = null;
+                _names.Dispose();
+                _names = null;
             }
 
-            if (gridManager != null)
+            if (_gridManager != null)
             {
-                gridManager.Dispose();
-                gridManager = null;
+                _gridManager.Dispose();
+                _gridManager = null;
             }
 
             //if (rlv != null)
@@ -500,9 +479,9 @@ namespace Raindrop
             //    rlv = null;
             //}
 
-            if (client != null)
+            if (_client != null)
             {
-                UnregisterClientEvents(client);
+                UnregisterClientEvents(_client);
             }
 
             //if (pluginManager != null)
@@ -511,10 +490,10 @@ namespace Raindrop
             //    pluginManager = null;
             //}
 
-            if (movement != null)
+            if (_movement != null)
             {
-                movement.Dispose();
-                movement = null;
+                _movement.Dispose();
+                _movement = null;
             }
             //if (commandsManager != null)
             //{
@@ -526,20 +505,20 @@ namespace Raindrop
             //    ContextActionManager.Dispose();
             //    ContextActionManager = null;
             //}
-            if (mediaManager != null)
+            if (_mediaManager != null)
             {
-                mediaManager.Dispose();
-                mediaManager = null;
+                _mediaManager.Dispose();
+                _mediaManager = null;
             }
-            if (state != null)
+            if (_state != null)
             {
-                state.Dispose();
-                state = null;
+                _state.Dispose();
+                _state = null;
             }
-            if (netcom != null)
+            if (_netcom != null)
             {
-                netcom.Dispose();
-                netcom = null;
+                _netcom.Dispose();
+                _netcom = null;
             }
             //if (mainCanvas != null)
             //{
@@ -547,15 +526,10 @@ namespace Raindrop
             //}
             Logger.Log("RaindropInstance finished cleaning up.", Helpers.LogLevel.Debug);
         }
-
-        void mainForm_Load(object sender, EventArgs e)
-        {
-            //pluginManager.StartPlugins();
-        }
-
+        
         void netcom_ClientConnected(object sender, EventArgs e)
         {
-            client.Self.RequestMuteList();
+            _client.Self.RequestMuteList();
         }
 
         void Network_LoginProgress(object sender, LoginProgressEventArgs e)
@@ -568,7 +542,7 @@ namespace Raindrop
                     {
                         Directory.CreateDirectory(ClientDir);
                     }
-                    clientSettings = new Settings(Path.Combine(ClientDir, "client_settings.xml"));
+                    _clientSettings = new Settings(Path.Combine(ClientDir, "client_settings.xml"));
                 }
                 catch (Exception ex)
                 {
@@ -585,7 +559,7 @@ namespace Raindrop
         /// <param name="blocking">Should we wait until the name is retrieved</param>
         /// <returns>Avatar name</returns>
         [Obsolete("Use Instance.Names.Get() instead")]
-        public string getAvatarName(UUID key, bool blocking)
+        public string GetAvatarName(UUID key, bool blocking)
         {
             return Names.Get(key, blocking);
         }
@@ -596,14 +570,14 @@ namespace Raindrop
         /// <param name="key">Avatar UUID</param>
         /// <returns>Avatar name</returns>
         [Obsolete("Use Instance.Names.Get() instead")]
-        public string getAvatarName(UUID key)
+        public string GetAvatarName(UUID key)
         {
             return Names.Get(key);
         }
 
         void Groups_GroupsChanged(object sender, EventArgs e)
         {
-            client.Groups.RequestCurrentGroups();
+            _client.Groups.RequestCurrentGroups();
         }
 
         public static string SafeFileName(string fileName)
@@ -632,7 +606,7 @@ namespace Raindrop
         //this method will log all messages to the relevant file.
         public void LogClientMessage(string sessioName, string message)
         {
-            if (globalSettings["disable_chat_im_log"]) return;
+            if (_globalSettings["disable_chat_im_log"]) return;
 
             lock (this)
             {
@@ -647,45 +621,45 @@ namespace Raindrop
 
         void Groups_CurrentGroups(object sender, CurrentGroupsEventArgs e)
         {
-            this.groups = e.Groups;
+            this._groups = e.Groups;
         }
 
         private void InitializeLoggingAndConfig()
         {
             try
             {
-                userDir = Path.Combine(app_data_dir, PROGRAMNAME);
-                if (!Directory.Exists(userDir))
+                _userDir = Path.Combine(_appDataDir, _programname);
+                if (!Directory.Exists(_userDir))
                 {
-                    Directory.CreateDirectory(userDir);
+                    Directory.CreateDirectory(_userDir);
                 }
             }
             catch (Exception)
             {
-                Logger.DebugLog("unable to create userDir: " + userDir);
-                userDir = System.Environment.CurrentDirectory;
+                Logger.DebugLog("unable to create userDir: " + _userDir);
+                _userDir = System.Environment.CurrentDirectory;
             };
 
-            Debug.Log("Userdir:" + userDir);
+            Debug.Log("Userdir:" + _userDir);
 
-            globalLogFile = Path.Combine(userDir, PROGRAMNAME + ".log");
-            globalSettings = new Settings(Path.Combine(userDir, "settings.xml"));
+            _globalLogFile = Path.Combine(_userDir, _programname + ".log");
+            _globalSettings = new Settings(Path.Combine(_userDir, "settings.xml"));
             //frmSettings.InitSettigs(globalSettings, monoRuntime);
         }
 
         public GridClient Client
         {
-            get { return client; }
+            get { return _client; }
         }
 
         public RaindropNetcom Netcom
         {
-            get { return netcom; }
+            get { return _netcom; }
         }
 
         public StateManager State
         {
-            get { return state; }
+            get { return _state; }
         }
 
         //public UIManager UI
@@ -705,17 +679,17 @@ namespace Raindrop
                 + e.Exception.Message + Environment.NewLine
                 + e.Exception.StackTrace + Environment.NewLine,
                 Helpers.LogLevel.Error,
-                client);
+                _client);
         }
 
         #region Crash reporting
-        FileStream MarkerLock = null;
-        private string PROGRAMNAME = "RaindropTest_02";
+        FileStream _markerLock = null;
+        private string _programname = "RaindropTest_02";
 
         public bool AnotherInstanceRunning()
         {
             // We have successfuly obtained lock
-            if (MarkerLock != null && MarkerLock.CanWrite)
+            if (_markerLock != null && _markerLock.CanWrite)
             {
                 Logger.Log("No other instances detected, marker file already locked", Helpers.LogLevel.Debug);
                 return false || MonoRuntime;
@@ -723,13 +697,13 @@ namespace Raindrop
 
             try
             {
-                MarkerLock = new FileStream(CrashMarkerFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                _markerLock = new FileStream(CrashMarkerFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
                 Logger.Log(string.Format("Successfully created and locked marker file {0}", CrashMarkerFileName), Helpers.LogLevel.Debug);
                 return false || MonoRuntime;
             }
             catch
             {
-                MarkerLock = null;
+                _markerLock = null;
                 Logger.Log(string.Format("Another instance detected, marker fils {0} locked", CrashMarkerFileName), Helpers.LogLevel.Debug);
                 return true;
             }
@@ -738,7 +712,7 @@ namespace Raindrop
         public LastExecStatus GetLastExecStatus()
         {
             // Crash marker file found and is not locked by us
-            if (File.Exists(CrashMarkerFileName) && MarkerLock == null)
+            if (File.Exists(CrashMarkerFileName) && _markerLock == null)
             {
                 Logger.Log(string.Format("Found crash marker file {0}", CrashMarkerFileName), Helpers.LogLevel.Debug);
                 return LastExecStatus.OtherCrash;
@@ -765,11 +739,11 @@ namespace Raindrop
             Logger.Log(string.Format("Marking end of execution run, deleting file: {0}", CrashMarkerFileName), Helpers.LogLevel.Debug);
             try
             {
-                if (MarkerLock != null)
+                if (_markerLock != null)
                 {
-                    MarkerLock.Close();
-                    MarkerLock.Dispose();
-                    MarkerLock = null;
+                    _markerLock.Close();
+                    _markerLock.Dispose();
+                    _markerLock = null;
                 }
 
                 File.Delete(CrashMarkerFileName);
@@ -777,7 +751,7 @@ namespace Raindrop
             catch { }
         }
 
-        internal void setAppDataDir(string app_data_Path)
+        internal void SetAppDataDir(string appDataPath)
         {
             throw new NotImplementedException();
         }

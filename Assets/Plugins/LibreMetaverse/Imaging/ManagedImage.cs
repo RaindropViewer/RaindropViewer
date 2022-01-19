@@ -28,7 +28,6 @@ using System;
 using Unity.Collections;
 //using System.Drawing;
 //using System.Drawing.Imaging;
-using Catnip.Drawing;
 //using Catnip.Drawing.Imaging;
 using UnityEngine;
 
@@ -145,24 +144,24 @@ namespace OpenMetaverse.Imaging
                 Alpha = new byte[pixelCount];
 
                 //BitmapData bd = bitmap.LockBits(new Rectangle(0, 0, Width, Height),
-                //    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                //    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);				
+				/*
+                unsafe
+                {
+                    byte* pixel = (byte*)bd.Scan0;
 
-                //unsafe
-                //{
-                //    byte* pixel = (byte*)bd.Scan0;
-
-                //    for (int i = 0; i < pixelCount; i++)
-                //    {
-                //        // GDI+ gives us BGRA and we need to turn that in to RGBA
-                //        Blue[i] = *(pixel++);
-                //        Green[i] = *(pixel++);
-                //        Red[i] = *(pixel++);
-                //        Alpha[i] = *(pixel++);
-                //    }
-                //}
-
-                //bitmap.UnlockBits(bd);
-
+                    for (int i = 0; i < pixelCount; i++)
+                    {
+                        // GDI+ gives us BGRA and we need to turn that in to RGBA
+                        Blue[i] = *(pixel++);
+                        Green[i] = *(pixel++);
+                        Red[i] = *(pixel++);
+                        Alpha[i] = *(pixel++);
+                    }
+                }
+				
+				*/
+			
                 for (int i = 0; i < pixelCount; i++)
                 {
                     Color32 bit = tex.GetPixel(i%Width , i / Width);
@@ -172,7 +171,10 @@ namespace OpenMetaverse.Imaging
                     Alpha[i] = bit.a;
 
                 }
+                //bitmap.UnlockBits(bd);
             }
+			// this 16bit grayscale image format is commented-out for Raindrop and we need to investigate what its used for; can we just ignore it?
+			// unity does not seem to support 16bit grayscale
             //else if (tex.format == TextureFormat.Alpha8)  // PixelFormat.Format16bppGrayScale --- 16 bits per pixel. The color information specifies 65536 shades of gray.
             //{
             //    Channels = ImageChannels.Gray;
@@ -216,6 +218,7 @@ namespace OpenMetaverse.Imaging
 
                 }
             }
+			// can we remove the following? this Format32bppRgb is a ridiculous format.
 			else if (tex.format == TextureFormat.RGB24) // PixelFormat.Format32bppRgb) --- The remaining 8 bits are not used.
             {
 				Channels = ImageChannels.Color;
@@ -461,39 +464,29 @@ namespace OpenMetaverse.Imaging
                 }
             }
 
-            Texture2D b = new Texture2D(Width, Height);
+            Texture2D b = new Texture2D(Width, Height,TextureFormat.ARGB32,false);
             b.hideFlags = HideFlags.HideAndDontSave; //this helps us delete this texture later?
 
-            var mip0Data = b.GetPixelData<Color32>(1);
+            var mip0Data = b.GetPixelData<Color32>(0);
 
             if (mip0Data.Length != Width * Height)
             {
-                Debug.LogError("mip0 data size (of texture) not match the data size of array!");
-                
+                Debug.LogError("mip0 data size (of texture) not match the data size of array! "
+                               + (mip0Data.Length).ToString() + " vs "+ (Width * Height).ToString()
+                               );
             } 
 
+            //copy managedinage bytes into the nativearray
             for (int i = 0; i < mip0Data.Length; i++)
             {
                 var blue = raw[i * 4 + 0];
                 var green = raw[i * 4 + 1];
                 var red = raw[i * 4 + 2];
                 var alpha = raw[i * 4 + 3];
-                mip0Data[i] = new Color32(red, green, blue, alpha);
+                mip0Data[i] = new Color32(alpha, red, green, blue);
             }
 
-            //Bitmap b = new Bitmap(
-            //            Width,
-            //            Height,
-            //            PixelFormat.Format32bppArgb);
-
-            //BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-            //    ImageLockMode.WriteOnly,
-            //    PixelFormat.Format32bppArgb);
-
-            //System.Runtime.InteropServices.Marshal.Copy(raw, 0, bd.Scan0, Width * Height * 4);
-
-            //b.UnlockBits(bd);
-
+            b.LoadRawTextureData(mip0Data);
             b.Apply(false);
             return b;
         }

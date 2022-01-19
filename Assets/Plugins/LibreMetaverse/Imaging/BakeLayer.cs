@@ -25,12 +25,10 @@
  */
 
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
 //using System.Drawing;
 using OpenMetaverse.Assets;
-using Catnip.Drawing;
 using UnityEngine;
 
 namespace OpenMetaverse.Imaging
@@ -162,9 +160,16 @@ namespace OpenMetaverse.Imaging
 
             if (bakeType == BakeType.Head)
             {
-                DrawLayer(LoadResourceLayer("head_color.tga"), false);
-                AddAlpha(bakedTexture.Image, LoadResourceLayer("head_alpha.tga"));
-                MultiplyLayerFromAlpha(bakedTexture.Image, LoadResourceLayer("head_skingrain.tga"));
+                if (DrawLayer(LoadResourceLayer("head_color.tga"), false) == true)
+                {
+                    AddAlpha(bakedTexture.Image, LoadResourceLayer("head_alpha.tga"));
+                    MultiplyLayerFromAlpha(bakedTexture.Image, LoadResourceLayer("head_skingrain.tga"));
+                    Logger.Log("[Bake]: created head master bake", Helpers.LogLevel.Debug);
+                }
+                else
+                {
+                    Logger.Log("[Bake]: Unable to draw layer from texture file", Helpers.LogLevel.Debug);
+                }
             }
 
             if (skinTexture.Texture == null)
@@ -425,8 +430,8 @@ namespace OpenMetaverse.Imaging
 
         private bool MaskBelongsToBake(string mask)
         {
-            return (bakeType != BakeType.LowerBody || !mask.Contains("upper")) 
-                   && (bakeType != BakeType.LowerBody || !mask.Contains("shirt")) 
+            return (bakeType != BakeType.LowerBody || !mask.Contains("upper"))
+                   && (bakeType != BakeType.LowerBody || !mask.Contains("shirt"))
                    && (bakeType != BakeType.UpperBody || !mask.Contains("lower"));
         }
 
@@ -461,16 +466,25 @@ namespace OpenMetaverse.Imaging
             byte[] sourceAlpha = sourceHasAlpha ? source.Alpha : null;
             byte[] sourceBump = sourceHasBump ? source.Bump : null;
 
+			/* 4c506093003675ce6f24d7273812c4440adc87b7
+			Update BakeLayer.cs
+				add unneeded but nice debug info around head_color loading
+				correct color loading due to alpha being broken
+			*/
+            bool loadedAlpha = false;
             for (int y = 0; y < bakeHeight; y++)
             {
                 for (int x = 0; x < bakeWidth; x++)
                 {
+                    loadedAlpha = false;
                     alpha = 0;
                     alphaInv = 0;
+
                     if (sourceHasAlpha)
                     {
                         if (sourceAlpha.Length > i)
                         {
+                            loadedAlpha = true;
                             alpha = sourceAlpha[i];
                             alphaInv = (byte)(Byte.MaxValue - alpha);
                         }
@@ -482,9 +496,18 @@ namespace OpenMetaverse.Imaging
                         {
                             if ((sourceRed.Length > i) && (sourceGreen.Length > i) && (sourceBlue.Length > i))
                             {
-                                bakedRed[i] = (byte)((bakedRed[i] * alphaInv + sourceRed[i] * alpha) >> 8);
-                                bakedGreen[i] = (byte)((bakedGreen[i] * alphaInv + sourceGreen[i] * alpha) >> 8);
-                                bakedBlue[i] = (byte)((bakedBlue[i] * alphaInv + sourceBlue[i] * alpha) >> 8);
+                                if (loadedAlpha == true)
+                                {
+                                    bakedRed[i] = (byte)((bakedRed[i] * alphaInv + sourceRed[i] * alpha) >> 8);
+                                    bakedGreen[i] = (byte)((bakedGreen[i] * alphaInv + sourceGreen[i] * alpha) >> 8);
+                                    bakedBlue[i] = (byte)((bakedBlue[i] * alphaInv + sourceBlue[i] * alpha) >> 8);
+                                }
+                                else
+                                {
+                                    bakedRed[i] = sourceRed[i];
+                                    bakedGreen[i] = sourceGreen[i];
+                                    bakedBlue[i] = sourceBlue[i];
+                                }
                             }
                         }
                     }
@@ -520,7 +543,7 @@ namespace OpenMetaverse.Imaging
         /// </summary>
         /// <param name="dest">Destination image</param>
         /// <param name="src">Source image</param>
-        /// <returns>Sanitization was succefull</returns>
+        /// <returns>Sanitization was successful</returns>
         private bool SanitizeLayers(ManagedImage dest, ManagedImage src)
         {
             if (dest == null || src == null) return false;

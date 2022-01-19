@@ -75,7 +75,7 @@ namespace OpenMetaverse
             //https://github.com/lkalif/unirad/blob/2f528e25c46aad4281d74f0eea363c171a219a8f/Assets/Core/Logger.cs
             if (!LogInstance.Logger.IsEnabledFor(log4net.Core.Level.Error))
             {
-                Debug.Log("Logger: Seems like no logger is configured");
+                Debug.Log("Logger: Seems like no logger is configured, so we shall use our own *UnityDebugAppender* ");
                 //IAppender appender = new ConsoleAppender
                 //{
                 //    Layout = new log4net.Layout.PatternLayout("%timestamp [%thread] %-5level - %message%newline")
@@ -91,10 +91,10 @@ namespace OpenMetaverse
 
 
                 if (Settings.LOG_LEVEL != Helpers.LogLevel.None)
-                    LogInstance.Info("No log configuration found, defaulting to console logging");
+                    LogInstance.Warn("No log configuration found, defaulting to console logging");
             } else
             {
-                Debug.Log("A default logger was created by Logger.cs");
+                Debug.Log("A default logger was created by Logger.cs. Our implementation was not used.");
 
             }
 

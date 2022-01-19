@@ -1,6 +1,7 @@
 <linker>
     <assembly fullname="Unity.ResourceManager" preserve="all" />
     <assembly fullname="Unity.Addressables" preserve="all" />
+    <assembly fullname="Log4Net" preserve="all"  />
 
   <!--<assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
     <type fullname="UnityEngine.ResourceManagement.ResourceProviders.LegacyResourcesProvider" preserve="all" />

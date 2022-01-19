@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 //using System.Drawing;
 //using System.Drawing.Drawing2D;
-using Catnip.Drawing;
+//using Catnip.Drawing;
 using UnityEngine;
 
 namespace LibreMetaverse.PrimMesher
@@ -73,9 +73,8 @@ namespace LibreMetaverse.PrimMesher
             try
             {
                 if (needsScaling)
-                    bm.Resize(width,height);
-                    //bm = ScaleImage(bm, width, height,
-                    //    InterpolationMode.NearestNeighbor);
+                    //bm.Resize(width,height);
+                    ScaleImage(bm, width, height);
             }
 
             catch (Exception e)
@@ -166,6 +165,12 @@ namespace LibreMetaverse.PrimMesher
             }
             return rows;
         }
+
+		private void ScaleImage(Texture2D srcImage, int destWidth, int destHeight)
+        {
+			srcImage.Resize(destWidth, destHeight);
+			srcImage.Apply();
+		}
 
         //private Bitmap ScaleImage(Bitmap srcImage, int destWidth, int destHeight,
         //    InterpolationMode interpMode)

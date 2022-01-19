@@ -3,103 +3,99 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 
 //a singleton monobehavior that activates modals.
 //maintains reference to all modals.
 public class ModalManager : MonoBehaviour
 {
-    Thread mainThread;
-    //pool of modals.
-    private modalPresenter genericModalPresenter;
-    public modalPresenter eulaModal;
-    public modalPresenter loggingInStatusModal;
-
-
+    [Header("Provide a reference to your modals:")]
+    
+    [Tooltip("The generic modal gameobject")]
     [SerializeField]
-    public GameObject GenericModalPrefab;
+    public ModalPresenter genericModalPresenter;
+    
+    Thread mainThread;
+    // private ModalPresenter eulaModalPresenter;
+    [SerializeField]
+    private ModalPresenter loginStatusModal;
+
+    
 
     private void Awake()
     {
-        //find yo modals in scene.
-        //foreach(modalPresenter _ in FindObjectsOfType<modalPresenter>())
-        //{
-
-        //    genericModal.Add(_);
-        //    _.closeModal();
-        //}
-
-        //if (FindObjectsOfType<modalPresenter>().Length != 0)
-        //{
-        //    genericModal = FindObjectsOfType<modalPresenter>()[0];
-        //    genericModal.closeModal();
-        //}
-
-
-        GameObject GenericModal = Instantiate(GenericModalPrefab) as GameObject;
-        GenericModal.transform.SetParent(this.transform);
-        genericModalPresenter = GenericModal.GetComponent<modalPresenter>();
-
-        if (genericModalPresenter == null)
-        {
-            Debug.LogError("cannot find the gneric modal");
-        }
+        CheckModals();
 
         mainThread = System.Threading.Thread.CurrentThread;
     }
 
-    public void openEula()
+    private void CheckModals()
     {
-        setVisibleEulaModal(true);
+        if (genericModalPresenter == null)
+        {
+            Debug.LogError("cannot find the gneric modal");
+        }
+        if (loginStatusModal == null)
+        {
+            Debug.LogError("cannot find the login modal");
+        }
+        
     }
+    //
+    // public void openEula()
+    // {
+    //     setVisibleEulaModal(true);
+    // }
+    //
+    // public void closeEula()
+    // {
+    //     setVisibleEulaModal(false);
+    // }
     
-    public void closeEula()
-    {
-        setVisibleEulaModal(false);
-    }
-
-    public void setVisibleEulaModal(bool visibility)
-    {
-        if (isOnMainThread())
-        {
-            if (eulaModal != null)
-            {
-                eulaModal.gameObject.SetActive(visibility);
-            }
-            else
-            {
-                Debug.Log("unable to get the modalPresenter object!");
-            }
-        }
-        else
-        {
-
-            UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
-                setVisibleEulaModal(visibility);
-            });
-        }
-
-
-    }
+    //
+    // public void setVisibleEulaModal(bool visibility)
+    // {
+    //     if (isOnMainThread())
+    //     {
+    //         if (eulaModalPresenter != null)
+    //         {
+    //             eulaModalPresenter.gameObject.SetActive(visibility);
+    //         }
+    //         else
+    //         {
+    //             Debug.Log("unable to get the modalPresenter object!");
+    //         }
+    //     }
+    //     else
+    //     {
+    //
+    //         UnityMainThreadDispatcher.Instance().Enqueue(() => {
+    //             Debug.Log(" dispatching of showing modal");
+    //             setVisibleEulaModal(visibility);
+    //         });
+    //     }
+    //
+    //
+    // }
     public void setVisibleGenericModal(string title, string content, bool visibility)
     {
         if (isOnMainThread())
         {
             if (genericModalPresenter != null)
             {
-                genericModalPresenter.setModal(title, content);
+                genericModalPresenter.setModalNoActions(title, content);
                 genericModalPresenter.gameObject.SetActive(visibility);
             }
             else
             {
-                Debug.Log("unable to get the modalPresenter object!");
+                Debug.LogWarning("unable to get the modalPresenter object!");
             }
         } else
         {
 
             UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
+                // Debug.Log(" dispatching of showing modal");
                 setVisibleGenericModal(title, content, visibility);
             });
         }
@@ -109,33 +105,33 @@ public class ModalManager : MonoBehaviour
 
 
     //by default obviously this must be visible; we are updating the login status.
-    public void setVisibleLoggingInModal(string content)
-    {
-        string title = "Logging in status...";
-
-        if (isOnMainThread())
-        {
-            if (loggingInStatusModal != null)
-            {
-                loggingInStatusModal.setModal(title, content);
-                loggingInStatusModal.gameObject.SetActive(true);
-            }
-            else
-            {
-                Debug.Log("unable to get the modalPresenter object!");
-            }
-        }
-        else
-        {
-
-            UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                Debug.Log(" dispatching of showing modal");
-                setVisibleLoggingInModal(content);
-            });
-        }
-
-
-    }
+    // public void setVisibleLoggingInModal(string content)
+    // {
+    //     string title = "Logging in status...";
+    //
+    //     if (isOnMainThread())
+    //     {
+    //         if (loginStatusModal != null)
+    //         {
+    //             loginStatusModal.setModalNoActions(title, content);
+    //             loginStatusModal.gameObject.SetActive(true);
+    //         }
+    //         else
+    //         {
+    //             Debug.LogWarning("unable to get the modalPresenter object!");
+    //         }
+    //     }
+    //     else
+    //     {
+    //
+    //         UnityMainThreadDispatcher.Instance().Enqueue(() => {
+    //             //Debug.Log(" dispatching of showing modal");
+    //             setVisibleLoggingInModal(content);
+    //         });
+    //     }
+    //
+    //
+    // }
 
 
     private bool isOnMainThread()
@@ -143,16 +139,62 @@ public class ModalManager : MonoBehaviour
         return mainThread.Equals(System.Threading.Thread.CurrentThread);
     }
 
-    public void showSimpleModalBoxWithActionBtn(string title, string content, string Action)
+    public void showModalNotification(string title, string content)
     {
         if (genericModalPresenter != null)
         {
-            genericModalPresenter.setModal(title, content, Action);
+            genericModalPresenter.setModal(
+                title,
+                content, 
+                "Ok"
+                );
             genericModalPresenter.gameObject.SetActive(true);
         }
         else
         {
-            Debug.Log("unable to get the modalPresenter object!");
+            Debug.LogWarning("unable to get the modalPresenter object!");
         }
     }
+    
+    public void setLoginModalText(string title, string content)
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.setModal(
+                title,
+                content, 
+                "OK"
+                );
+            showLoginModal();
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the loginStatusModal object!");
+        }
+    }
+
+    private void showLoginModal()
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the login modal object!");
+        }
+    }
+
+    public void fadeLoginModal()
+    {
+        if (loginStatusModal != null)
+        {
+            loginStatusModal.fadeaway();
+        }
+        else
+        {
+            Debug.LogWarning("unable to get the login modal object!");
+        }
+    }
+
 }

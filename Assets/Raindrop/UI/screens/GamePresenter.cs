@@ -12,6 +12,7 @@ using UnityEngine.UI;
 using UniRx;
 using TMPro;
 using OpenMetaverse.Imaging;
+using Raindrop.Services;
 
 
 //view(unitytext) -- presenter(this) -- controller(this?) -- model (raindropinstance singleton)
@@ -29,7 +30,7 @@ namespace Raindrop.Presenters
         private GridClient client { get { return instance.Client; } }
 
         private UIService uimanager;
-        private Settings s;
+        private Settings s; //todo. init this.
 
         bool Active => instance.Client.Network.Connected;
 
@@ -39,28 +40,16 @@ namespace Raindrop.Presenters
         public Button ChatButton; 
         public Button MapButton; 
 
+        //currently unused
         public Toggle SoundToggle; 
         
-        //ui elements that just dock to the screen.
-        public TMP_Text locationText;
-        public TMP_Text usernameText;
+        //HUD display.
+        public TMP_Text locationText; // sim + x y z of the user.
+        public TMP_Text usernameText; // user's name.
         //public MinimapModule minimap;
-
-
-        //public ReactiveProperty<string> simName;
-
-        public UnityEngine.Vector2 jsDir;
-        private float timeSinceLastUpdate;
-
-
         #endregion
 
-        //camera data
-        //public Vector3 cameraloc { get { return instance.cameraLoc; } }
-
-
-
-
+        private float timeSinceLastUpdate;
         private System.Threading.Timer configTimer;
         private const int saveConfigTimeout = 1000;
         #region behavior
@@ -68,7 +57,6 @@ namespace Raindrop.Presenters
         // Use this for initialization
         void Start()
         {
-
             initialiseFields();
             
             configTimer = new System.Threading.Timer(SaveConfig, null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
@@ -81,19 +69,15 @@ namespace Raindrop.Presenters
 
             //get uimanager service
             uimanager = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
-
-
-
+            
             client.Network.SimConnected += Network_SimConnected;
 
             //client.Network.SimChanged += Network_SimChanged;
             //client.Network.SimConnected += Network_SimConnected;
-
             //client.Self.SimPosition
 
             //set usename
             usernameText.text = client.Self.Name;
-
         }
 
         //its too late bro, the UI is started only after connected to sim has occured.
@@ -101,9 +85,7 @@ namespace Raindrop.Presenters
         {
             //update the user'sname
             usernameText.text = client.Self.Name;
-
             Debug.Log("Network_SimConnected is raised! wow. not expected. as sim connection should have occured far before this event is registered.");
-
         }
 
         private void SaveConfig(object state)
@@ -124,7 +106,7 @@ namespace Raindrop.Presenters
         private void OnToggleSounds(bool _)
         {
             OpenMetaverse.Logger.DebugLog("sound toggle is on? : " + _);
-            instance.MediaManager.ObjectEnable = _;
+            //instance.MediaManager.ObjectEnable = _;
             configTimer.Change(saveConfigTimeout, System.Threading.Timeout.Infinite);
         }
 
@@ -181,23 +163,16 @@ namespace Raindrop.Presenters
 
         public void OnChatBtnClick()
         {
-            uimanager.canvasManager.pushCanvas(CanvasType.Chat);
-
-
+            uimanager.canvasManager.Push(CanvasType.Chat);
         }
         public void OnMapBtnClick()
         {
-            uimanager.canvasManager.pushCanvas(CanvasType.Map);
+            uimanager.canvasManager.Push(CanvasType.Map);
 
 
         }
 
 
         #endregion
-
-
-
-
-
     }
 }

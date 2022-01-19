@@ -5,14 +5,19 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "LibreMetaverseAssembly",
-        "RaindropUnity"
+        "RaindropUnity",
+        "LeanGUI",
+        "Unity.TextMeshPro",
+        "AsyncImageLoader.Runtime",
+        "Better"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "OpenJpegDotNet.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

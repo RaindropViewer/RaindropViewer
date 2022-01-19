@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC.
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without
@@ -25,34 +26,29 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using OpenMetaverse;
 
-namespace OpenMetaverse.Voice
+namespace LibreMetaverse.Voice
 {
     public class VoiceParticipant
     {
-        private string Sip;
         private string AvatarName { get; set; }
-        private UUID id;
 
         private bool muted;
         private int volume;
-        private VoiceSession session;
-        private float energy;
+        private readonly VoiceSession session;
 
-        public float Energy { get { return energy; } }
-        private bool speaking;
-        public bool IsSpeaking { get { return speaking; } }
-        public string URI { get { return Sip; } }
-        public UUID ID { get { return id; } }
+        public float Energy { get; private set; }
+        public bool IsSpeaking { get; private set; }
+        public string URI { get; }
+        public UUID ID { get; }
 
         public VoiceParticipant(string puri, VoiceSession s)
         {
-            id = IDFromName(puri);
-            Sip = puri;
+            ID = IDFromName(puri);
+            URI = puri;
             session = s;
         }
 
@@ -92,7 +88,7 @@ namespace OpenMetaverse.Voice
 
         private static string Encode64(string str)
         {
-            byte[] encbuff = System.Text.Encoding.UTF8.GetBytes(str);
+            byte[] encbuff = Encoding.UTF8.GetBytes(str);
             return Convert.ToBase64String(encbuff);
         }
         private static byte[] Decode64(string str)
@@ -116,43 +112,43 @@ namespace OpenMetaverse.Voice
 
         public string Name
         {
-            get { return AvatarName; }
-            set { AvatarName = value; }
+            get => AvatarName;
+            set => AvatarName = value;
         }
 
         public bool IsMuted
         {
-            get { return muted; }
+            get => muted;
             set
             {
                 muted = value;
                 StringBuilder sb = new StringBuilder();
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("SessionHandle", session.Handle));
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("ParticipantURI", Sip));
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("Mute", muted ? "1" : "0"));
+                sb.Append(VoiceGateway.MakeXML("SessionHandle", session.Handle));
+                sb.Append(VoiceGateway.MakeXML("ParticipantURI", URI));
+                sb.Append(VoiceGateway.MakeXML("Mute", muted ? "1" : "0"));
                 session.Connector.Request("Session.SetParticipantMuteForMe.1", sb.ToString());
             }
         }
 
         public int Volume
         {
-            get { return volume; }
+            get => volume;
             set
             {
                 volume = value;
                 StringBuilder sb = new StringBuilder();
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("SessionHandle", session.Handle));
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("ParticipantURI", Sip));
-                sb.Append(OpenMetaverse.Voice.VoiceGateway.MakeXML("Volume", volume.ToString()));
+                sb.Append(VoiceGateway.MakeXML("SessionHandle", session.Handle));
+                sb.Append(VoiceGateway.MakeXML("ParticipantURI", URI));
+                sb.Append(VoiceGateway.MakeXML("Volume", volume.ToString()));
                 session.Connector.Request("Session.SetParticipantVolumeForMe.1", sb.ToString());
             }
         }
 
         internal void SetProperties(bool speak, bool mute, float en)
         {
-            speaking = speak;
+            IsSpeaking = speak;
             muted = mute;
-            energy = en;
+            Energy = en;
         }
     }
 }

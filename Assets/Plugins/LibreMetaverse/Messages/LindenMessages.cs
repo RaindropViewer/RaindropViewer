@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (c) 2006-2016, openmetaverse.co
+ * Copyright (c) 2021-2022, Sjofn LLC
  * All rights reserved.
  *
  * - Redistribution and use in source and binary forms, with or without 
@@ -1401,9 +1402,7 @@ namespace OpenMetaverse.Messages.Linden
             {
                 FolderDataInfo ret = new FolderDataInfo();
 
-                if (!(data is OSDMap)) return ret;
-
-                OSDMap map = (OSDMap)data;
+                if (!(data is OSDMap map)) return ret;
 
                 ret.FolderID = map["FolderID"];
                 ret.ParentID = map["ParentID"];
@@ -1442,9 +1441,7 @@ namespace OpenMetaverse.Messages.Linden
             {
                 ItemDataInfo ret = new ItemDataInfo();
 
-                if (!(data is OSDMap)) return ret;
-
-                OSDMap map = (OSDMap)data;
+                if (!(data is OSDMap map)) return ret;
 
                 ret.ItemID = map["ItemID"];
                 ret.CallbackID = map["CallbackID"];
