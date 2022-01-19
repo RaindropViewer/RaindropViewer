@@ -67,18 +67,9 @@ namespace Raindrop.Tests.ImagingTests
                 Assert.True(thebytes.Length > 0);
                 
                 
-                var texture = new Texture2D(1, 1, TextureFormat.ARGB32,false); // impt there is a jobs bug here
-                var loaderSettings = AsyncImageLoader.LoaderSettings.Default;
-                loaderSettings.generateMipmap = false; // impt there is a bug here
-                var loadSuccess = false;
+                var texture = Raindrop.Imaging.LoadT2DWithoutMipMaps(thebytes);
 
-                // Use the default LoaderSettings
-                loadSuccess = AsyncImageLoader.LoadImage(texture, thebytes, loaderSettings);
-                // ==================================
-                // Create new texture from image data
-                // ==================================
-
-                Assert.True(loadSuccess);
+                Assert.True(texture.height > 5); //todo   so arbitrary
                 
                 var outbytes = texture.EncodeToJPG(100);
                 #if UNITY_EDITOR
