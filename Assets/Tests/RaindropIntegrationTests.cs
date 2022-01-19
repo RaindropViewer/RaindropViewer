@@ -30,6 +30,8 @@ namespace Raindrop.Tests
     [TestFixture()]
     public class RaindropIntegrationTests
     {
+        private static string _username;
+        private static string _password;
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
@@ -145,10 +147,7 @@ namespace Raindrop.Tests
         public IEnumerator LoginLogoutTest()
         {
             //0. is the scene ready?
-            var gm = GameObject.Find("GameManager");
-            var vm = GameObject.Find("ViewsManager");
-            var mm = GameObject.Find("ModalManager");
-            var go = GameObject.Find("GlobalOverlay");
+            var vm = Get_ViewsManager();
 
             //1. get the refence to the UI service.
             var srvLocator = ServiceLocator.ServiceLocator.Instance;
@@ -173,26 +172,16 @@ namespace Raindrop.Tests
                 Assert.Fail("expected to be on the welcome screen!");
             }
             
-            //Extra: set reducedsettings so that we do not use too many dependencies
-            instance.Client.Settings.ALWAYS_DECODE_OBJECTS = false;
-            instance.Client.Settings.ALWAYS_REQUEST_OBJECTS = false;
-            instance.Client.Settings.MULTIPLE_SIMS= false;
-            instance.Client.Settings.SEND_AGENT_APPEARANCE= false;
-            instance.Client.Settings.USE_ASSET_CACHE= false;
-            instance.Client.Settings.STORE_LAND_PATCHES= false;
-            instance.Client.Settings.STORE_LAND_PATCHES= false;
-            
+            SetClientSettings();
+
             //1b. we are on the login screen. do login. assert logged in.
             Assert.IsTrue(UISrv.canvasManager.topCanvas.canvasType == CanvasType.Login);
-            yield return new WaitForSeconds(2);
-            var loginPresenter
-                = vm.GetComponent<CanvasManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
-            string _username = "***REMOVED*** Resident";
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("UserTextField", _username);
-            string _password = "***REMOVED***";
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("PassTextField", _password);
+            yield return new WaitForSeconds(2); // if you remvoe this one you will fail the test.
+            LoginPresenterIsAvailable(vm);
+            TypeUserAndPassIntoLoginPanel();
             yield return new WaitForSeconds(2);
             Utils.UIHelpers.ClickButtonByUnityName("LoginBtn");
+            
             //assert the backend API; that we are logged in.
             yield return new WaitForSeconds(20);
             Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
@@ -221,16 +210,13 @@ namespace Raindrop.Tests
             {
                 Assert.Fail("expected to be on the welcome screen!");
             }
-            Assert.True(UISrv.canvasManager.topCanvas.canvasType == CanvasType.Login);
-            yield return new WaitForSeconds(2);
+            Assert.IsTrue(UISrv.canvasManager.topCanvas.canvasType == CanvasType.Login);
             Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
-            
-            loginPresenter
-                = vm.GetComponent<CanvasManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("UserTextField", _username);
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("PassTextField", _password);
+            LoginPresenterIsAvailable(vm);
+            TypeUserAndPassIntoLoginPanel();
             yield return new WaitForSeconds(2);
             Utils.UIHelpers.ClickButtonByUnityName("LoginBtn");
+
             //assert the backend API; that we are logged in.
             yield return new WaitForSeconds(20);
             Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
@@ -245,6 +231,53 @@ namespace Raindrop.Tests
             Debug.Log("test is ok!");
             yield return new WaitForSeconds(30);
         }
+
+        private static GameObject Get_ViewsManager()
+        {
+            var gm = GameObject.Find("GameManager");
+            var vm = GameObject.Find("ViewsManager");
+            var mm = GameObject.Find("ModalManager");
+            var go = GameObject.Find("GlobalOverlay");
+            UnityEngine.Assertions.Assert.IsTrue(gm & vm & mm & go);
+
+            return vm;
+        }
+
+        private static void LoginPresenterIsAvailable(GameObject vm)
+        {
+            var loginPresenter
+                = vm.GetComponent<CanvasManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
+            Assert.True(loginPresenter != null);
+        }
+        
+        private static void TypeUserAndPassIntoLoginPanel()
+        {
+            _username = "***REMOVED*** Resident";
+            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("UserTextField", _username);
+            _password = "***REMOVED***";
+            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("PassTextField", _password);
+        }
+
+        private void SetClientSettings()
+        {
+            //Extra: set reducedsettings so that we do not use too many dependencies
+            instance.Client.Settings.ALWAYS_DECODE_OBJECTS = false;
+            instance.Client.Settings.ALWAYS_REQUEST_OBJECTS = false;
+            instance.Client.Settings.MULTIPLE_SIMS = false;
+            instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
+            instance.Client.Settings.USE_ASSET_CACHE = false;
+            instance.Client.Settings.STORE_LAND_PATCHES = false;
+            instance.Client.Settings.STORE_LAND_PATCHES = false;
+        }
+        //
+        // [Test]
+        // public IEnumerator LoginAndDownloadTexture()
+        // {
+        //     
+        //     
+        //     
+        //     
+        // }
 
         public class Utils
         {
