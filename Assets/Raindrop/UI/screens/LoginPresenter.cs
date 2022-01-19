@@ -63,7 +63,7 @@ namespace Raindrop.Presenters
         }
 
         public ReactiveProperty<string> loginMsg = new ReactiveProperty<string>(""); //"" is a magic value that is required to prevent showing the modal immediately on load.
-        private ReactiveProperty<bool> btnLoginEnabled = new ReactiveProperty<bool>(true);
+        private ReactiveProperty<bool> LoginButton_IsClickable = new ReactiveProperty<bool>(true);
 
         //is empty string if there is no error.
         public ReactiveProperty<string> credParserErrorString = new ReactiveProperty<string>();
@@ -97,7 +97,11 @@ namespace Raindrop.Presenters
             //3 hookup reactive UIs.
             LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick()); //when clicked, runs this method.
 
-            btnLoginEnabled.AsObservable().Subscribe(_ => LoginButton.gameObject.SetActive(_)); //update the login button availabilty according to this boolean.
+            LoginButton_IsClickable.AsObservable().Subscribe(_ =>
+            {
+                LoginButton.gameObject.SetActive(_);
+                LoginButton.interactable = _;
+            }); //update the login button availabilty according to this boolean.
 
             usernameField.onValueChanged.AsObservable().Subscribe(_ =>
             {
@@ -204,7 +208,7 @@ namespace Raindrop.Presenters
                 case LoginStatus.Success:
                     loginMsg.Value += "Logged in as " + netcom.LoginOptions.FullName;
 
-                    btnLoginEnabled.Value = false;
+                    LoginButton_IsClickable.Value = false;
                     // instance.Client.Groups.RequestCurrentGroups();
 
                     Close_LoginModal_Slow();
@@ -218,18 +222,16 @@ namespace Raindrop.Presenters
                     if (e.FailReason == "tos")
                     {
                         loginMsg.Value = "Must agree to Terms of Service before logging in";
-                        uimanager.modalManager.showModalNotification("Logging in failed",loginMsg.Value);
+                        //uimanager.modalManager.showModalNotification("Logging in failed",loginMsg.Value);
                         //pnlTos.Visible = true;
                         //txtTOS.Text = e.Message.Replace("\n", "\r\n");
-                        btnLoginEnabled.Value = true;
-                        LoginButton.interactable = true;
+                        LoginButton_IsClickable.Value = true;
                     }
                     else
                     {
                         loginMsg.Value = e.Message;
-                        uimanager.modalManager.showModalNotification("Logging in failed", loginMsg.Value);
-                        btnLoginEnabled.Value = true;
-                        LoginButton.interactable = true;
+                        //uimanager.modalManager.showModalNotification("Logging in failed", loginMsg.Value);
+                        LoginButton_IsClickable.Value = true;
                     }
                     break;
             }
@@ -238,7 +240,8 @@ namespace Raindrop.Presenters
         public void netcom_ClientLoggedOut(object sender, EventArgs e)
         {
             loginMsg.Value = "logged out.";
-            uimanager.modalManager.showModalNotification("Login status", loginMsg.Value);
+            // uimanager.modalManager.showModalNotification("Login status", loginMsg.Value);
+            LoginButton_IsClickable.Value = true;
             //pnlLoginPrompt.Visible = true;
             //pnlLoggingIn.Visible = false;
 
@@ -248,7 +251,7 @@ namespace Raindrop.Presenters
 
         public void netcom_ClientLoggingOut(object sender, OverrideEventArgs e)
         {
-            btnLoginEnabled.Value = false;
+            LoginButton_IsClickable.Value = false;
 
             loginMsg.Value = "Logging out...";
             // uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
@@ -259,7 +262,7 @@ namespace Raindrop.Presenters
             loginMsg.Value = "Start to Logging in...";
             // uimanager.modalManager.showModalNotification("Login status", Login_msg.Value);
             
-            btnLoginEnabled.Value = false;
+            LoginButton_IsClickable.Value = false;
         }
           
 
