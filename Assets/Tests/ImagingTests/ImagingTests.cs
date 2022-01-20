@@ -76,7 +76,7 @@ namespace Raindrop.Tests.ImagingTests
                 var outbytes = texture.EncodeToJPG(100);
                 #if UNITY_EDITOR
                 
-                    WriteToFile(outbytes, outPath_persistentDataPath);
+                    Helper.WriteToFile(outbytes, outPath_persistentDataPath);
                 #elif UNITY_ANDROID //warn, this is true if we are in editor...
                     string outPath_GetAndroidExternalFilesDir_internal =  
                         GetAndroidExternalFilesDir(false) + "/Pictures/menhara_out_GetAndroidExternalFilesDir_internal.jpg";
@@ -121,49 +121,14 @@ namespace Raindrop.Tests.ImagingTests
                 // should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
                 
                 Debug.Log("Application.sataPath" + Application.dataPath);
-                Debug.Log("GetAndroidExternalFilesDir internal"+ GetAndroidExternalFilesDir(true));
+                Debug.Log("GetAndroidExternalFilesDir internal"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(true));
                 // should be  /storage/6106-8710/Android/data/com.UnityTestRunner.UnityTestRunner/files
 
-                Debug.Log("GetAndroidExternalFilesDir prefersdcard"+ GetAndroidExternalFilesDir(false));
+                Debug.Log("GetAndroidExternalFilesDir prefersdcard"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(false));
                 //should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
                 
             }
             
-            // returns SD card if the bool is true OR the sd card is not available.
-            // otherwise i will return internal-but-shared storage
-            private static string GetAndroidExternalFilesDir(bool preferSDcard)
-            {
-                using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-                {
-                    using (AndroidJavaObject context = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
-                    {
-                        // Get all available external file directories (emulated and sdCards)
-                        AndroidJavaObject[] externalFilesDirectories = context.Call<AndroidJavaObject[],AndroidJavaObject[]>("getExternalFilesDirs", null);
-                        AndroidJavaObject emulated = null;
-                        AndroidJavaObject sdCard = null;
-
-                        for (int i = 0; i < externalFilesDirectories.Length; i++)
-                        {
-                            AndroidJavaObject directory = externalFilesDirectories[i];
-                            using (AndroidJavaClass environment = new AndroidJavaClass("android.os.Environment"))
-                            {
-                                // Check which one is the emulated and which the sdCard.
-                                bool isRemovable = environment.CallStatic<bool> ("isExternalStorageRemovable", directory);
-                                bool isEmulated = environment.CallStatic<bool> ("isExternalStorageEmulated", directory);
-                                if (isEmulated)
-                                    emulated = directory;
-                                else if (isRemovable && isEmulated == false)
-                                    sdCard = directory;
-                            }
-                        }
-                        // Return the sdCard if available
-                        if (sdCard != null && preferSDcard)
-                            return sdCard.Call<string>("getAbsolutePath");
-                        else
-                            return emulated.Call<string>("getAbsolutePath");
-                    }
-                }
-            }
         }
     }
 }
