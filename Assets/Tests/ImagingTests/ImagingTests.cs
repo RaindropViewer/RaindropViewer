@@ -97,17 +97,6 @@ namespace Raindrop.Tests.ImagingTests
 
             }
 
-            //filePath = fully-specified file path
-            private void WriteToFile(byte[] outbytes, string filePath)
-            {
-                //create parent subfolders
-                var parentDir = Path.GetDirectoryName(filePath);
-                System.IO.Directory.CreateDirectory(parentDir);
-                
-                //write file
-                System.IO.File.WriteAllBytes(filePath, outbytes);
-                Debug.Log($"write: {filePath} ");
-            }
 
 
             [Test]
