@@ -1,5 +1,6 @@
 ﻿using OpenMetaverse;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Raindrop.Map.Model
@@ -7,16 +8,19 @@ namespace Raindrop.Map.Model
     /// <summary>
     /// API to retrieve, delete, modify, create MapTiles in the scene
     /// </summary>
-    public class MapTilesManager
+    public class MapTilesRAM
     {
         //number of tiles that are in the scene.
         public int visibleCount => sceneTiles.Count;
-
+        int poolSize => pool.Count;
+        
         //tiles that are in the scene.
         private Dictionary<ulong, MapTile> sceneTiles = new Dictionary<ulong, MapTile>();
 
         private MapTilesPool pool;
-        public MapTilesManager(int poolSize)
+
+        private ConcurrentQueue<MapService.MapData> readyForDecode_DataQueue;
+        public MapTilesRAM(int poolSize, ConcurrentQueue<MapService.MapData> receivedDataQueue)
         {
             pool = new MapTilesPool(poolSize);
         }
@@ -36,11 +40,11 @@ namespace Raindrop.Map.Model
         /// </summary>
         /// <param name="handle">the region handle of the tile to get ; gridCoords * 256 and pack X&Y together.</param>
         /// <returns> Tile </returns>
-        public MapTile tryGetTile(ulong handle)
+        public bool tryGetTile_RAM(ulong handle, out MapTile tile)
         {
-            MapTile tile = null;
+            // MapTile tile = null;
             bool success = sceneTiles.TryGetValue(handle, out tile);
-            return tile;
+            return success;
         }
         
         /// <summary>

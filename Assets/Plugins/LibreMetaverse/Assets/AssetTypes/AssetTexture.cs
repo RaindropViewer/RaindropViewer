@@ -27,6 +27,7 @@
 
 using System;
 using OpenMetaverse.Imaging;
+using UnityEngine;
 
 namespace OpenMetaverse.Assets
 {
@@ -97,14 +98,18 @@ namespace OpenMetaverse.Assets
 
             this.Components = 0;
 
-            using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
-            {
-                // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
-                if (!reader.ReadHeader()) { return false; }
-
-                throw new NotImplementedException();
-                // Image = new ManagedImage(reader.DecodeToBitmap());
-            }
+            Texture2D texture = new Texture2D(1,1);
+            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
+            T2D.LoadT2DWithoutMipMaps(AssetData, texture); //blocking.
+            Image = new ManagedImage(texture); //blocking.
+            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
+            // {
+            //     // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
+            //     if (!reader.ReadHeader()) { return false; }
+            //
+            //     throw new NotImplementedException();
+            //     // Image = new ManagedImage(reader.DecodeToBitmap());
+            // }
 
             if ((Image.Channels & ManagedImage.ImageChannels.Color) != 0)
                 Components += 3;

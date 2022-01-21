@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using OpenMetaverse.Http;
 
 namespace OpenMetaverse
@@ -130,7 +131,7 @@ namespace OpenMetaverse
                 request.ClientCertificates.Add(ClientCert);
 
             // Leave idle connections to this endpoint open for up to 60 seconds
-            request.ServicePoint.MaxIdleTime = 0;
+            request.ServicePoint.MaxIdleTime = Timeout.Infinite;
             // Disable stupid Expect-100: Continue header
             request.ServicePoint.Expect100Continue = false;
             // Crank up the max number of connections per endpoint

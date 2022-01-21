@@ -1,5 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -77,12 +76,6 @@ namespace Raindrop.Disk
 
 
 
-        public static bool SaveTextureToFile(Image image)
-        {
-
-            //image.Save(outputStream, format);
-            return true;
-        }
 
     }
 }

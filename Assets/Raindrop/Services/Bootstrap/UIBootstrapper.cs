@@ -30,10 +30,10 @@ namespace Raindrop.Services.Bootstrap
         private void Start()
         {
             //1. mapfetcher - logic, not ui. please refactor
-            if (!ServiceLocator.ServiceLocator.Instance.IsRegistered<MapFetcher>())
+            if (!ServiceLocator.ServiceLocator.Instance.IsRegistered<MapService>())
             {
                 Debug.Log("UIBootstrapper creating and registering MapBackend.MapFetcher!");
-                ServiceLocator.ServiceLocator.Instance.Register<MapFetcher>(new MapFetcher());
+                ServiceLocator.ServiceLocator.Instance.Register<MapService>(new MapService());
                 //return;
             }
 

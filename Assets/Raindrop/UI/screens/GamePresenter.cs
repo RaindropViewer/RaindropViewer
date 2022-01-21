@@ -97,7 +97,7 @@ namespace Raindrop.Presenters
             //s["parcel_audio_play"] = OSD.FromBoolean(cbPlayAudioStream.Checked);
             //s["parcel_audio_keep_url"] = OSD.FromBoolean(cbKeep.Checked);
             //s["object_audio_vol"] = OSD.FromReal(instance.MediaManager.ObjectVolume);
-            s["object_audio_enable"] = OSD.FromBoolean(SoundToggle.isOn);
+            // s["object_audio_enable"] = OSD.FromBoolean(SoundToggle.isOn); //this one is buggy.
             //s["ui_audio_vol"] = OSD.FromReal(instance.MediaManager.UIVolume);
         }
 

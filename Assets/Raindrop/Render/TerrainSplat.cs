@@ -385,9 +385,9 @@ namespace Raindrop.Rendering
             {
                 if (state == TextureRequestState.Finished && assetTexture?.AssetData != null)
                 {
-                    Texture2D img;
-                    ManagedImage mi;
-                    OpenJPEG.DecodeToImage(assetTexture.AssetData, out mi, out img);
+                    Texture2D img
+                        = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                    T2D.LoadT2DWithoutMipMaps(assetTexture.AssetData, img); 
                     detailTexture[i] = (Texture2D)img;
                 }
                 textureDone.Set();

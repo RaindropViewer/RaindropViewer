@@ -38,6 +38,7 @@ using Raindrop.Netcom;
 using Raindrop.Media;
 using Raindrop.UI.Notification;
 using OpenMetaverse;
+using Raindrop.Disk;
 using Raindrop.ServiceLocator;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
@@ -268,7 +269,7 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client0)
         {
-            _appDataDir = Application.persistentDataPath;
+            _appDataDir = DirectoryHelpers.GetCacheDir(); //Application.persistentDataPath;
             _streamingAssetsDir = Application.streamingAssetsPath;
 
             InitializeLoggingAndConfig();
