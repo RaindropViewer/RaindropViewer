@@ -214,7 +214,7 @@ namespace Raindrop.Tests
             Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
             LoginPresenterIsAvailable(vm);
             TypeUserAndPassIntoLoginPanel();
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(5);
             Utils.UIHelpers.ClickButtonByUnityName("LoginBtn");
 
             //assert the backend API; that we are logged in.

@@ -27,6 +27,7 @@
 
 using System;
 using OpenMetaverse.Imaging;
+using UnityEngine;
 
 namespace OpenMetaverse.Assets
 {
@@ -97,9 +98,10 @@ namespace OpenMetaverse.Assets
 
             this.Components = 0;
 
+            Texture2D texture = new Texture2D(1,1);
             // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
-            var texture = Imaging.T2D.LoadT2DWithoutMipMaps(AssetData);
-            Image = new ManagedImage(texture);
+            T2D.LoadT2DWithoutMipMaps(AssetData, texture); //blocking.
+            Image = new ManagedImage(texture); //blocking.
             // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
             // {
             //     // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!

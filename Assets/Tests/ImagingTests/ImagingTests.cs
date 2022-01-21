@@ -67,9 +67,11 @@ namespace Raindrop.Tests.ImagingTests
                 
                 byte[] thebytes = BetterStreamingAssets.ReadAllBytes(_inputImageSubPath);
                 Assert.True(thebytes.Length > 0);
-                
-                
-                var texture = T2D.LoadT2DWithoutMipMaps(thebytes);
+
+
+                Texture2D texture 
+                    = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                T2D.LoadT2DWithoutMipMaps(thebytes, texture);
 
                 Assert.True(texture.height > 5); //todo   so arbitrary
                 
@@ -98,10 +100,9 @@ namespace Raindrop.Tests.ImagingTests
             }
 
 
-
+            // fixme: after implementing on-sd/on-device caching preferences
             [Test]
-            [UnityPlatform (RuntimePlatform.Android)]
-            public void printImportantPaths_Android()
+            public void printImportantPaths_Platforms()
             {
                 //get from SA
                 // var j2p_bytes = BetterStreamingAssets.ReadAllBytes(_largeImageRelativePath);
@@ -121,10 +122,10 @@ namespace Raindrop.Tests.ImagingTests
                 // should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
                 
                 Debug.Log("Application.sataPath" + Application.dataPath);
-                Debug.Log("GetAndroidExternalFilesDir internal"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(true));
+                // Debug.Log("GetAndroidExternalFilesDir internal"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(true));
                 // should be  /storage/6106-8710/Android/data/com.UnityTestRunner.UnityTestRunner/files
 
-                Debug.Log("GetAndroidExternalFilesDir prefersdcard"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(false));
+                // Debug.Log("GetAndroidExternalFilesDir prefersdcard"+ Disk.DirectoryHelpers.GetAndroidExternalFilesDir(false));
                 //should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
                 
             }
