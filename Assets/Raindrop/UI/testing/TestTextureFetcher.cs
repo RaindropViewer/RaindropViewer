@@ -17,13 +17,13 @@ namespace Raindrop
     class TestTextureFetcher : MonoBehaviour
     {
         [SerializeField]
-        public MapFetcher mapFetcher; //fetching logic + pooling data here
+        public MapService MapService; //fetching logic + pooling data here
         
 
         private void Awake()
         {
             MainThreadDispatcher.Initialize();
-            mapFetcher = new MapFetcher();
+            MapService = new MapService();
         }
 
 
@@ -36,7 +36,8 @@ namespace Raindrop
 
 
             var handle = Utils.UIntsToLong(256 * 1000, 256 * 1000);
-            mapFetcher.GetRegionTileExternal(handle, 1);
+            throw new NotImplementedException("we recently refactored the mapservice interface.");
+            // MapService.GetRegionTileExternal(handle, 1);
             Debug.Log("end of initial fetch call.");
         }
 

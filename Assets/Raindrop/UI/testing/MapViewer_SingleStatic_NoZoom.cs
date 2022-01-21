@@ -20,7 +20,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
 {
     
     [SerializeField]
-    public MapFetcher mapFetcher;
+    public MapService MapService;
 
     [SerializeField]
     public GameObject mapTileGO;
@@ -43,7 +43,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
     System.Threading.Timer repaint;
     private void Awake()
     {
-        mapFetcher = new MapFetcher();
+        MapService = new MapService();
 
     }
 
@@ -78,7 +78,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
             throw new System.Exception("mapMoverGO is fucked"); // fix exception type plz
         }
 
-        mapFetcher = new MapFetcher();
+        MapService = new MapService();
 
 
         // for testing
@@ -93,11 +93,13 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
         ulong handle = mapMover.GetLookAt();
         int zoom = (int)zoomSlider.value;
         // how 2 convert look at floats into uints? (uints are gridpos * 256)
-        if (mapFetcher.tryGetMapTile(handle, 1) == null) //hack for now.
-        {
-            mapFetcher.GetRegionTileExternal(handle, 1);
-        } 
-        
+        MapTile mt =  MapService.GetMapTile(handle, 1, out bool isReady);
+        //
+        // if (MapService.GetMapTile(handle, 1) == null) //hack for now.
+        // {
+        //     MapService.GetMapTile(handle, 1, out bool isReady);
+        // } 
+        //
         needRepaint = true;
 
         Debug.Log("refreshed internal images. fetching images if any..");
@@ -119,12 +121,13 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
             return;
         }
         ulong handle = mapMover.GetLookAt();
-        MapTile tex = mapFetcher.tryGetMapTile(handle, 1);
-
-        if (tex != null) 
-        {
-            iv.setRawImage(tex.getTex());
-        }
-        Debug.Log("drew images.");
+        // MapTile tex = MapService.GetMapTile(handle, 1);
+        throw new NotImplementedException("we recently refactored the mapservice interface.");
+        
+        // if (tex != null) 
+        // {
+        //     iv.setRawImage(tex.getTex());
+        // }
+        // Debug.Log("drew images.");
     }
 }

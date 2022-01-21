@@ -22,7 +22,7 @@ namespace Raindrop.UI.Model
     class MapModel
     {
         // i fetch images.
-        private MapFetcher mapFetcher;
+        private MapService _mapService;
         // i cache images to disk.
         private MapCache mapCache;
 

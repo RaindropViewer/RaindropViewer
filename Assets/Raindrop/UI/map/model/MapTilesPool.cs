@@ -8,7 +8,7 @@ namespace Raindrop.Map.Model
     {
         private Queue<MapTile> tilePool;
 
-        public int count => tilePool.Count;
+        public int Count => tilePool.Count;
 
 
         public MapTilesPool(int poolSize)
@@ -23,7 +23,7 @@ namespace Raindrop.Map.Model
         // gets a unused maptile from pool.
         public MapTile acquireTile()
         {
-            if (count <= 0)
+            if (Count <= 0)
             {
                 throw new Exception("ran out of memory in mapdatapool! Please implement data recycling logic.");
             }
