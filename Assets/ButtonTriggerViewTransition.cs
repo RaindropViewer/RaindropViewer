@@ -6,8 +6,10 @@ using Raindrop;
 using Raindrop.ServiceLocator;
 using Raindrop.Services;
 using UnityEngine;
+using UnityEngine.UI;
 using Logger = OpenMetaverse.Logger;
 
+// This component allows you to bring up the scene that the button is supposed to lead to.
 public class ButtonTriggerViewTransition : MonoBehaviour
 {
     public CanvasType canvasTypeToPush;
@@ -16,7 +18,14 @@ public class ButtonTriggerViewTransition : MonoBehaviour
     {
         try
         {
-            this.GetComponent<LeanButton>().OnClick.AddListener(OnClick);
+            if (this.GetComponent<LeanButton>())
+            {
+                this.GetComponent<LeanButton>().OnClick.AddListener(OnClick);
+            }
+            if (this.GetComponent<Button>())
+            {
+                this.GetComponent<Button>().onClick.AddListener(OnClick);
+            }
         }
         catch (Exception e)
         {
