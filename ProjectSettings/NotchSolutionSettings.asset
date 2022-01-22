@@ -7,8 +7,8 @@
             "configurations": [
                 {
                     "configurationName": "Config A",
-                    "<DeviceIndex>k__BackingField": 0,
-                    "<Orientation>k__BackingField": 0,
+                    "<DeviceIndex>k__BackingField": 1,
+                    "<Orientation>k__BackingField": 2,
                     "<GameViewSize>k__BackingField": 0
                 },
                 {
@@ -20,7 +20,7 @@
             ]
         }
     ],
-    "<EnableSimulation>k__BackingField": false,
+    "<EnableSimulation>k__BackingField": true,
     "<PrefabModeOverlayColor>k__BackingField": {
         "r": 0.296999990940094,
         "g": 0.4050000011920929,
