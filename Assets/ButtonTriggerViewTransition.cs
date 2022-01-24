@@ -37,16 +37,16 @@ public class ButtonTriggerViewTransition : MonoBehaviour
     {
         if (canvasTypeToPush == CanvasType.NONE)
         {
-            ServiceLocator.Instance.Get<UIService>().canvasManager.PopCanvas();
+            ServiceLocator.Instance.Get<UIService>().ScreensManager.PopCanvas();
             return;
         }
         
         if (popCurrent)
         {
-            ServiceLocator.Instance.Get<UIService>().canvasManager.PopAndPush(canvasTypeToPush);
+            ServiceLocator.Instance.Get<UIService>().ScreensManager.PopAndPush(canvasTypeToPush);
         } else
         {
-            ServiceLocator.Instance.Get<UIService>().canvasManager.Push(canvasTypeToPush);
+            ServiceLocator.Instance.Get<UIService>().ScreensManager.Push(canvasTypeToPush);
         }
     }
 }

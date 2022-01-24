@@ -84,7 +84,6 @@ namespace Raindrop.Tests
                 }
             ));
             
-            Assert.Pass();
             yield break;
         }
         
@@ -109,8 +108,6 @@ namespace Raindrop.Tests
             void FinishWebRequest(IAsyncResult ar)
             {
                 Debug.Log("net done.");
-            
-                Assert.Pass();
 
             }
         }

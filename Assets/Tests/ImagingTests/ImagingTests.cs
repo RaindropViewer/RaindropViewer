@@ -21,7 +21,6 @@ namespace Raindrop.Tests.ImagingTests
         {
             private static RaindropInstance instance = new RaindropInstance(new GridClient());
             public static string clientDir = instance.ClientDir;
-            public string appDataDir =  clientDir + "/ImagingTests/menhara_out_persistentDataPath.jpg";
             public static string _inputImageSubPath = "test/menhara.jp2";
 
             [OneTimeSetUp]
@@ -61,18 +60,18 @@ namespace Raindrop.Tests.ImagingTests
                 
                 var outbytes = texture.EncodeToJPG(100);
                 
+                string appDataDir =  clientDir + "/ImagingTests/menhara_out_clientDir.jpg";
                 Helper.WriteToFile(outbytes, appDataDir);
                 #if UNITY_EDITOR
                 #elif UNITY_ANDROID //warn, this is true if we are in editor...
                     string outPath_GetAndroidExternalFilesDir_internal =  
-                        GetAndroidExternalFilesDir(false) + "/Pictures/menhara_out_GetAndroidExternalFilesDir_internal.jpg";
+                        Disk.DirectoryHelpers.GetAndroidExternalFilesDir(false) + "/ImagingTests/menhara_out_GetAndroidExternalFilesDir_internal.jpg";
                     string outPath_GetAndroidExternalFilesDir_external =  
-                        GetAndroidExternalFilesDir(true) + "/Pictures/menhara_out_GetAndroidExternalFilesDir_external.jpg";
+                        Disk.DirectoryHelpers.GetAndroidExternalFilesDir(true) + "/ImagingTests/menhara_out_GetAndroidExternalFilesDir_external.jpg";
                     
-                    WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_internal);
-                    WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_external);
-                    WriteToFile(outbytes, outPath_persistentDataPath);
-
+                    Helper.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_internal);
+                    Helper.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_external);
+                    
                 #endif
 
                 float timeEnd = Time.realtimeSinceStartup;

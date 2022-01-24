@@ -52,7 +52,7 @@ public class EulaView : MonoBehaviour
         if (instance.GlobalSettings["EulaAccepted"] == false)
             return;
         
-        ServiceLocator.Instance.Get<UIService>().canvasManager.resetToInitialScreen();
+        ServiceLocator.Instance.Get<UIService>().ScreensManager.resetToInitialScreen();
     }
 
     private void onToggleChanged(bool isEulaAccepted)

@@ -1,19 +1,9 @@
-﻿using NUnit.Framework;
-using OpenMetaverse;
+﻿using System.Collections;
+using Lean.Gui;
+using NUnit.Framework;
+using Raindrop;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lean.Gui;
-using NUnit.Framework.Internal;
-using OpenMetaverse.Assets;
-using OpenMetaverse.Imaging;
-using OpenMetaverse.ImportExport.Collada14;
 using Raindrop.Services;
 using TMPro;
 using UnityEngine;
@@ -21,7 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace Raindrop.Tests
+namespace Tests.RaindropIntegrationTests
 {
     /*
      * UI-intensive tests for the login functionality. the main scene will be loaded.
@@ -30,10 +20,10 @@ namespace Raindrop.Tests
     [TestFixture()]
     public class LoginTests
     {
-        private static string _username;
-        private static string _password;
+        private static string _username = "***REMOVED*** Resident"; // fixme: move this to some xml
+        private static string _password = "***REMOVED***";
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return Raindrop.ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -43,7 +33,7 @@ namespace Raindrop.Tests
         }
 
         [UnityTest]
-        //assert pass is working (teardown is ok)
+        //assert that the loading main scene have no huge errors.
         public IEnumerator AbleToAssertPass()
         {
             Assert.Pass();
@@ -56,7 +46,9 @@ namespace Raindrop.Tests
          * 2. check backend API, login is true
          * 3. [UI] press logout button.
          * 4. check is logged out
-         * 5. passed.
+         *
+         * 5. then do the above again.
+         * 6. passed
          */
         public IEnumerator LoginLogoutTest()
         {
@@ -64,86 +56,61 @@ namespace Raindrop.Tests
             var vm = Get_ViewsManager();
 
             //1. get the refence to the UI service.
-            var srvLocator = ServiceLocator.ServiceLocator.Instance;
-            var UISrv = srvLocator.Get<UIService>();
-            // srvLocator.Get<UIService>().resetUI();
+            var srvLocator = Raindrop.ServiceLocator.ServiceLocator.Instance;
+            UIService uiSrv = null;
+            try
+            {
+                uiSrv = srvLocator.Get<UIService>();
+            }
+            catch
+            {
+                Assert.Fail("UIService unavailable.");
+            }
+            // uiSrv.resetUI();
             
             //1a. accept the eula if needed.
-            if (UISrv.canvasManager.topCanvas.canvasType == CanvasType.Eula)
+            if (uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Eula)
             {
                 // well, we need to agree to eula first.
-                Utils.UIHelpers.accepttheeula();
-            }
-            
-            //1b. we are on the welcome screen. now navigate to the login screen.
-            if (UISrv.canvasManager.topCanvas.canvasType == CanvasType.Welcome)
-            {
+                InputSubroutines.Login.accepttheeula();
                 yield return new WaitForSeconds(2);
-                Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
             }
-            else
-            {
-                Assert.Fail("expected to be on the welcome screen!");
-            }
-            
+
             SetClientSettings();
-
-            //1b. we are on the login screen. do login. assert logged in.
-            Assert.IsTrue(UISrv.canvasManager.topCanvas.canvasType == CanvasType.Login);
-            yield return new WaitForSeconds(2); // if you remvoe this one you will fail the test.
-            LoginPresenterIsAvailable(vm);
-            TypeUserAndPassIntoLoginPanel();
-            yield return new WaitForSeconds(2);
-            Utils.UIHelpers.ClickButtonByUnityName("LoginBtn");
             
-            //assert the backend API; that we are logged in.
-            yield return new WaitForSeconds(20);
-            Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
-            
-            //finally, disconnect. assert disconnected.
-            Utils.UIHelpers.Click_DisconnectButton();
-            yield return new WaitForSeconds(5);
-            Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
-            
-            
-            
-            yield return new WaitForSeconds(30);
-            
-            
-            
-            
-            //try to login again!
-            
-            //1b. we are on the welcome screen. now navigate to the login screen.
-            if (UISrv.canvasManager.topCanvas.canvasType == CanvasType.Welcome)
+            int times = 2;
+            for (int i = 0; i < times; i++)
             {
-                yield return new WaitForSeconds(2);
-                Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
-            }
-            else
-            {
-                Assert.Fail("expected to be on the welcome screen!");
-            }
-            Assert.IsTrue(UISrv.canvasManager.topCanvas.canvasType == CanvasType.Login);
-            Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
-            LoginPresenterIsAvailable(vm);
-            TypeUserAndPassIntoLoginPanel();
-            yield return new WaitForSeconds(5);
-            Utils.UIHelpers.ClickButtonByUnityName("LoginBtn");
-
-            //assert the backend API; that we are logged in.
-            yield return new WaitForSeconds(20);
-            Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
+                //1b. we are on the welcome screen. now navigate to the login screen.
+                if (uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Welcome)
+                {
+                    yield return new WaitForSeconds(2);
+                    yield return Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
+                }
+                else
+                {
+                    Assert.Fail("expected to be on the welcome screen!");
+                }
+                
+                //1b. we are on the login screen. do login. assert logged in.
+                Assert.IsTrue(uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Login);
+                LoginPresenterIsAvailable(vm);
             
-            //finally, disconnect. assert disconnected.
-            Utils.UIHelpers.Click_DisconnectButton();
-            yield return new WaitForSeconds(5);
-            Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
+                yield return InputSubroutines.Login.StartLogin(_username, _password);
             
-                        
-            Assert.Pass();
-            Debug.Log("test is ok!");
-            yield return new WaitForSeconds(30);
+                //assert the backend API; that we are logged in.
+                Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
+            
+                //finally, disconnect. assert disconnected.
+                InputSubroutines.UIHelpers.Click_ButtonByUnityName("LogoutBtn");
+                yield return new WaitForSeconds(12);
+                Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
+                
+                yield return new WaitForSeconds(12);
+                
+            }
+            
+            yield break;
         }
 
         private static GameObject Get_ViewsManager()
@@ -160,18 +127,10 @@ namespace Raindrop.Tests
         private static void LoginPresenterIsAvailable(GameObject vm)
         {
             var loginPresenter
-                = vm.GetComponent<CanvasManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
+                = vm.GetComponent<ScreensManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
             Assert.True(loginPresenter != null);
         }
         
-        private static void TypeUserAndPassIntoLoginPanel()
-        {
-            _username = "***REMOVED*** Resident";
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("UserTextField", _username);
-            _password = "***REMOVED***";
-            Utils.UIHelpers.Set_TMPInputField_ofGameObjectName("PassTextField", _password);
-        }
-
         private void SetClientSettings()
         {
             //Extra: set reducedsettings so that we do not use too many dependencies
@@ -183,6 +142,7 @@ namespace Raindrop.Tests
             instance.Client.Settings.STORE_LAND_PATCHES = false;
             instance.Client.Settings.STORE_LAND_PATCHES = false;
         }
+        
         public class Utils
         {
             /*
@@ -190,62 +150,13 @@ namespace Raindrop.Tests
              */
             public class UIHelpers
             {
-                public static bool ClickButtonByUnityName(string gameObjectName)
+
+                public static IEnumerator Click_Button_Welcome2LoginScreen()
                 {
-                    var btn = GameObject.Find(gameObjectName);
-                    Assert.IsNotNull(btn, "Missing button supposed to have name: " + gameObjectName);
-
-                    if (btn.GetComponent<Button>())
-                    {
-                        btn.GetComponent<Button>().onClick.Invoke();
-                        return true;
-                    }
-                    if (btn.GetComponent<LeanButton>())
-                    {
-                        btn.GetComponent<LeanButton>().OnClick.Invoke();
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                public static void Set_TMPInputField_ofGameObjectName(string go_name, string input)
-                {
-                    var go = GameObject.Find(go_name);
-                    Assert.True(go != null, "unable to find gameobject of name " + go_name);
-                    var tmp = go.GetComponent<TMP_InputField>();
-                    Assert.True(tmp != null, "Gameobject + " + go_name + " does not have TMP inputfield component ");
-                    tmp.ActivateInputField();
-                    tmp.text = input;
-                    tmp.onValueChanged.Invoke(input);
-                    tmp.onSubmit.Invoke(input);
-                }
-
-                public static void Click_DisconnectButton()
-                {
-                    ClickButtonByUnityName("LogoutBtn");
-                }
-
-                //accept the eula:
-                /* 1. toggle true
-                 * 2. click "next" btn
-                 */
-
-                // on the welcome screen, click the go button.
-                public static void accepttheeula()
-                {
-                    string eulaCheckbox = "AgreeToggle";
-                    var checkboxEULA = GameObject.Find(eulaCheckbox);
-                    Assert.IsNotNull(checkboxEULA, "Missing checkbox " + eulaCheckbox);
-                    checkboxEULA.GetComponent<Toggle>().onValueChanged.Invoke(true);
-            
-                    string eulaCloseBtn = "NextButton";
-                    Assert.IsTrue(LoginTests.Utils.UIHelpers.ClickButtonByUnityName(eulaCloseBtn));
-                }
-
-                public static void Click_Button_Welcome2LoginScreen()
-                {
-                    Assert.IsTrue(LoginTests.Utils.UIHelpers.ClickButtonByUnityName("LetsGo!"));
+                    Assert.IsTrue(
+                        InputSubroutines.UIHelpers.Click_ButtonByUnityName("LetsGo!")
+                        );
+                    yield return new WaitForSeconds(2); // if you remvoe this one you will fail the test.
                 }
             }
         }

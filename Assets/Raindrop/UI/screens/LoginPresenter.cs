@@ -213,7 +213,7 @@ namespace Raindrop.Presenters
 
                     Close_LoginModal_Slow();
 
-                    uimanager.canvasManager.PopAndPush(CanvasType.Game);
+                    uimanager.ScreensManager.PopAndPush(CanvasType.Game);
                     //instance.UI.canvasManager.popCanvas();
                     LoginButton.interactable = true;
                     break;

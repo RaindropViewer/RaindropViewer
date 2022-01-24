@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 //helper class that helps to pop, push, stack canvases.
 //singleton.
 //on awake, it searches children for all canvases.
-public class CanvasManager : MonoBehaviour
+public class ScreensManager : MonoBehaviour
 {
     [Tooltip("The canvases that are available to use.")]
     public List<CanvasIdentifier> canvasControllerList = new List<CanvasIdentifier>();
@@ -127,7 +127,7 @@ public class CanvasManager : MonoBehaviour
     
     // pop the current login screen, and push the game view. This is for viewing chats offline.
     // planned for debug only. 
-    public void loginWithoutNetworking()
+    public void LoginWithoutNetworking()
     {
         while ((activeCanvasStack.Count() != 0))
         {

@@ -7,16 +7,21 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-public class logoutButton : MonoBehaviour
+public class LogoutButton : MonoBehaviour
 {
-    
-    void Start()
+    //get own references.
+    void Awake()
     {
         Button btn = this.GetComponent<Button>();
-        btn.onClick.AddListener(logout);
+        btn.onClick.AddListener(Logout);
+    }
+    
+    //get others' references, if required.
+    void Start()
+    {
     }
 
-    private void logout()
+    private void Logout()
     {
         Debug.Log("logout requested by user UI");
         ServiceLocator.Instance.Get<RaindropInstance>().Netcom.Logout();

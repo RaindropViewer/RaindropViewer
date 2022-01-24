@@ -7,7 +7,7 @@ namespace Raindrop.Disk
         
         // returns SD card if the bool is true OR the sd card is not available.
         // otherwise i will return internal-but-shared storage
-        private static string GetAndroidExternalFilesDir(bool preferSDcard)
+        public static string GetAndroidExternalFilesDir(bool preferSDcard)
         {
             using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {

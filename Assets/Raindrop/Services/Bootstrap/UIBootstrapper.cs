@@ -38,7 +38,7 @@ namespace Raindrop.Services.Bootstrap
             }
 
             //2. ui services
-            var cm = GetComponentInChildren<CanvasManager>();
+            var cm = GetComponentInChildren<ScreensManager>();
             if (cm == null)
                 Debug.LogError("canvasmanager not present");
             var mm = GetComponentInChildren<ModalManager>();

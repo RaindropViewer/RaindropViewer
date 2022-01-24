@@ -2,10 +2,12 @@
 using NUnit.Framework;
 using OpenMetaverse;
 using Raindrop.Map.Model;
+using Raindrop.ServiceLocator;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Utils = OpenMetaverse.Utils;
 
-namespace Raindrop.Tests.RaindropTests
+namespace Tests.RaindropIntegrationTests
 {
     //test the map service.
     public class MapServiceTests
@@ -17,11 +19,11 @@ namespace Raindrop.Tests.RaindropTests
         {
             Raindrop.Unity.SceneBootstrapperGenerator.Init();
             yield return new WaitForSeconds(2);
-            Assert.True(ServiceLocator.ServiceLocator.Instance != null);
+            Assert.True(ServiceLocator.Instance != null);
             Raindrop.Unity.SceneBootstrapperGenerator.AddMainThreadDispatcher();
 
             BeginMapFetcher();
-            var fetcher = ServiceLocator.ServiceLocator.Instance.Get<MapService>();
+            var fetcher = ServiceLocator.Instance.Get<MapService>();
 
             //initally, the maptile is just a empty pocket
             bool isReady;
@@ -42,10 +44,10 @@ namespace Raindrop.Tests.RaindropTests
             
             void BeginMapFetcher()
             {
-                if (!ServiceLocator.ServiceLocator.Instance.IsRegistered<MapService>())
+                if (!ServiceLocator.Instance.IsRegistered<MapService>())
                 {
                     Debug.Log("UIBootstrapper creating and registering MapBackend.MapFetcher!");
-                    ServiceLocator.ServiceLocator.Instance.Register<MapService>(new MapService());
+                    ServiceLocator.Instance.Register<MapService>(new MapService());
                     //return;
                 }
             }

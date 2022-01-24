@@ -50,10 +50,6 @@ public class ModalPresenter : MonoBehaviour
             {
                 BackgroundButton.onClick.AsObservable().Subscribe(_ => closeModal()); //when clicked, runs this method.
             }
-            else
-            {
-                Debug.LogError("BackgroundButton failed");
-            }
 
             if (titletext.GetComponent<TMP_Text>() == null)
             {
@@ -99,9 +95,4 @@ public class ModalPresenter : MonoBehaviour
         // StartCoroutine(SlowFade_Coroutine(1500));
     }
     
-
-    private CanvasRenderer getRenderer()
-    {
-        return renderer;
-    }
 }

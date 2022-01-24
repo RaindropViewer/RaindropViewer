@@ -21,16 +21,15 @@ namespace Raindrop.Services
         private GridClient client { get { return instance.Client; } }
 
         // canvases are stack-based. only 1 is top-most and active at any time.
-        private CanvasManager _canvasManager;
-        public CanvasManager canvasManager { set { _canvasManager = value; } get { return _canvasManager; } }
+        public ScreensManager ScreensManager { set; get; }
+
         // modals are single-display. however, there is a modal queue, such that when the current modal is dismissed, the next-in-queue will appear.
         //care has to be taken not to spam the user with modals.
-        private ModalManager _modalManager;
-        public ModalManager modalManager { set { _modalManager = value; } get { return _modalManager; } }
+        public ModalManager modalManager { set; get; }
 
-        public UIService(CanvasManager cm, ModalManager mm)
+        public UIService(ScreensManager cm, ModalManager mm)
         {
-            canvasManager = cm;
+            ScreensManager = cm;
             modalManager = mm;
 
             // UI depends on raindrop business layer.
@@ -77,13 +76,13 @@ namespace Raindrop.Services
 
         protected void startUIInitialView()
         {
-            canvasManager.resetToInitialScreen();
+            ScreensManager.resetToInitialScreen();
             modalManager.showModalNotification("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
         }
 
         public GameObject getCurrentForegroundPresenter()
         {
-            return canvasManager.getForegroundCanvas();
+            return ScreensManager.getForegroundCanvas();
         }
 
         private void RegisterClientEvents(GridClient client)
@@ -140,7 +139,7 @@ namespace Raindrop.Services
         {
             modalManager.showModalNotification("Logged out", "you have/were logged out");
 
-            canvasManager.resetToInitialScreen();
+            ScreensManager.resetToInitialScreen();
 
             //tsb3D.Enabled = tbtnVoice.Enabled = disconnectToolStripMenuItem.Enabled =
             //tbtnGroups.Enabled = tbnObjects.Enabled = tbtnWorld.Enabled = tbnTools.Enabled = tmnuImport.Enabled =
@@ -166,7 +165,7 @@ namespace Raindrop.Services
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
 
-            canvasManager.resetToInitialScreen();
+            ScreensManager.resetToInitialScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{
