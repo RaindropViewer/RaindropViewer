@@ -22,7 +22,7 @@ namespace Raindrop.Services.Bootstrap
         // creates/has dependency on the UIrootGO!!!
         private void Awake()
         {
-            RaindropBootstrapper.Start_RaindropInstance();
+            RaindropBootstrapper.Start_Raindrop_CoreDependencies(); // hacky - to ensure that the UI's dependencies are ready.
             OpenMetaverse.Logger.Log("UI variant of application Started. Logging Started.", OpenMetaverse.Helpers.LogLevel.Info);
         }
         
@@ -32,9 +32,7 @@ namespace Raindrop.Services.Bootstrap
             //1. mapfetcher - logic, not ui. please refactor
             if (!ServiceLocator.ServiceLocator.Instance.IsRegistered<MapService>())
             {
-                Debug.Log("UIBootstrapper creating and registering MapBackend.MapFetcher!");
                 ServiceLocator.ServiceLocator.Instance.Register<MapService>(new MapService());
-                //return;
             }
 
             //2. ui services
