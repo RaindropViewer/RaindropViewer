@@ -9,7 +9,8 @@
         "LeanGUI",
         "Unity.TextMeshPro",
         "AsyncImageLoader.Runtime",
-        "Better"
+        "Better",
+        "Main"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
