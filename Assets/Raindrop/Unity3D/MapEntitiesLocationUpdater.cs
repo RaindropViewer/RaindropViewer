@@ -10,8 +10,13 @@ using OpenMetaverse;
 
 namespace Raindrop.Unity3D
 {
-    //sets the attached gameobject to the location of the user in the sim.
-    class AgentLocationUpdater : MonoBehaviour
+    // sets the attached gameobject to the location of the user in the sim.
+    
+    // the location of the mapEntities in the scene hierachy is defined as 
+    // "global" coordinates / 256 - that is, an entity existing in the sim Daboom (1000, 1000)
+    // at the sim coordinates 0,0,0, will be shown at the Unityscene position of
+    // (1000,1000, mapItemDepthConstant) 
+    class MapEntitiesLocationUpdater : MonoBehaviour
     {
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
@@ -20,13 +25,7 @@ namespace Raindrop.Unity3D
         List<UUID> agents;
         public GameObject agent;
         //the height at which all map items are at (unity y axis.)
-        private readonly float mapItemDepthConstant;
-
-        private void Awake()
-        {
-            
-        }
-
+        private readonly float mapItemDepthConstant = 10;
 
         private void Update()
         {
@@ -41,18 +40,19 @@ namespace Raindrop.Unity3D
             UnityEngine.Vector3 agentGridLoc = (UnityEngine.Vector3)RHelp.TKVector3d(instance.Client.Self.GlobalPosition);
             UnityEngine.Vector2 mapPos = toMapPlaneCoords(agentGridLoc);// + toMapPlaneCoords(agentSimLoc);
             //transform.rotation = (UnityEngine.Vector3)RHelp.TKVector4(instance.Client.Self.SimRotation); 
-            setMapItemPosition(agent.transform , mapPos);
+            SetMapItemPosition(agent.transform , mapPos);
 
             //set mapItems
         }
 
         // moves the transform to the 2d map position (x,y).
-        private void setMapItemPosition(Transform transform, UnityEngine.Vector2 mapPos)
+        private void SetMapItemPosition(Transform entitiyTransform, UnityEngine.Vector2 mapPos)
         {
             UnityEngine.Vector3 newPos = fromMapCoord(mapPos);
-            transform.position = newPos;
+            entitiyTransform.position = newPos;
         }
 
+        // translate the vector2 globalMapPositions into scene vector3 transform positions
         private UnityEngine.Vector3 fromMapCoord(UnityEngine.Vector2 mapPos)
         {
             return new UnityEngine.Vector3(mapPos.x, mapItemDepthConstant , mapPos.y);

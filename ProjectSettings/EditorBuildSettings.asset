@@ -5,14 +5,17 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/MainScene.unity
+    guid: bb761ad61c4e4c74aaa552fad3c8b089
   - enabled: 0
-    path: Assets/Scenes/MapViewerTest_Daboom_Basic.unity
+    path: Assets/Scenes/Map/MapViewerTest_Daboom_Basic.unity
     guid: 07d358068ee106e4ea7053462a2740f3
   - enabled: 0
     path: Assets/Scenes/TGALoaderTest.unity
     guid: 6dda257986255e74db736b4c0567afd2
-  - enabled: 0
-    path: Assets/Scenes/mainBootstrapScene.unity
+  - enabled: 1
+    path: Assets/Tests/HeadlessBootstrapScene.unity
     guid: a9f35cb3e179fef4389cf769af057e55
   - enabled: 0
     path: Assets/Scenes/UI/UIscene.unity
@@ -20,8 +23,5 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/3Dscene.unity
     guid: e4b15a01227c10445b0a25ca88394bb4
-  - enabled: 1
-    path: Assets/Scenes/MainScene.unity
-    guid: bb761ad61c4e4c74aaa552fad3c8b089
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 3362b748d547f3b4a9d98d2d3821aff8, type: 2}
