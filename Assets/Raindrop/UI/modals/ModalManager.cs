@@ -14,7 +14,7 @@ public class ModalManager : MonoBehaviour
     
     [Tooltip("The generic modal gameobject")]
     [SerializeField]
-    public ModalPresenter genericModalPresenter;
+    public GameObject genericModalPrefab;
     
     Thread mainThread;
     // private ModalPresenter eulaModalPresenter;
@@ -32,10 +32,10 @@ public class ModalManager : MonoBehaviour
 
     private void CheckModals()
     {
-        if (genericModalPresenter == null)
-        {
-            Debug.LogError("cannot find the gneric modal");
-        }
+        // if (genericModalPresenter == null)
+        // {
+        //     Debug.LogError("cannot find the gneric modal");
+        // }
         if (loginStatusModal == null)
         {
             Debug.LogError("cannot find the login modal");
@@ -78,30 +78,30 @@ public class ModalManager : MonoBehaviour
     //
     //
     // }
-    public void setVisibleGenericModal(string title, string content, bool visibility)
-    {
-        if (isOnMainThread())
-        {
-            if (genericModalPresenter != null)
-            {
-                genericModalPresenter.setModalNoActions(title, content);
-                genericModalPresenter.gameObject.SetActive(visibility);
-            }
-            else
-            {
-                Debug.LogWarning("unable to get the modalPresenter object!");
-            }
-        } else
-        {
-
-            UnityMainThreadDispatcher.Instance().Enqueue(() => {
-                // Debug.Log(" dispatching of showing modal");
-                setVisibleGenericModal(title, content, visibility);
-            });
-        }
-
-
-    }
+    // public void setVisibleGenericModal(string title, string content, bool visibility)
+    // {
+    //     if (isOnMainThread())
+    //     {
+    //         if (genericModalPresenter != null)
+    //         {
+    //             genericModalPresenter.setModalNoActions(title, content);
+    //             genericModalPresenter.gameObject.SetActive(visibility);
+    //         }
+    //         else
+    //         {
+    //             Debug.LogWarning("unable to get the modalPresenter object!");
+    //         }
+    //     } else
+    //     {
+    //
+    //         UnityMainThreadDispatcher.Instance().Enqueue(() => {
+    //             // Debug.Log(" dispatching of showing modal");
+    //             setVisibleGenericModal(title, content, visibility);
+    //         });
+    //     }
+    //
+    //
+    // }
 
 
     //by default obviously this must be visible; we are updating the login status.
@@ -139,20 +139,34 @@ public class ModalManager : MonoBehaviour
         return mainThread.Equals(System.Threading.Thread.CurrentThread);
     }
 
-    public void showModalNotification(string title, string content)
+    // the default reply is "ok"
+    public void showModalNotification(string title, string content /*, ModalType type*/)
     {
-        if (genericModalPresenter != null)
+        if (!isOnMainThread())
         {
-            genericModalPresenter.setModal(
-                title,
-                content, 
-                "Ok"
+            UnityMainThreadDispatcher.Instance().Enqueue(() => {
+                    //Debug.Log(" dispatching of showing modal");
+                    showModalNotification(title,content);
+                });
+        } else 
+        {
+            var newModal = Instantiate(genericModalPrefab);
+
+            if (newModal != null)
+            {
+                var modalPresenter = newModal.GetComponent<ModalPresenter>();
+
+                modalPresenter.setModal(
+                    title,
+                    content,
+                    "Ok"
                 );
-            genericModalPresenter.gameObject.SetActive(true);
-        }
-        else
-        {
-            Debug.LogWarning("unable to get the modalPresenter object!");
+                newModal.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("unable to get the modalPresenter object!");
+            }
         }
     }
     
@@ -197,4 +211,9 @@ public class ModalManager : MonoBehaviour
         }
     }
 
+}
+
+public enum ModalType
+{
+    Generic,
 }
