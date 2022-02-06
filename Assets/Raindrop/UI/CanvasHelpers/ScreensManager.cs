@@ -7,16 +7,15 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 //helper class that helps to pop, push, stack canvases.
-//singleton.
 //on awake, it searches children for all canvases.
 public class ScreensManager : MonoBehaviour
 {
-    [Tooltip("The canvases that are available to use.")]
-    public List<CanvasIdentifier> canvasControllerList = new List<CanvasIdentifier>();
+    [FormerlySerializedAs("canvasControllerList")] [Tooltip("The canvases that are available to use.")]
+    public List<CanvasIdentifier> availableCanvases = new List<CanvasIdentifier>();
     [Tooltip("The canvases that are created and in memory stack.")]
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
 
-    public CanvasIdentifier topCanvas
+    public CanvasIdentifier TopCanvas
     {
         get
         {
@@ -26,6 +25,7 @@ public class ScreensManager : MonoBehaviour
             }
             catch (InvalidOperationException e)
             {
+                Debug.Log("pop canvas has error : " + e.ToString());
                 return null;
             }
         }
@@ -41,14 +41,13 @@ public class ScreensManager : MonoBehaviour
             var _ = transform.GetChild(i).GetComponent<CanvasIdentifier>();
             if (_ != null)
             {
-                canvasControllerList.Add(_);
+                availableCanvases.Add(_);
             }
         }
 
         try
         {
-            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
-            Debug.Log("Found " + canvasControllerList.Count + " canvas identifiers.");
+            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
         }
         catch (Exception e)
         {
@@ -59,19 +58,19 @@ public class ScreensManager : MonoBehaviour
 
     public void resetToInitialScreen()
     {
-        if (! GetEulaAcceptance())
+        if (! IsEulaAccepted())
         {
-            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
             Push(CanvasType.Eula);
         }
         else
         {
-            canvasControllerList.ForEach(x => x.gameObject.SetActive(false));
+            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
             Push(initialPage);
         }
     }
 
-    private bool GetEulaAcceptance()
+    private bool IsEulaAccepted()
     {
         if (ServiceLocator.Instance.Get<RaindropInstance>().GlobalSettings["EulaAccepted"])
         {
@@ -94,7 +93,7 @@ public class ScreensManager : MonoBehaviour
     }
     public CanvasType getCanvasTypeFromString(string _type)
     {
-        foreach(CanvasIdentifier _ in canvasControllerList)
+        foreach(CanvasIdentifier _ in availableCanvases)
         {
             var thecanvastype = _.canvasType;
             if (_type == thecanvastype.ToString())
@@ -118,7 +117,7 @@ public class ScreensManager : MonoBehaviour
         // {
         //     Debug.LogError("unable to get the canvas of identifer: "+ _type);
         // } 
-        if (topCanvas)
+        if (TopCanvas)
         {
             PopCanvas();
         }
@@ -146,7 +145,7 @@ public class ScreensManager : MonoBehaviour
         }
 
         //find the new canvas to push.
-        CanvasIdentifier desiredCanvas = canvasControllerList.Find(x => x.canvasType == type);
+        CanvasIdentifier desiredCanvas = availableCanvases.Find(x => x.canvasType == type);
         if (desiredCanvas != null)
         {
             desiredCanvas.gameObject.SetActive(true);
@@ -157,20 +156,20 @@ public class ScreensManager : MonoBehaviour
 
     public void PopCanvas()
     {
-        if (! topCanvas)
+        if (! TopCanvas)
         {
             Debug.LogWarning("tried to pop empty canvas stack.");
             return;
         }
 
         //1 remove topmost
-        topCanvas.gameObject.SetActive(false); //this lince causes error, as the function was called from the login thread!
+        TopCanvas.gameObject.SetActive(false); //this lince causes error, as the function was called from the login thread!
         activeCanvasStack.Pop();
         
         //2 reactivate the one underneath.
-        if (topCanvas)
+        if (TopCanvas)
         {
-            topCanvas.gameObject.SetActive(true);
+            TopCanvas.gameObject.SetActive(true);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Threading;
 using Raindrop.Map.Model;
 using Raindrop.Netcom;
+using Raindrop.Presenters;
 using UnityEngine;
 
 namespace Raindrop.Services.Bootstrap
@@ -13,6 +14,11 @@ namespace Raindrop.Services.Bootstrap
         private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom => instance.Netcom;
 
+        [SerializeField] public ModalManager mm;
+        [SerializeField] public ScreensManager sm;
+        [SerializeField] public LoadingCanvasPresenter ll;
+        
+        
         // bootstraps the UI.
         // 1. it first bootstraps the base layer of RaindropInstance
         // 2. then it find all the canvasmanager and modal managers.
@@ -36,13 +42,17 @@ namespace Raindrop.Services.Bootstrap
             }
 
             //2. ui services
-            var cm = GetComponentInChildren<ScreensManager>();
-            if (cm == null)
-                Debug.LogError("canvasmanager not present");
-            var mm = GetComponentInChildren<ModalManager>();
+            //getcomponent only can handle active objects.
+            // var cm = GetComponentInChildren<ScreensManager>();
+            if (sm == null)
+                Debug.LogError("ScreensManager not present");
+            // var mm = GetComponentInChildren<ModalManager>();
             if (mm == null)
-                Debug.LogError("modalmanager not present");
-            ServiceLocator.ServiceLocator.Instance.Register<UIService>(new UIService(cm, mm));
+                Debug.LogError("ModalManager not present");
+            // var ll = GetComponentInChildren<LoadingCanvasPresenter>();
+            if (ll == null)
+                Debug.LogError("loadingscreen not present");
+            ServiceLocator.ServiceLocator.Instance.Register<UIService>(new UIService(sm, mm, ll));
         }
 
         

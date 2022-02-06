@@ -10,5 +10,5 @@
     Avatar,
     Inventory,
     UNKNOWN,
-    NONE //use this if you want to pop only.
+    POP //use this if you want to pop only.
 }

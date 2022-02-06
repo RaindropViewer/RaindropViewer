@@ -31,10 +31,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using Disk;
 //using System.Reflection;
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
+using UnityEngine.Assertions;
 
 namespace Raindrop
 {
@@ -86,22 +89,50 @@ namespace Raindrop
 
             return grid;
         }
+        
+        public static OSD ToOSD(Grid grid)
+        {
+            OSDMap map = new OSDMap();
+
+            map["gridnick"] = grid.ID;
+            map["gridname"] = grid.Name;
+            map["platform"] = grid.Platform;
+            map["loginuri"] = grid.LoginURI;
+            map["loginpage"] = grid.LoginPage;
+            map["helperuri"] = grid.HelperURI;
+            map["website"] = grid.Website;
+            map["support"] = grid.Support;
+            map["register"] = grid.Register;
+            map["password"] = grid.PasswordURL;
+            map["version"] = grid.Version;
+
+            return map;
+        }
     }
 
     public class GridManager : IDisposable
     {
         public List<Grid> Grids;
+        public List<Grid> CustomGrids;
+        private string gridsFileCustom = "grids_custom.xml";
+        private string gridsFileDefault = "grids.xml";
 
-        public GridManager()
+        // _appDataDir: the folder of the 2 grid xml files.
+        public GridManager(string _appDataDir)
         {
             Grids = new List<Grid>();
+            CustomGrids = new List<Grid>();
+            
+            LoadDefaultGrids(_appDataDir);
+            LoadCustomGrids(_appDataDir);
         }
 
         public void Dispose()
         {
         }
 
-        public void LoadGrids(string datadir)
+        // load default, hard-coded list of grids.
+        public void LoadDefaultGrids(string datadir)
         {
             Grids.Clear();
             Grids.Add(new Grid("agni", "Second Life (agni)", "https://login.agni.lindenlab.com/cgi-bin/login.cgi"));
@@ -109,7 +140,7 @@ namespace Raindrop
 
             try
             {
-                string sysGridsFile = Path.Combine(datadir, "grids.xml");
+                string sysGridsFile = Path.Combine(datadir, gridsFileDefault);
                 OSDArray sysGrids = (OSDArray)OSDParser.DeserializeLLSDXml(File.ReadAllText(sysGridsFile));
                 for (int i = 0; i < sysGrids.Count; i++)
                 {
@@ -119,6 +150,29 @@ namespace Raindrop
             catch (Exception ex)
             {
                 Logger.Log(string.Format("Error loading grid information: {0}", ex.Message), Helpers.LogLevel.Warning);
+            }
+        }
+        
+        //save the current instance into the grids.xml file
+        public void SaveCustomGrids(string datadir)
+        {
+            try
+            {
+                OSDArray customGrids = new OSDArray();
+                foreach (var grid in Grids)
+                {
+                    var item = Grid.ToOSD(grid);
+                    customGrids.Add(item);
+                }
+
+                var bytesToWrite = OSDParser.SerializeLLSDXmlBytes(customGrids);
+                string customGridsFile = Path.Combine(datadir, gridsFileCustom);
+                
+                DirectoryHelpers.WriteToFile(bytesToWrite, customGridsFile);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(string.Format("Error saving custom grids information: {0}", ex.Message), Helpers.LogLevel.Warning);
             }
         }
 
@@ -132,6 +186,19 @@ namespace Raindrop
             else
             {
                 Grids[ix] = grid;
+            }
+        }
+        
+        public void RegisterCustomGrid(Grid grid)
+        {
+            int ix = CustomGrids.FindIndex((Grid g) => { return g.ID == grid.ID; });
+            if (ix < 0)
+            {
+                CustomGrids.Add(grid);
+            }
+            else
+            {
+                CustomGrids[ix] = grid;
             }
         }
 
@@ -164,6 +231,32 @@ namespace Raindrop
         public int Count
         {
             get { return Grids.Count; }
+        }
+
+        public void LoadCustomGrids(string datadir)
+        {
+            CustomGrids.Clear();
+            
+            //create blank LLSD file if not exists.
+            string sysGridsFile = Path.Combine(datadir, gridsFileCustom);
+            if (!File.Exists(sysGridsFile))
+            {
+                SaveCustomGrids(datadir);
+                return;
+            }
+            
+            try
+            {
+                OSDArray sysGrids = (OSDArray)OSDParser.DeserializeLLSDXml(File.ReadAllText(sysGridsFile));
+                for (int i = 0; i < sysGrids.Count; i++)
+                {
+                    RegisterCustomGrid(Grid.FromOSD(sysGrids[i]));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(string.Format("Error loading custom grid information: {0}", ex.Message), Helpers.LogLevel.Warning);
+            }
         }
     }
 }

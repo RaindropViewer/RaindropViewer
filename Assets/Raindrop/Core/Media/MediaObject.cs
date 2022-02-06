@@ -81,10 +81,10 @@ namespace Raindrop.Media
         protected bool Cloned = false;
         public virtual void Dispose()
         {
-            if (!Cloned)
+            if (!Cloned && sound.hasHandle())
             {
                 sound.release();
-                //sound = null;
+                sound.clearHandle();
             }
 
             Disposed = true;

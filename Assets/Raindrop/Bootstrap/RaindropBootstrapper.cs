@@ -43,6 +43,10 @@ namespace Raindrop.Services.Bootstrap
         {
             //0. start rolling log file
             // ConfigureRollingLogFile();
+
+            startupPrintLogger();
+            
+            Assign_MainThreadReference();
             
             Init_StaticFileSystem();
             
@@ -53,33 +57,18 @@ namespace Raindrop.Services.Bootstrap
             CreateAndRegister_RaindropInstance();
         }
 
-        private static void ConfigureRollingLogFile()
+        private static void Assign_MainThreadReference()
         {
-            // log4net.Config.XmlConfigurator.Configure();
-            
-            //1. log to unity console.
-            var unityDebugAppender = new UnityDebugAppender();
-            unityDebugAppender.Layout = new PatternLayout("%date{HH:mm:ss} [%level] - %message");
-            //appender.Layout = new PatternLayout("%timestamp [%thread] %-5level - %message%newline");
-            BasicConfigurator.Configure(unityDebugAppender);
+            Globals.GMainThread = System.Threading.Thread.CurrentThread;
+        }
 
-            
-            var logFileAppender = new RollingFileAppender();
-            logFileAppender.Layout = new PatternLayout("%date{HH:mm:ss} [%level] - %message");
-            logFileAppender.File = Path.Combine(
-                DirectoryHelpers.GetInternalCacheDir(),
-                "log.txt");
-            logFileAppender.AppendToFile = true;
-            logFileAppender.RollingStyle = RollingFileAppender.RollingMode.Size;
-            logFileAppender.MaxSizeRollBackups = 10;
-            logFileAppender.MaxFileSize = 250 * 1000; // 250KB
-            logFileAppender.StaticLogFileName = true;
-            XmlConfigurator.Configure();
-
+       
+        public static void startupPrintLogger()
+        {
             Logger.Log("Logger is ready", Helpers.LogLevel.Debug);
             Logger.Log("Logger is logging to : "+  Path.Combine(
-                DirectoryHelpers.GetInternalCacheDir(),
-                "log.txt")
+                    DirectoryHelpers.GetInternalCacheDir(),
+                    "log.txt")
                 , Helpers.LogLevel.Debug);
         }
 
@@ -104,6 +93,21 @@ namespace Raindrop.Services.Bootstrap
         
         void OnApplicationQuit()
         {
+            void SaveInventoryToDiskAndLogout(RaindropInstance raindropInstance, RaindropNetcom raindropNetcom)
+            {
+                Thread saveInvToDisk = new Thread(delegate()
+                {
+                    raindropInstance.Client.Inventory.Store.SaveToDisk(raindropInstance.InventoryCacheFileName);
+                })
+                {
+                    Name = "Save inventory to disk"
+                };
+                saveInvToDisk.Start();
+
+                raindropNetcom.Logout();
+                Debug.Log("Logged out! :)");
+            }
+
             RaindropInstance instance;
             try
             {
@@ -119,29 +123,20 @@ namespace Raindrop.Services.Bootstrap
             OpenMetaverse.Logger.Log("Application ending after " + Time.time + " seconds"
                 , Helpers.LogLevel.Debug); 
 
-            //if (statusTimer != null)
-            //{
-            //    statusTimer.Stop();
-            //    statusTimer.Dispose();
-            //    statusTimer = null;
-            //}
+            // if (statusTimer != null)
+            // {
+            //     statusTimer.Stop();
+            //     statusTimer.Dispose();
+            //     statusTimer = null;
+            // }
 
-            if (!netcom.IsLoggedIn) return;
-
-            Thread saveInvToDisk = new Thread(delegate ()
+            if (netcom.IsLoggedIn)
             {
-                instance.Client.Inventory.Store.SaveToDisk(instance.InventoryCacheFileName);
-            })
-            {
-                Name = "Save inventory to disk"
-            };
-            saveInvToDisk.Start();
-
-            netcom.Logout();
-            Debug.Log("Logged out! :)");
+                SaveInventoryToDiskAndLogout(instance, netcom);
+            }
 
             frmMain_Disposed(instance);
-            Debug.Log("disposed mainform! :)");
+            Debug.Log("disposed netcom and client! :) This marks the end of the app.");
         }
 
         //wraps up the netcom and client.
