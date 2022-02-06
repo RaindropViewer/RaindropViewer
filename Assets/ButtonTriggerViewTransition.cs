@@ -6,6 +6,7 @@ using Raindrop;
 using Raindrop.ServiceLocator;
 using Raindrop.Services;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Logger = OpenMetaverse.Logger;
 
@@ -13,7 +14,7 @@ using Logger = OpenMetaverse.Logger;
 public class ButtonTriggerViewTransition : MonoBehaviour
 {
     public CanvasType canvasTypeToPush;
-    public bool popCurrent;
+    [FormerlySerializedAs("popCurrent")] public bool popAndPush;
     private void Start()
     {
         try
@@ -35,13 +36,13 @@ public class ButtonTriggerViewTransition : MonoBehaviour
 
     private void OnClick()
     {
-        if (canvasTypeToPush == CanvasType.NONE)
+        if (canvasTypeToPush == CanvasType.POP)
         {
             ServiceLocator.Instance.Get<UIService>().ScreensManager.PopCanvas();
             return;
         }
         
-        if (popCurrent)
+        if (popAndPush)
         {
             ServiceLocator.Instance.Get<UIService>().ScreensManager.PopAndPush(canvasTypeToPush);
         } else
