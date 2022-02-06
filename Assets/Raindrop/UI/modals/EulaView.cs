@@ -40,7 +40,8 @@ public class EulaView : MonoBehaviour
         }
 
         bool isAcceptedEULA = instance.GlobalSettings["EulaAccepted"];
-        onToggleChanged(isAcceptedEULA);
+        EulaToggle.isOn = isAcceptedEULA;
+        //onToggleChanged(isAcceptedEULA);
         
         closeBtn.onClick.AddListener(closeEula);
     }
