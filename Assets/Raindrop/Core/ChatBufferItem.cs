@@ -20,6 +20,7 @@
 
 using System;
 using OpenMetaverse;
+using UnityEngine;
 
 namespace Raindrop
 {
@@ -50,6 +51,14 @@ namespace Raindrop
         public ChatBufferTextStyle Style { get; set; }
 
         public ChatEventArgs RawMessage { get; set; }
+
+        public static Color ToColor(ChatBufferTextStyle itemStyle)
+        {
+            var fontMap = Settings.DefaultFontSettings;
+
+            Settings.FontSetting font = Settings.DefaultFontSettings[itemStyle.ToString()];
+            return font.ForeColor;
+        }
     }
 
     public enum ChatBufferTextStyle

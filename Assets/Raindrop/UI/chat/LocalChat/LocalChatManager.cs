@@ -12,12 +12,14 @@ using UnityEngine;
 using Object = System.Object;
 using System.Text.RegularExpressions;
 using Raindrop.Core;
+using Raindrop.Services;
+using Logger = OpenMetaverse.Logger;
 
 namespace Raindrop
 {
     //This class orchestrates the printing into a text box.
     //it has a text buffer to hold data (optional).
-    public class LocalChatTextManager : IDisposable
+    public class LocalChatManager : IDisposable
     {
         private Regex chatRegex = new Regex(@"^/(\d+)\s*(.*)", RegexOptions.Compiled);
         private int chatPointer;
@@ -36,9 +38,10 @@ namespace Raindrop
         
         private bool showTimestamps;
 
-        //public static Dictionary<string, Settings.FontSetting> fontSettings = new Dictionary<string, Settings.FontSetting>();
+        public static Dictionary<string, Settings.FontSetting> fontSettings = 
+            new Dictionary<string, Settings.FontSetting>();
 
-        public LocalChatTextManager(RaindropInstance instance, ITextPrinter textPrinter)
+        public LocalChatManager(RaindropInstance instance, ITextPrinter textPrinter)
         {
             TextPrinter = textPrinter;
             textBuffer = new List<ChatBufferItem>(); // a pipe into the string.
@@ -51,7 +54,8 @@ namespace Raindrop
             netcom.ChatSent += new EventHandler<ChatSentEventArgs>(netcom_ChatSent);
             netcom.AlertMessageReceived += new EventHandler<AlertMessageEventArgs>(netcom_AlertMessageReceived);
             client.Self.TeleportProgress += new EventHandler<TeleportEventArgs>(Self_TeleportProgress);
-            
+            client.Network.SimConnected += Network_SimConnected;
+
             PrintStartupMessage();
         }
 
@@ -65,16 +69,49 @@ namespace Raindrop
 
         private void InitializeConfig()
         {
+            var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+
             Settings s = instance.GlobalSettings;
             
             if (s["chat_timestamps"].Type == OSDType.Unknown)
             {
                 s["chat_timestamps"] = OSD.FromBoolean(true);
             }
-            
+
+            GetFontFromSettings();
+
             showTimestamps = s["chat_timestamps"].AsBoolean();
 
             s.OnSettingChanged += new Settings.SettingChangedCallback(s_OnSettingChanged);
+
+            void GetFontFromSettings()
+            {
+                if (s["chat_fonts"].Type == OSDType.Unknown)
+                {
+                    SaveDefaultFontSettingsToDisk();
+                }
+
+                try
+                {
+                    fontSettings = JsonConvert.DeserializeObject<Dictionary<string, Settings.FontSetting>>(s["chat_fonts"]);
+                }
+                catch (Exception ex)
+                {
+                    ui.modalManager.showModalNotification("Failed to read chat font settings. Using defaults. " , ex.Message);
+                }
+
+                void SaveDefaultFontSettingsToDisk()
+                {
+                    try
+                    {
+                        s["chat_fonts"] = JsonConvert.SerializeObject(Settings.DefaultFontSettings);
+                    }
+                    catch (Exception ex)
+                    {
+                        ui.modalManager.showModalNotification("Failed to save default font settings: ", ex.Message);
+                    }
+                }
+            }
         }
 
         void s_OnSettingChanged(object sender, SettingsEventArgs e)
@@ -87,18 +124,28 @@ namespace Raindrop
             
         }
         
+        
+        private void Network_SimConnected(object sender, OpenMetaverse.SimConnectedEventArgs e)
+        {
+            //create local chat.
+            Logger.Log("Simulator Connected", Helpers.LogLevel.Info);
+            TextPrinter.PrintTextLine("Simulator Connected");
+        }
+
+        
         void Self_TeleportProgress(object sender, TeleportEventArgs e)
         {
             if (e.Status == TeleportStatus.Progress || e.Status == TeleportStatus.Finished)
             {
-                TextPrinter.PrintTextLine("teleport...");
+                TextPrinter.PrintTextLine("teleport... " + e.Message.ToString());
             }
         }
 
         private void netcom_ChatSent(object sender, ChatSentEventArgs e)
         {
-            if (e.Channel == 0) return;
-
+            //because local, visible chats are going to be echoed back to us by the server, we don't display it.
+            if (e.Channel == 0) return; 
+            
             ProcessOutgoingChat(e);
         }
 
@@ -122,7 +169,7 @@ namespace Raindrop
             ChatBufferItem title = new ChatBufferItem(
                 DateTime.Now, "",
                 UUID.Zero,
-                /*Properties.Resources.RaindropTitle +*/ " " + Assembly.GetExecutingAssembly().GetName().Version, 
+                Application.productName + " " + Application.version, 
                 ChatBufferTextStyle.StartupTitle);
 
             ChatBufferItem ready = new ChatBufferItem(
@@ -145,13 +192,37 @@ namespace Raindrop
                 instance.LogClientMessage("chat.txt", item.From + item.Text);
                 if (addToBuffer) textBuffer.Add(item);
 
-                TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
-                TextPrinter.PrintText(item.From);
-                TextPrinter.PrintTextLine(item.Text);
+                if (showTimestamps)
+                {
+                    TextPrinter.PrintText(
+                        item.Timestamp.ToString("[HH:mm] "), 
+                        UnityEngine.Color.gray
+                        );
+                }
+                
+                if (item.Style == ChatBufferTextStyle.Normal && item.ID != UUID.Zero && instance.GlobalSettings["av_name_link"])
+                {
+                    TextPrinter.InsertLink(item.From, $"secondlife:///app/agent/{item.ID}/about");
+                }
+                else
+                {
+                    TextPrinter.PrintText(item.From, Color.black);
+                }
+
+                Color color = Color.black;
+                if(fontSettings.ContainsKey(item.Style.ToString()))
+                {
+                    var fontSetting = fontSettings[item.Style.ToString()];
+                    color = fontSetting.ForeColor;
+                }
+                
+                // TextPrinter.PrintText(item.Timestamp.ToString("[HH:mm] "));
+                // TextPrinter.PrintText(item.From);
+                TextPrinter.PrintTextLine(item.Text, color);
             }
         }
 
-        
+
         //process sending-out of local chat
         internal void ProcessChatInput(string input, ChatType type)
         {
@@ -243,87 +314,97 @@ namespace Raindrop
 
             bool isEmote = e.Message.ToLower().StartsWith("/me ");
 
-            if (!isEmote)
-            {
-                switch (e.Type)
-                {
+            AppendShoutOrWhisper();
 
-                    case ChatType.Whisper:
-                        sb.Append(" whispers");
-                        break;
-
-                    case ChatType.Shout:
-                        sb.Append(" shouts");
-                        break;
-                }
-            }
-
-            //if (isEmote)
-            //{
-            //    if (e.SourceType == ChatSourceType.Agent && instance.RLV.RestictionActive("recvemote", e.SourceID.ToString()))
-            //        sb.Append(" ...");
-            //    else
-            //        sb.Append(e.Message.Substring(3));
-            //}
-            //else
-            //{
-            //    sb.Append(": ");
-            //    if (e.SourceType == ChatSourceType.Agent && !e.Message.StartsWith("/") && instance.RLV.RestictionActive("recvchat", e.SourceID.ToString()))
-            //        sb.Append("...");
-            //    else
-            //        sb.Append(e.Message);
-            //}
+            AppendTheMessage();
 
             item.Timestamp = DateTime.Now;
             item.Text = sb.ToString();
 
-            switch (e.SourceType)
-            {
-                case ChatSourceType.Agent:
-                    if(e.FromName.EndsWith("Linden"))
-                    {
-                        item.Style = ChatBufferTextStyle.LindenChat;
-                    }
-                    else if(isEmote)
-                    {
-                        item.Style = ChatBufferTextStyle.Emote;
-                    }
-                    else if(e.SourceID == client.Self.AgentID)
-                    {
-                        item.Style = ChatBufferTextStyle.Self;
-                    }
-                    else
-                    {
-                        item.Style = ChatBufferTextStyle.Normal;
-                    }
-                    break;
-                case ChatSourceType.Object:
-                    if (e.Type == ChatType.OwnerSay)
-                    {
-                        if(isEmote)
-                        {
-                            item.Style = ChatBufferTextStyle.Emote;
-                        }
-                        else
-                        {
-                            item.Style = ChatBufferTextStyle.OwnerSay;
-                        }
-                    }
-                    else if (e.Type == ChatType.Debug)
-                    {
-                        item.Style = ChatBufferTextStyle.Error;
-                    }
-                    else
-                    {
-                        item.Style = ChatBufferTextStyle.ObjectChat;
-                    }
-                    break;
-            }
+            StyleTextBySourceType();
 
             ProcessBufferItem(item, true);
             //instance.TabConsole.Tabs["chat"].Highlight();
 
             sb = null;
+
+            void AppendShoutOrWhisper()
+            {
+                if (!isEmote)
+                {
+                    switch (e.Type)
+                    {
+                        case ChatType.Whisper:
+                            sb.Append(" whispers");
+                            break;
+
+                        case ChatType.Shout:
+                            sb.Append(" shouts");
+                            break;
+                    }
+                }
+            }
+
+            void AppendTheMessage()
+            {
+                if (isEmote)
+                {
+                    sb.Append(e.Message.Substring(3));
+                }
+                else
+                {
+                    sb.Append(": ");
+                    sb.Append(e.Message);
+                }
+            }
+
+            void StyleTextBySourceType()
+            {
+                switch (e.SourceType)
+                {
+                    case ChatSourceType.Agent:
+                        if (e.FromName.EndsWith("Linden"))
+                        {
+                            item.Style = ChatBufferTextStyle.LindenChat;
+                        }
+                        else if (isEmote)
+                        {
+                            item.Style = ChatBufferTextStyle.Emote;
+                        }
+                        else if (e.SourceID == client.Self.AgentID)
+                        {
+                            item.Style = ChatBufferTextStyle.Self;
+                        }
+                        else
+                        {
+                            item.Style = ChatBufferTextStyle.Normal;
+                        }
+
+                        break;
+                    case ChatSourceType.Object:
+                        if (e.Type == ChatType.OwnerSay)
+                        {
+                            if (isEmote)
+                            {
+                                item.Style = ChatBufferTextStyle.Emote;
+                            }
+                            else
+                            {
+                                item.Style = ChatBufferTextStyle.OwnerSay;
+                            }
+                        }
+                        else if (e.Type == ChatType.Debug)
+                        {
+                            item.Style = ChatBufferTextStyle.Error;
+                        }
+                        else
+                        {
+                            item.Style = ChatBufferTextStyle.ObjectChat;
+                        }
+
+                        break;
+                }
+            }
         }
 
         //reprint all the text in the printer.
