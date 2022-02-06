@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using NUnit.Framework;
-using OpenMetaverse;
 using Raindrop.Map.Model;
 using Raindrop.ServiceLocator;
+using Raindrop.Unity;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Utils = OpenMetaverse.Utils;
 
-namespace Tests.RaindropIntegrationTests
+namespace Tests.Raindrop.RaindropFullIntegrationTests
 {
     //test the map service.
     public class MapServiceTests
@@ -17,10 +17,10 @@ namespace Tests.RaindropIntegrationTests
         [UnityTest]
         public IEnumerator Test_MapService_SingleTile()
         {
-            Raindrop.Unity.SceneBootstrapperGenerator.Init();
+            SceneBootstrapperGenerator.Init();
             yield return new WaitForSeconds(2);
             Assert.True(ServiceLocator.Instance != null);
-            Raindrop.Unity.SceneBootstrapperGenerator.AddMainThreadDispatcher();
+            SceneBootstrapperGenerator.AddMainThreadDispatcher();
 
             BeginMapFetcher();
             var fetcher = ServiceLocator.Instance.Get<MapService>();

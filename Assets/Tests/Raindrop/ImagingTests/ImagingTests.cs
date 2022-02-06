@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Disk;
 using NUnit.Framework;
 using OpenMetaverse;
 using OpenMetaverse.Imaging;
@@ -61,7 +62,7 @@ namespace Raindrop.Tests.ImagingTests
                 var outbytes = texture.EncodeToJPG(100);
                 
                 string appDataDir =  clientDir + "/ImagingTests/menhara_out_clientDir.jpg";
-                Helper.WriteToFile(outbytes, appDataDir);
+                DirectoryHelpers.WriteToFile(outbytes, appDataDir);
                 #if UNITY_EDITOR
                 #elif UNITY_ANDROID //warn, this is true if we are in editor...
                     string outPath_GetAndroidExternalFilesDir_internal =  

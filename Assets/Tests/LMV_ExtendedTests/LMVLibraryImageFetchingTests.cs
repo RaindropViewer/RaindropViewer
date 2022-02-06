@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using System.Net;
+using Disk;
 using OpenMetaverse.Http;
 using Raindrop.Map.Model;
 using Raindrop.ServiceLocator;
@@ -326,7 +327,7 @@ namespace Raindrop.Tests
             //save that image, j2p
             var basepath = instance.ClientDir + "/test_cache/";
             var relativepath1 = assettexture.AssetID.ToString() +  ".j2p";
-            Helper.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
+            DirectoryHelpers.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
             
             //j2p -> t2d -> png 
             //needs to be on main thread...
@@ -338,7 +339,7 @@ namespace Raindrop.Tests
             
                 //save that image, png
                 var relativepath2 = assettexture.AssetID.ToString() +  ".png";
-                Helper.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
+                DirectoryHelpers.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
                 
             });
 

@@ -1,17 +1,16 @@
 ﻿using System.Collections;
-using Lean.Gui;
 using NUnit.Framework;
 using Raindrop;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
+using Raindrop.ServiceLocator;
 using Raindrop.Services;
-using TMPro;
+using Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
 
-namespace Tests.RaindropIntegrationTests
+namespace Tests.Raindrop.RaindropFullIntegrationTests
 {
     /*
      * UI-intensive tests for the login functionality. the main scene will be loaded.
@@ -23,7 +22,7 @@ namespace Tests.RaindropIntegrationTests
         private static string _username = "***REMOVED*** Resident"; // fixme: move this to some xml
         private static string _password = "***REMOVED***";
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private RaindropInstance instance { get { return Raindrop.ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -56,7 +55,7 @@ namespace Tests.RaindropIntegrationTests
             var vm = Get_ViewsManager();
 
             //1. get the refence to the UI service.
-            var srvLocator = Raindrop.ServiceLocator.ServiceLocator.Instance;
+            var srvLocator = ServiceLocator.Instance;
             UIService uiSrv = null;
             try
             {
@@ -69,10 +68,10 @@ namespace Tests.RaindropIntegrationTests
             // uiSrv.resetUI();
             
             //1a. accept the eula if needed.
-            if (uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Eula)
+            if (uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Eula)
             {
                 // well, we need to agree to eula first.
-                InputSubroutines.Login.accepttheeula();
+                yield return Login.accepttheeula();
                 yield return new WaitForSeconds(2);
             }
 
@@ -82,7 +81,7 @@ namespace Tests.RaindropIntegrationTests
             for (int i = 0; i < times; i++)
             {
                 //1b. we are on the welcome screen. now navigate to the login screen.
-                if (uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Welcome)
+                if (uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Welcome)
                 {
                     yield return new WaitForSeconds(2);
                     yield return Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
@@ -93,20 +92,20 @@ namespace Tests.RaindropIntegrationTests
                 }
                 
                 //1b. we are on the login screen. do login. assert logged in.
-                Assert.IsTrue(uiSrv.ScreensManager.topCanvas.canvasType == CanvasType.Login);
+                Assert.IsTrue(uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Login);
                 LoginPresenterIsAvailable(vm);
             
-                yield return InputSubroutines.Login.StartLogin(_username, _password);
+                yield return Login.StartLogin(_username, _password);
             
                 //assert the backend API; that we are logged in.
                 Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
             
                 //finally, disconnect. assert disconnected.
-                InputSubroutines.UIHelpers.Click_ButtonByUnityName("LogoutBtn");
-                yield return new WaitForSeconds(12);
+                UIHelpers.Click_ButtonByUnityName("LogoutBtn");
+                yield return new WaitForSeconds(10);
                 Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
                 
-                yield return new WaitForSeconds(12);
+                yield return new WaitForSeconds(4);
                 
             }
             

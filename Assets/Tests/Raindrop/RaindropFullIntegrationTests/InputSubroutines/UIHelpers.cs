@@ -4,8 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Tests.RaindropIntegrationTests.InputSubroutines
+namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
 {
+    //static methods to help you click buttons!
     static internal class UIHelpers
     {
         public static bool Click_ButtonByUnityName(string gameObjectName)
