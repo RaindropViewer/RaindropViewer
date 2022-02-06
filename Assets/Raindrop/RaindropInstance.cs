@@ -33,12 +33,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using Disk;
 //using Radegast.Commands;
 using Raindrop.Netcom;
 using Raindrop.Media;
 using Raindrop.UI.Notification;
 using OpenMetaverse;
-using Raindrop.Disk;
 using Raindrop.ServiceLocator;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
@@ -58,15 +58,13 @@ namespace Raindrop
         private string _streamingAssetsDir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
-        //private UIManager ui_manager;
-        //private RaindropUnitySceneRenderer mainWorldRenderer;
-
+        
         // Singleton, there can be only one instance
 
 
         // managed the chats that are loaded in memory. (including local chat.)
-        //public ChatManager ChatManger { get { return chatManger; } }
-        //private ChatManager chatManger;
+        public ChatManager ChatManger { get { return chatManger; } }
+        private ChatManager chatManger;
 
 
 
@@ -86,11 +84,10 @@ namespace Raindrop
         /// </summary>
         public TimeZoneInfo WordTimeZone;
 
-        private string _userDir;
         /// <summary>
         /// System (not grid!) user's dir
         /// </summary>
-        public string UserDir { get { return _userDir; } }
+        public string UserDir { get; private set; }
 
         /// <summary>
         /// Grid client's user dir for settings and logs
@@ -102,7 +99,7 @@ namespace Raindrop
             {
                 if (_client != null && _client.Self != null && !string.IsNullOrEmpty(_client.Self.Name))
                 {
-                    return Path.Combine(_userDir, _client.Self.Name);
+                    return Path.Combine(UserDir, _client.Self.Name);
                 }
                 else
                 {
@@ -119,8 +116,7 @@ namespace Raindrop
         private bool _monoRuntime;
         public bool MonoRuntime { get { return _monoRuntime; } }
 
-        private Dictionary<UUID, Group> _groups = new Dictionary<UUID, Group>();
-        public Dictionary<UUID, Group> Groups { get { return _groups; } }
+        public Dictionary<UUID, Group> Groups { get; private set; } = new Dictionary<UUID, Group>();
 
         private Settings _globalSettings;
         /// <summary>
@@ -128,11 +124,10 @@ namespace Raindrop
         /// </summary>
         public Settings GlobalSettings { get { return _globalSettings; } }
 
-        private Settings _clientSettings;
         /// <summary>
         /// Per client settings
         /// </summary>
-        public Settings ClientSettings { get { return _clientSettings; } }
+        public Settings ClientSettings { get; private set; }
 
         public const string IncompleteName = "Loading...";
 
@@ -142,11 +137,10 @@ namespace Raindrop
         ///// <summary> Handles loading plugins and scripts</summary>
         //public PluginManager PluginManager { get { return pluginManager; } }
 
-        private MediaManager _mediaManager;
         /// <summary>
         /// Radegast media manager for playing streams and in world sounds
         /// </summary>
-        public MediaManager MediaManager { get { return _mediaManager; } }
+        public MediaManager MediaManager { get; private set; }
 
 
         //private CommandsManager commandsManager;
@@ -267,21 +261,15 @@ namespace Raindrop
 
         #endregion Events
 
-        public RaindropInstance(GridClient client0)
+        public RaindropInstance(GridClient client)
         {
-            _appDataDir = DirectoryHelpers.GetCacheDir(); //Application.persistentDataPath;
-            _streamingAssetsDir = Application.streamingAssetsPath;
+            _appDataDir = DirectoryHelpers.GetInternalCacheDir();
+            // _extAppDataDir = DirectoryHelpers.GetExternalCacheDir_WithInternalAsFallback();
+            // _streamingAssetsDir = Application.streamingAssetsPath;
 
             InitializeLoggingAndConfig();
 
-            if (!System.Diagnostics.Debugger.IsAttached)
-            {
-                Debug.LogWarning("no debugger detected. ");
-                //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                //Application.ThreadException += HandleThreadException;
-            }
-
-            _client = client0;
+            _client = client;
 
             // Initialize current time zone, and mark when we started
             GetWorldTimeZone();
@@ -299,7 +287,7 @@ namespace Raindrop
 
             _netcom = new RaindropNetcom(this);
             _state = new StateManager(this);
-            //_mediaManager = new MediaManager(this);
+            MediaManager = new MediaManager(this);
             
             //commandsManager = new CommandsManager(this);
             //ContextActionManager = new ContextActionsManager(this);
@@ -309,9 +297,7 @@ namespace Raindrop
             InitializeClient(_client);
 
             //rlv = new RLVManager(this);
-            _gridManager = new GridManager();
-            Debug.Log(_streamingAssetsDir);
-            _gridManager.LoadGrids(_streamingAssetsDir);
+            _gridManager = new GridManager(_appDataDir);
 
             _names = new NameManager(this);
             Cof = new CurrentOutfitFolder(this);
@@ -325,6 +311,8 @@ namespace Raindrop
             //pluginManager.ScanAndLoadPlugins();
 
             //chatManger = new ChatManager(this);
+            
+            Debug.Log("raindrop ready --- buttonsound");
         }
 
         private void InitializeClient(GridClient client)
@@ -342,8 +330,7 @@ namespace Raindrop
             client.Settings.STORE_LAND_PATCHES = true;
 
             client.Settings.USE_ASSET_CACHE = true;
-            client.Settings.ASSET_CACHE_DIR = Path.Combine(_userDir, "cache");
-            Debug.Log("Userdir:" + _userDir);
+            client.Settings.ASSET_CACHE_DIR = Path.Combine(UserDir, "cache");
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
@@ -452,6 +439,7 @@ namespace Raindrop
             _netcom.Login();
         }
 
+        // invoke dispose pattern on all my objects
         public void CleanUp()
         {
             MarkEndExecution();
@@ -506,10 +494,10 @@ namespace Raindrop
             //    ContextActionManager.Dispose();
             //    ContextActionManager = null;
             //}
-            if (_mediaManager != null)
+            if (MediaManager != null)
             {
-                _mediaManager.Dispose();
-                _mediaManager = null;
+                MediaManager.Dispose();
+                MediaManager = null;
             }
             if (_state != null)
             {
@@ -528,6 +516,8 @@ namespace Raindrop
             Logger.Log("RaindropInstance finished cleaning up.", Helpers.LogLevel.Debug);
         }
         
+        
+        
         void netcom_ClientConnected(object sender, EventArgs e)
         {
             _client.Self.RequestMuteList();
@@ -543,7 +533,7 @@ namespace Raindrop
                     {
                         Directory.CreateDirectory(ClientDir);
                     }
-                    _clientSettings = new Settings(Path.Combine(ClientDir, "client_settings.xml"));
+                    ClientSettings = new Settings(Path.Combine(ClientDir, "client_settings.xml"));
                 }
                 catch (Exception ex)
                 {
@@ -605,7 +595,7 @@ namespace Raindrop
         }
 
         //this method will log all messages to the relevant file.
-        public void LogClientMessage(string sessioName, string message)
+        public void LogClientMessage(string sessionName, string message)
         {
             if (_globalSettings["disable_chat_im_log"]) return;
 
@@ -613,7 +603,7 @@ namespace Raindrop
             {
                 try
                 {
-                    File.AppendAllText(ChatFileName(sessioName),
+                    File.AppendAllText(ChatFileName(sessionName),
                         DateTime.Now.ToString("yyyy-MM-dd [HH:mm:ss] ") + message + Environment.NewLine);
                 }
                 catch (Exception) { }
@@ -622,29 +612,28 @@ namespace Raindrop
 
         void Groups_CurrentGroups(object sender, CurrentGroupsEventArgs e)
         {
-            this._groups = e.Groups;
+            this.Groups = e.Groups;
         }
 
+        // for simplicity, we will always use internal dir for settings.
         private void InitializeLoggingAndConfig()
         {
             try
             {
-                _userDir = Path.Combine(_appDataDir, _programname);
-                if (!Directory.Exists(_userDir))
+                UserDir = Path.Combine(_appDataDir, _programname);
+                if (!Directory.Exists(UserDir))
                 {
-                    Directory.CreateDirectory(_userDir);
+                    Directory.CreateDirectory(UserDir);
                 }
             }
             catch (Exception)
             {
-                Logger.DebugLog("unable to create userDir: " + _userDir);
-                _userDir = System.Environment.CurrentDirectory;
+                Logger.DebugLog("unable to create UserDir: " + UserDir);
+                //UserDir = System.Environment.CurrentDirectory;
             };
 
-            Debug.Log("Userdir:" + _userDir);
-
-            _globalLogFile = Path.Combine(_userDir, _programname + ".log");
-            _globalSettings = new Settings(Path.Combine(_userDir, "settings.xml"));
+            _globalLogFile = Path.Combine(UserDir, _programname + ".log");
+            _globalSettings = new Settings(Path.Combine(UserDir, "settings.xml"));
             //frmSettings.InitSettigs(globalSettings, monoRuntime);
         }
 
@@ -663,12 +652,6 @@ namespace Raindrop
             get { return _state; }
         }
 
-        //public UIManager UI
-        //{
-        //    get { return ui_manager; }
-        //}
-
-
         //public TabsConsole TabConsole
         //{
         //    get { return mainForm.TabConsole; }
@@ -685,7 +668,8 @@ namespace Raindrop
 
         #region Crash reporting
         FileStream _markerLock = null;
-        private string _programname = "RaindropTest_02";
+        private string _programname = "RaindropViewer";
+        private readonly string _extAppDataDir;
 
         public bool AnotherInstanceRunning()
         {
