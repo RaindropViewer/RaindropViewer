@@ -82,13 +82,12 @@ namespace OpenMetaverse
                 //};
                 //BasicConfigurator.Configure(LogManager.GetRepository(Assembly.GetCallingAssembly()), appender);
 
-                //this is the new version, i hope it works.
-                var appender = new UnityDebugAppender();
-                
-                appender.Layout = new PatternLayout("%date{HH:mm:ss} [%level] - %message");
+                //1. log to unity console.
+                var unityDebugAppender = new UnityDebugAppender();
+                unityDebugAppender.Layout = new PatternLayout("%date{HH:mm:ss} [%level] - %message");
                 //appender.Layout = new PatternLayout("%timestamp [%thread] %-5level - %message%newline");
-                BasicConfigurator.Configure(appender);
-
+                BasicConfigurator.Configure(unityDebugAppender);
+                
 
                 if (Settings.LOG_LEVEL != Helpers.LogLevel.None)
                     LogInstance.Warn("No log configuration found, defaulting to console logging");
