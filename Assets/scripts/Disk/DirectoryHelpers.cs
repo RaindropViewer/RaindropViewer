@@ -1,13 +1,14 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
-namespace Raindrop.Disk
+namespace Disk
 {
     public static class DirectoryHelpers
     {
         
         // returns SD card if the bool is true OR the sd card is not available.
         // otherwise i will return internal-but-shared storage
-        public static string GetAndroidExternalFilesDir(bool preferSDcard)
+        private static string GetAndroidExternalFilesDir(bool preferSDcard)
         {
             using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {
@@ -41,20 +42,39 @@ namespace Raindrop.Disk
             }
         }
 
-        //gives us the base directory where we should be storing the cache files
-        public static string GetCacheDir()
+        // gives us the base directory where we should be storing the cache files
+        // returns the internal storage if android.
+        public static string GetInternalCacheDir()
         {
             #if UNITY_EDITOR
-            
-            return Application.persistentDataPath; //todo : correctly implement this.
+                return Application.persistentDataPath;
             #endif
-            
             #if UNITY_ANDROID
-            
-            return GetAndroidExternalFilesDir(true); //todo : correctly implement this.
+                return GetAndroidExternalFilesDir(false);
             #endif
+        }
 
-            
+        #if UNITY_ANDROID
+        // returns path to the external storage in android phone.
+        // returns null if the sd card is not inserted
+        public static string Android_GetExternalCacheDir_WithInternalAsFallback()
+        {
+            return GetAndroidExternalFilesDir(true); //todo : correctly implement this.
+        }
+        #endif
+
+        
+        //easily write to a file
+        //filePath = fully-specified file path
+        public static void WriteToFile(byte[] outbytes, string filePath)
+        {
+            //create parent subfolders
+            var parentDir = Path.GetDirectoryName(filePath);
+            System.IO.Directory.CreateDirectory(parentDir);
+                
+            //write file
+            System.IO.File.WriteAllBytes(filePath, outbytes);
+            // Debug.Log($"write: {filePath} ");
         }
     }
 }
