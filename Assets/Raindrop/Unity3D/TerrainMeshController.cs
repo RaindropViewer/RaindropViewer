@@ -1,39 +1,32 @@
-﻿using Raindrop.Netcom;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using Raindrop.Rendering;
-using OpenMetaverse;
+﻿using System;
 using System.Threading;
-using RenderSettings = Raindrop.Rendering.RenderSettings;
+using OpenMetaverse;
 using OpenMetaverse.Rendering;
+using Raindrop.Netcom;
+using Raindrop.Rendering;
+using UnityEditor.PackageManager;
+using UnityEngine;
 using Mesh = UnityEngine.Mesh;
+using RenderSettings = Raindrop.Rendering.RenderSettings;
 
 namespace Raindrop.Unity3D
 {
-    //sets the mesh of the gameobject to match the sim's shape. 
-    class TerrainMeshUpdater : MonoBehaviour
+    public class TerrainMeshController 
     {
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private GridClient Client { get { return instance.Client; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
+        Simulator sim => instance.Client.Network.CurrentSim;
         //unity DS
         Texture2D terrainImage = null;
-        MeshRenderer meshRenderer;
-        MeshFilter meshFilter;
-        UnityEngine.Mesh terrainMesh;
 
         UnityEngine.Vector3[] newVertices;
         UnityEngine.Vector2[] newUV;
         int[] newTriangles;
 
 
-        bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
         float[,] heightTable = new float[256, 256];     //heightmap of terrain
         bool fetchingTerrainTexture = false;            //semaphore for reading terrain tex.
         bool terrainTextureNeedsUpdate = false;         //does the texture need to be redrawn?
@@ -43,43 +36,35 @@ namespace Raindrop.Unity3D
         MeshmerizerR renderer;
         //private float lastTimeItRendered = 0f;
 
-        Simulator sim => instance.Client.Network.CurrentSim;
 
         Face terrainFace; //seems like a 'face' is the secondlife kind of face (where each prim can have up to 8 faces.)
         ColorVertex[] terrainVertices;
         uint[] terrainIndices;
         private bool terrainMesherIsIdle = true;
+        bool Modified = true;                    //is the terrain data in OSL(backend) modified since our rendering?
+        private readonly TerrainMeshView _terrainMeshView;
 
-        private void Awake()
+
+        public TerrainMeshController(TerrainMeshView terrainMeshView)
         {
-            //1 mesh renderer component
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = new UnityEngine.Material(Shader.Find("Standard")); //hopefully this not use reflection.
-
-            //2 mesh filter component (owns the mesh)
-            meshFilter = gameObject.AddComponent<MeshFilter>();
-            
-            //2.1 make terrain mesh of 256*256 at zero height and pass to meshfilter
-            terrainMesh = new UnityEngine.Mesh(); //make the mesh.
-            GetComponent<MeshFilter>().mesh = terrainMesh;         //assign this mesh to the meshfiltercomponent
-
-            //mesh.vertices = newVertices;
-            //mesh.uv = newUV;
-            //mesh.triangles = newTriangles;
-            //buildBasicLandMesh();
-
-
-        }
-
-        private void Start()
-        {
-
-
+            this._terrainMeshView = terrainMeshView;
             Client.Terrain.LandPatchReceived += new EventHandler<LandPatchReceivedEventArgs>(Terrain_LandPatchReceived);
-
-
+            Client.Network.SimChanged += NetworkOnSimChanged;
         }
 
+        private void NetworkOnSimChanged(object sender, SimChangedEventArgs e)
+        {
+            ResetIfSimChanged();
+            
+            void ResetIfSimChanged()
+            {
+                if (instance.Client.Network.CurrentSim != knownCurrentSim) //different sim now.
+                {
+                    knownCurrentSim = instance.Client.Network.CurrentSim;
+                    ResetTerrainTex();
+                }
+            }
+        }
 
         void Terrain_LandPatchReceived(object sender, LandPatchReceivedEventArgs e)
         {
@@ -88,10 +73,10 @@ namespace Raindrop.Unity3D
                 this.Modified = true;
             }
         }
-
+        
+        // construct a flat land mesh of 256*256 size
         private void buildBasicLandMesh()
         {
-
             int step = 1;
             for (int x = 0; x < 256; x += step)
             {
@@ -105,38 +90,14 @@ namespace Raindrop.Unity3D
             }
         }
 
+        //
+        // Render(Time.deltaTime);
 
-        private void Update()
-        {
-            if (! Active) //guard clause: don't continue if disconnected
-            {
-                return;
-            }
-
-            ResetIfSimChanged();
-
-            //
-            // if (terrainTextureNeedsUpdate)
-            // {
-            //     UpdateTerrainTexture();
-            // }
-
-            render(Time.deltaTime);
-
-            void ResetIfSimChanged()
-            {
-                if (instance.Client.Network.CurrentSim != knownCurrentSim) //different sim now.
-                {
-                    knownCurrentSim = instance.Client.Network.CurrentSim;
-                    ResetTerrainTex();
-                }
-            }
-        }
 
         //this performs re-meshing and re-texturing. ONLY IF MODIFIED and sufficient time elapsed.
-        private void render(float timeSinceLastFrame)
+        private void Render(float timeSinceLastRenderCall)
         {
-            terrainTimeSinceUpdate += timeSinceLastFrame;
+            terrainTimeSinceUpdate += timeSinceLastRenderCall;
 
             if (terrainMesherIsIdle == false)
             {
@@ -252,24 +213,18 @@ namespace Raindrop.Unity3D
                 // terrainMesherIsIdle = true;
                 
                 // 4. apply this face-mesh to the gameobject's mesh component.
-                setMesh(ref terrainMesh, terrainFace);
+                // terrainMeshUpdater.setMesh(ref terrainMesh, terrainFace);
 
             });
         }
 
-        private void setMesh(ref Mesh mesh, Face face)
-        {
-            //todo
-            
-            throw new NotImplementedException();
-        }
 
         //delete terrain tex 
         private void ResetTerrainTex()
         {
             if (terrainImage != null)
             {
-                Destroy(terrainImage);
+                GameObject.Destroy(terrainImage);
                 terrainImage = null;
             }
 
@@ -296,11 +251,10 @@ namespace Raindrop.Unity3D
 
                     fetchingTerrainTexture = false;
                     terrainTextureNeedsUpdate = false;
-                    meshRenderer.material.mainTexture = terrainImage;
+                    _terrainMeshView.SetTexture(terrainImage);
                 });
             }
         }
-
 
     }
 }
