@@ -26,9 +26,9 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             var fetcher = ServiceLocator.Instance.Get<MapService>();
 
             //initally, the maptile is just a empty pocket
-            bool isReady;
-            var emptyTile = fetcher.GetMapTile(Utils.UIntsToLong(1000*256,1000*256) , 1, out isReady);
-            Assert.False(isReady);
+            //bool isReady;
+            var emptyTile = fetcher.GetMapTile(Utils.UIntsToLong(1000*256,1000*256) , 1);
+            Assert.False(emptyTile.isReady);
             
             // wait for the maptile to be filled by the network.
             yield return new WaitForSeconds(10);
@@ -37,7 +37,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             Assert.True(emptyTile.getTex().width > 10);
             
             var secondRequestForSameTile = 
-                fetcher.GetMapTile(Utils.UIntsToLong(1000*256,1000*256) , 1, out isReady);
+                fetcher.GetMapTile(Utils.UIntsToLong(1000*256,1000*256) , 1);
             Assert.True(emptyTile.isReady, "tile should be ready in subsequent fetch");
 
             Assert.Pass();

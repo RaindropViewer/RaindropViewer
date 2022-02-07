@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FMOD;
 using OpenMetaverse;
 using Raindrop.Services.Bootstrap;
 using Raindrop.UI.views;
@@ -30,8 +31,7 @@ public class LandmarkView : MonoBehaviour
         LandmarkController controller = new LandmarkController(this);
         if (imageView == null)
         {
-            
-            
+            OpenMetaverse.Logger.Log("mandmarkview's image is not properly linked ", Helpers.LogLevel.Error);
         }
     }
 

@@ -36,7 +36,7 @@ namespace Raindrop.Map.Model
         // returns a tile to the pool.
         public void releaseTile(MapTile tile)
         {
-            tile.clearTex();
+            tile.destroyTex();
             tilePool.Enqueue(tile);
         }
     }

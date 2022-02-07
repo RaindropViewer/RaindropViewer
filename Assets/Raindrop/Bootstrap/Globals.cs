@@ -1,8 +1,9 @@
 ﻿using System.Threading;
+using UnityEngine;
 
 namespace Raindrop.Services.Bootstrap
 {
-    public class Globals
+    public class Globals : MonoBehaviour
     {
         public static Thread GMainThread;
         
@@ -10,5 +11,6 @@ namespace Raindrop.Services.Bootstrap
         {
             return Globals.GMainThread.Equals(System.Threading.Thread.CurrentThread);
         }
+
     }
 }

@@ -28,6 +28,8 @@ namespace Raindrop.Presenters
 
         void Awake()
         {
+            this.gameObject.SetActive(true);
+            
             loginMsg = new ReactiveProperty<string>(""); //"" is a magic value that is required to prevent showing the modal immediately on load.
             loginMsg.AsObservable().Subscribe(
                 (message) =>

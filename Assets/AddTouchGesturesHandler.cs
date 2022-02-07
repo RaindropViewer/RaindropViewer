@@ -10,23 +10,25 @@ public class AddTouchGesturesHandler : MonoBehaviour
 {
 	[SerializeField]
 	private MapUIView mapUIView;
-	public GameObject mapUIGO;
 
 	[SerializeField]
-	public GameObject cameraGO; 
-	private Camera camera; 
+	public DownwardOrthoCameraView camera; 
 	[SerializeField]
 	public GameObject pannableFrame; 
 	[SerializeField]
 	public float panningSpeed;
 
 
-	public float prevCameraSize;
-	public Vector2 startPoint;
+	public float prevCameraZoom
+	{
+		get => prevcamzoom;
+		set { prevcamzoom = Mathf.Clamp(value, 1, 10); }
+	}
+
+	private float prevcamzoom;
 
 	private void Awake()
     {
-		camera = cameraGO.GetComponent<Camera>();
 
 		//mapUI = Raindrop.Globals.GetUI().Get  //mapUIGO.GetComponent<MapUI>();
 	}
@@ -50,14 +52,22 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
 				Vector2 start = recognizer.startPoint;
-				startPoint = start;
+				var worldpointStart = camera.camera.ScreenToWorldPoint(start);
+				
 				if (false)
 				{
 					//do nothing.
-				} else { 
-					camera.transform.position -= new Vector3(recognizer.deltaTranslation.x, 0, recognizer.deltaTranslation.y) / panningSpeed * camera.orthographicSize;
 				}
-                Debug.Log("pan recognizer fired: " + r.ToString());
+				else
+				{
+					//since delta translation is probably in pixels, we might want to move the camera in units of pixles.
+					var pixelstomove = new Vector3(recognizer.deltaTranslation.x, recognizer.deltaTranslation.y, 0);
+					//float half_vertical_visibleheight = camera.orthographicSize;
+					var DPI = Screen.dpi;
+					camera.transform.position -= (pixelstomove / DPI) * camera.getZoom()  * panningSpeed ;
+				}
+
+				Debug.Log("pan recognizer fired: " + r.ToString());
             };
 
 			// continuous gestures have a complete event so that we know when they are done recognizing
@@ -75,14 +85,14 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			var recognizer = new TKPinchRecognizer();
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
-				camera.orthographicSize = prevCameraSize / recognizer.accumulatedScale;
+				camera.setZoom(prevCameraZoom / recognizer.accumulatedScale);
 				//Debug.Log("pinch recognizer fired: " + r);
 			};
 			TouchKit.addGestureRecognizer(recognizer);
 
 			recognizer.gestureCompleteEvent += (r) =>
 			{
-				prevCameraSize = camera.orthographicSize;
+				prevCameraZoom = camera.getZoom();
 				//Debug.Log("pinch gesture complete");
 			};
 		}
@@ -92,8 +102,8 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			var recognizer = new TKTapRecognizer();
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
-				Vector3 worldPoint = camera.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
-				ulong regionCoords = Coverters.getRegionFromWorldPoint(worldPoint);
+				Vector3 worldPoint = camera.camera.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
+				ulong regionCoords = MapSpaceConverters.Vector32Handle(worldPoint);
 				mapUIView.getPresenter().OnMapClick(regionCoords);
 				//Debug.Log("tap recognizer fired: " + r);
 			};

@@ -117,7 +117,7 @@ namespace Raindrop
         {
             float delta = (float)timer.Interval / 1000f;
             if (isTurning) {
-                client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
+                //client.Self.Movement.BodyRotation = client.Self.Movement.BodyRotation * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, delta);
                 
                 SendMovementPacketIfChanged();
             } 

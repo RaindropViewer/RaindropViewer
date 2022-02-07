@@ -93,7 +93,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
         ulong handle = mapMover.GetLookAt();
         int zoom = (int)zoomSlider.value;
         // how 2 convert look at floats into uints? (uints are gridpos * 256)
-        MapTile mt =  MapService.GetMapTile(handle, 1, out bool isReady);
+        MapTile mt =  MapService.GetMapTile(handle, 1);
         //
         // if (MapService.GetMapTile(handle, 1) == null) //hack for now.
         // {

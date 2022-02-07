@@ -66,18 +66,16 @@ namespace Raindrop.Map.Model
         /// <param name="zoom"></param>
         /// <param name="isReady">if the returned MapTile is ready for display.</param>
         /// <returns></returns>
-        public MapTile GetMapTile(ulong handle, int zoom, out bool isReady)
+        public MapTile GetMapTile(ulong handle, int zoom)
         {
             MapTile res = null;
             bool isTileAvailable = _mapTilesRam.tryGetTile_RAM(handle, out res);
             if (isTileAvailable)
             {
-                isReady = true;
                 return res;
             }
             //this call to network, returns a maptile that is empty inside for now.
             res = mapTilesNetwork.GetRegionTileExternal(handle, 1);
-            isReady = false;
             return res;
         }
         

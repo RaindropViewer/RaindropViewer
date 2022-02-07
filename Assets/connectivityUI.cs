@@ -23,7 +23,7 @@ public class connectivityUI : MonoBehaviour
             Logger.Log("raindrop instance/netcom not available", Helpers.LogLevel.Error);
 
         isConnected.AsObservable().Subscribe(_ => updateConnectivityUI(_));
-        isConnected.Value = instance.Netcom.IsLoggedIn;
+        isConnected.Value = instance.Netcom.IsLoggedIn; // wtf.
         
         instance.Netcom.ClientLoginStatus += NetcomOnClientLoginStatus;
         instance.Netcom.ClientLoggedOut += NetcomOnClientLoggedOut;
