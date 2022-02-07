@@ -14,7 +14,6 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
             TypeUserAndPassIntoLoginPanel(username, password);
             yield return new WaitForSeconds(2);
             UIHelpers.Click_ButtonByUnityName("LoginBtn");
-            yield return new WaitForSeconds(12);
         }
 
         public static void TypeUserAndPassIntoLoginPanel(string _username, string _password)

@@ -167,7 +167,7 @@ namespace OpenMetaverse.Http
                         // Try to log a meaningful error message
                         if (code != HttpStatusCode.OK)
                         {
-                            Logger.Log($"Unrecognized caps connection problem from {_Address}: {code}", 
+                            Logger.Log($"Unrecognized caps connection problem from {_Address}: {code} + {error.Message}", 
                                 Helpers.LogLevel.Warning);
                         }
                         else if (error.InnerException != null)

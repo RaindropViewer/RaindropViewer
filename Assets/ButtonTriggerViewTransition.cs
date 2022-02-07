@@ -14,7 +14,7 @@ using Logger = OpenMetaverse.Logger;
 public class ButtonTriggerViewTransition : MonoBehaviour
 {
     public CanvasType canvasTypeToPush;
-    [FormerlySerializedAs("popCurrent")] public bool popAndPush;
+    public bool popAndPush;
     private void Start()
     {
         try

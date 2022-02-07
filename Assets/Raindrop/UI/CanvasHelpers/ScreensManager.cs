@@ -2,15 +2,17 @@ using Raindrop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenMetaverse;
 using Raindrop.ServiceLocator;
+using Raindrop.Services;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 //helper class that helps to pop, push, stack canvases.
-//on awake, it searches children for all canvases.
+//on start, it searches children for all canvases.
 public class ScreensManager : MonoBehaviour
-{
-    [FormerlySerializedAs("canvasControllerList")] [Tooltip("The canvases that are available to use.")]
+{ 
+    [Tooltip("The canvases that are available to use.")]
     public List<CanvasIdentifier> availableCanvases = new List<CanvasIdentifier>();
     [Tooltip("The canvases that are created and in memory stack.")]
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
@@ -25,7 +27,7 @@ public class ScreensManager : MonoBehaviour
             }
             catch (InvalidOperationException e)
             {
-                Debug.Log("pop canvas has error : " + e.ToString());
+                OpenMetaverse.Logger.Log("pop canvas has error : " + e.ToString(), Helpers.LogLevel.Error);
                 return null;
             }
         }
@@ -33,7 +35,7 @@ public class ScreensManager : MonoBehaviour
 
     public CanvasType initialPage;
     
-    private void Awake()
+    private void Start()
     {
         int childrenCount = transform.childCount;
         for (int i = 0; i < childrenCount ; i++)
@@ -56,7 +58,7 @@ public class ScreensManager : MonoBehaviour
         }
     }
 
-    public void resetToInitialScreen()
+    public void ResetToInitialScreen()
     {
         if (! IsEulaAccepted())
         {
@@ -82,7 +84,7 @@ public class ScreensManager : MonoBehaviour
         } 
     }
 
-    public GameObject getForegroundCanvas()
+    public GameObject GetForegroundCanvas()
     {
         if (activeCanvasStack.Count == 0)
         {
@@ -91,74 +93,53 @@ public class ScreensManager : MonoBehaviour
 
         return activeCanvasStack.Peek().gameObject;
     }
-    public CanvasType getCanvasTypeFromString(string _type)
-    {
-        foreach(CanvasIdentifier _ in availableCanvases)
-        {
-            var thecanvastype = _.canvasType;
-            if (_type == thecanvastype.ToString())
-            {
-                return thecanvastype;
-            }
-            
-        }
-
-        return CanvasType.UNKNOWN;
-         
-    }
 
     //pop current, then push the desired canvas.
     public void PopAndPush(CanvasType type)
     {
-       
-        
-        // CanvasType theCanvasType = getCanvasTypeFromString(_type);
-        // if (theCanvasType ==CanvasType.UNKNOWN)
-        // {
-        //     Debug.LogError("unable to get the canvas of identifer: "+ _type);
-        // } 
         if (TopCanvas)
         {
             PopCanvas();
         }
         Push(type);
     }
-    
-    // pop the current login screen, and push the game view. This is for viewing chats offline.
-    // planned for debug only. 
-    public void LoginWithoutNetworking()
-    {
-        while ((activeCanvasStack.Count() != 0))
-        {
-            activeCanvasStack.Pop();
-        }
-        PopAndPush(CanvasType.Game);
-    }
-    
     public void Push(CanvasType type)
     {
-        //deactivate present canvas
+        CanvasIdentifier desiredCanvas = availableCanvases.Find(x => x.canvasType == type);
+     
+        //check if the canvas is not supported:
+        if (desiredCanvas == null)
+        {
+            OpenMetaverse.Logger.Log(
+                "The desired canvas was not found!" + type.ToString(),
+                Helpers.LogLevel.Warning
+            );
+            var ui = ServiceLocator.Instance.Get<UIService>();
+            ui.modalManager.showModalNotification(
+                "The desired feature is not implemented yet: ",
+                type.ToString() + " UI + \n \n + Stay tuned for updates!");
+            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            instance.MediaManager.PlayUISound(UISounds.Warning);
+            return;
+        }
+        
+        //deactivate present canvas, if any.
+        //(because the old canvas may appear above the new one - due to heirachy ordering)
         if (activeCanvasStack.Count() != 0)
         {
             var lastActiveCanvas = activeCanvasStack.Peek();
             lastActiveCanvas.gameObject.SetActive(false);
         }
-
-        //find the new canvas to push.
-        CanvasIdentifier desiredCanvas = availableCanvases.Find(x => x.canvasType == type);
-        if (desiredCanvas != null)
-        {
-            desiredCanvas.gameObject.SetActive(true);
-            activeCanvasStack.Push(desiredCanvas);
-        }
-        else { Debug.LogWarning("The desired canvas was not found!" + desiredCanvas.ToString()); }
+        //push it
+        desiredCanvas.gameObject.SetActive(true);
+        activeCanvasStack.Push(desiredCanvas);
     }
 
     public void PopCanvas()
     {
         if (! TopCanvas)
         {
-            Debug.LogWarning("tried to pop empty canvas stack.");
+            OpenMetaverse.Logger.Log("tried to pop empty canvas stack.", Helpers.LogLevel.Warning);
             return;
         }
 

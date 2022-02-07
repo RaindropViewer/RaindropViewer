@@ -12,6 +12,7 @@ namespace Raindrop.Presenters
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
+        public bool isInteractable => view.canvas.interactable;
         
         public LoadingController(LoadingCanvasPresenter _view)
         {
@@ -65,6 +66,7 @@ namespace Raindrop.Presenters
                     //Close_LoginModal_Slow();
                     
                     ServiceLocator.ServiceLocator.Instance.Get<UIService>().ScreensManager.PopAndPush(CanvasType.Game);
+                    
                     view.FadeOut();
                     break;
 

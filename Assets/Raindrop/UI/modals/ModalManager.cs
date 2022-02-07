@@ -15,6 +15,8 @@ public class ModalManager : MonoBehaviour
     [SerializeField]
     private ModalPresenter loginStatusModal;
 
+    [SerializeField] public Transform ModalRoot;
+
     
 
     private void Awake()
@@ -75,7 +77,7 @@ public class ModalManager : MonoBehaviour
                 });
         } else 
         {
-            var newModal = Instantiate(genericModalPrefab);
+            var newModal = Instantiate(genericModalPrefab, ModalRoot);
 
             if (newModal != null)
             {

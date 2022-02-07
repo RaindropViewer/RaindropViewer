@@ -139,7 +139,7 @@ namespace Raindrop
             string hex_b = BitConverter.ToString(new[]{b});
             
             rtb.text = rtb.text 
-                       + "<color=" + hex_r + hex_g + hex_r + ">" + text;
+                       + "<color=#" + hex_r + hex_g + hex_r + ">" + text;
 
             //else
             //{

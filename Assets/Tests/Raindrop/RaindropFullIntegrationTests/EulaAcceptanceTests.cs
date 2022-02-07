@@ -54,8 +54,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             SceneManager.LoadScene("Scenes/MainScene");
             yield return new WaitForSeconds(2);
 
-            //1. disable the EULA
-            // var instance = new RaindropInstance(new GridClient());
+            //1. reject the EULA
             var instance = ServiceLocator.Instance.Get<RaindropInstance>();
             instance.GlobalSettings["EulaAccepted"] = false;
             instance.GlobalSettings.Save();

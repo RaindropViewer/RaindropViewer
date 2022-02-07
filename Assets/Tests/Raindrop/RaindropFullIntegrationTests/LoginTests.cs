@@ -96,6 +96,13 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
                 LoginPresenterIsAvailable(vm);
             
                 yield return Login.StartLogin(_username, _password);
+                // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
+                yield return new WaitForSeconds(12);
+
+                //for login successful, the loading will fade by itself.
+                //UIHelpers.Click_ButtonByUnityName("CloseLoadingScreenButton");
+                yield return new WaitForSeconds(2);
+                Assert.False(uiSrv._loadingController.isInteractable, "expected: loading screen is not interactable (and closed; todo).");
             
                 //assert the backend API; that we are logged in.
                 Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
@@ -126,7 +133,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         private static void LoginPresenterIsAvailable(GameObject vm)
         {
             var loginPresenter
-                = vm.GetComponent<ScreensManager>().getForegroundCanvas().GetComponent<LoginPresenter>();
+                = vm.GetComponent<ScreensManager>().GetForegroundCanvas().GetComponent<LoginPresenter>();
             Assert.True(loginPresenter != null);
         }
         

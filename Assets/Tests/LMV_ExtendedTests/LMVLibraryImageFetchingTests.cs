@@ -32,10 +32,6 @@ namespace Raindrop.Tests
             mainThreadDispatcher_Test.AddComponent<UnityMainThreadDispatcher>();
             
             instance = new RaindropInstance(new GridClient());
-            // Client.Self.Movement.Fly = true;
-            // Register callbacks
-            // Client.Network.RegisterCallback(PacketType.ObjectUpdate, ObjectUpdateHandler);
-            //Client.Self.OnTeleport += new MainAvatar.TeleportCallback(OnTeleportHandler)
         }
         
         void login()
@@ -311,6 +307,9 @@ namespace Raindrop.Tests
             yield return new WaitForSeconds(10);
             instance.Client.Network.Logout();
             yield return new WaitForSeconds(10);
+            
+            instance.CleanUp();
+            
             yield break;
         }
 

@@ -88,13 +88,13 @@ namespace Raindrop.Services
 
         protected void startUIInitialView()
         {
-            ScreensManager.resetToInitialScreen();
+            ScreensManager.ResetToInitialScreen();
             modalManager.showModalNotification("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
         }
 
         public GameObject getCurrentForegroundPresenter()
         {
-            return ScreensManager.getForegroundCanvas();
+            return ScreensManager.GetForegroundCanvas();
         }
 
         private void RegisterClientEvents(GridClient client)
@@ -151,7 +151,7 @@ namespace Raindrop.Services
         {
             //modalManager.showModalNotification("Logged out", "you have/were logged out");
 
-            ScreensManager.resetToInitialScreen();
+            ScreensManager.ResetToInitialScreen();
             
             //RefreshStatusBar();
             //RefreshWindowTitle();
@@ -166,7 +166,7 @@ namespace Raindrop.Services
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
 
-            ScreensManager.resetToInitialScreen();
+            ScreensManager.ResetToInitialScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{

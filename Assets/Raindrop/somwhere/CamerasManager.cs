@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using OpenMetaverse;
 using UnityEngine;
 
 public class CamerasManager : MonoBehaviour
@@ -31,8 +32,10 @@ public class CamerasManager : MonoBehaviour
     
     #endregion
 
-    private Dictionary<string, Camera> cameras = new Dictionary<string, Camera>();
+    private Dictionary<CameraIdentifier.CameraType, Camera> cameras = 
+        new Dictionary<CameraIdentifier.CameraType, Camera>();
     public Camera currentCam;
+    public bool Ready { get; set; } = false;
 
     private void Start()
     {
@@ -41,14 +44,17 @@ public class CamerasManager : MonoBehaviour
         {
             RegisterCamera(child.gameObject);
         }
+
+        Ready = true;
     }
 
     private void RegisterCamera(GameObject Camera)
     {
         Camera cam = Camera.GetComponent<Camera>();
-        if (cam)
+        var type = Camera.GetComponent<CameraIdentifier>();
+        if (cam && type)
         {
-            cameras.Add(Camera.name, cam);
+            cameras.Add(type.type, cam);
             
             if (Camera.activeInHierarchy)
             {
@@ -57,21 +63,29 @@ public class CamerasManager : MonoBehaviour
         }
     }
 
-    //warn: silent failure
-    // return null if camera not found.
-    [CanBeNull]
-    public Camera ActivateCamera(string name)
+    public void ActivateCamera(CameraIdentifier.CameraType type)
     {
-        Camera cam = cameras[name];
-        if (cam)
+        if (!Ready)
+            return;
+        
+        try
         {
+            Camera cam = cameras[type];
             //1 deactive current
             currentCam.gameObject.SetActive(false);
             //2 active current
             currentCam = cam;
             cam.gameObject.SetActive(true);
+            return;
+        }
+        catch (Exception e)
+        {
+            OpenMetaverse.Logger.Log("camera not available: " + type.ToString()
+                , Helpers.LogLevel.Error);
+            return;
         }
 
-        return cam;
-    } 
+        return;
+    }
+
 }

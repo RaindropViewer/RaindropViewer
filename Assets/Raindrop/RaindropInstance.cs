@@ -311,8 +311,6 @@ namespace Raindrop
             //pluginManager.ScanAndLoadPlugins();
 
             //chatManger = new ChatManager(this);
-            
-            Debug.Log("raindrop ready --- buttonsound");
         }
 
         private void InitializeClient(GridClient client)

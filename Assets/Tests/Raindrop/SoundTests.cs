@@ -21,6 +21,7 @@ namespace Tests.Raindrop
 
             instance.MediaManager.PlayUISound(UUID.Zero);
 
+            instance.CleanUp();
             yield break;
         }
     

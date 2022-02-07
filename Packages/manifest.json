@@ -10,6 +10,7 @@
     "com.unity.inputsystem": "1.2.0",
     "com.unity.jobs": "0.8.0-preview.23",
     "com.unity.memoryprofiler": "0.2.9-preview.3",
+    "com.unity.render-pipelines.universal": "10.8.1",
     "com.unity.test-framework": "1.1.29",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.4.8",

@@ -24,7 +24,8 @@ public class Texturable : MonoBehaviour
         {
             OpenMetaverse.Logger.Log("error", Helpers.LogLevel.Error);
         }
-        mat = renderer.material;
+        mat = renderer.material; 
+        
         // ApplyTexture(RandomGenericTexture());
         ApplyTexture(Texture2D.blackTexture);
     }
@@ -63,7 +64,9 @@ public class Texturable : MonoBehaviour
         //     //Destroy(oldtex);
         // }
         
-        mat.SetTexture("_MainTex", tex);
+        mat.SetTexture("_BaseMap", tex);
+        // Obsolete: was working for standard render pipeline
+        // mat.SetTexture("_MainTex", tex);
         isTextured = true;
         
         

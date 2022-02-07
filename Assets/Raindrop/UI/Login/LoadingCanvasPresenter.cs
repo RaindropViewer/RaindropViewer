@@ -21,15 +21,11 @@ namespace Raindrop.Presenters
         // public string loginMsg;
         public ReactiveProperty<string> loginMsg { get; set;  }//
 
-        // public LoadingController Controller;
-
         private FadingState state = FadingState.None;
-        
+        [SerializeField] public float delayBeforeFade { get; set; } = 2;
 
         void Awake()
         {
-            this.gameObject.SetActive(true);
-            
             loginMsg = new ReactiveProperty<string>(""); //"" is a magic value that is required to prevent showing the modal immediately on load.
             loginMsg.AsObservable().Subscribe(
                 (message) =>
@@ -39,15 +35,15 @@ namespace Raindrop.Presenters
                 );
 
             CloseButton.onClick.AsObservable().Subscribe(_ => OnCloseBtnClick());
+            disableCloseBtn();
 
             if (text == null)
             {
                 OpenMetaverse.Logger.Log("loading bar fail.", Helpers.LogLevel.Error);
             }
-
         }
 
-        //completely wtf initialisation
+        //disable myself on start, as obviously no one wants a loading in screen at start.
         private void Start()
         {
             FadeOut();
@@ -57,12 +53,11 @@ namespace Raindrop.Presenters
         private void OnCloseBtnClick()
         {
             //CloseButton.interactable = false;
-            CloseButton.gameObject.SetActive(false);
+            disableCloseBtn();
             FadeOut();
-            ResetLoadingText();
         }
 
-        private void ResetLoadingText()
+        public void ResetLoadingText()
         {
             loginMsg.Value = "";
         }
@@ -75,55 +70,70 @@ namespace Raindrop.Presenters
             {
                 return;
             } 
-            StopAllCoroutines();
             state = FadingState.In;
+            StopAllCoroutines();
             
-            this.gameObject.SetActive(true);
+            canvas.interactable = false;
+            canvas.blocksRaycasts = true;
             StartCoroutine(FadeInCoroutine());
-            state = FadingState.None;
-        }
-        
-        // fade from transparent to opaque
-        IEnumerator FadeInCoroutine()
-        {
-            float target = 1;
-            float initial = canvas.alpha;
-            // loop over 1 second
-            for (float i = initial; i <= target; i += Time.deltaTime)
+            
+            // fade from transparent to opaque
+            IEnumerator FadeInCoroutine()
             {
-                // set color with i as alpha
-                canvas.alpha = i;
-                yield return null;
+                float target = 1;
+                float initial = canvas.alpha;
+                // loop over 1 second
+                for (float i = initial; i <= target; i += Time.deltaTime)
+                {
+                    // set color with i as alpha
+                    canvas.alpha = i;
+                    yield return null;
+                }
+                state = FadingState.None;
+                canvas.interactable = true;
+                canvas.blocksRaycasts = true;
+                yield break;
             }
         }
+
         public void FadeOut()
         {
             if (state == FadingState.Out)
             {
                 return;
             }
-            StopAllCoroutines();
             state = FadingState.Out;
+            StopAllCoroutines();
+            canvas.blocksRaycasts = true;
+            canvas.interactable = false;
             
+            StartCoroutine(FadeoutCoroutine(delayBeforeFade));
             
-            StartCoroutine(FadeoutCoroutine());
-
-            this.gameObject.SetActive(false);
-            state = FadingState.None;
-        }
-         
-        IEnumerator FadeoutCoroutine()
-        {
-            float target = 0;
-            float initial = canvas.alpha;
-            // loop over 1 second
-            for (float i = initial; i >= target; i -= Time.deltaTime)
+            IEnumerator FadeoutCoroutine(float delay)
             {
-                // set color with i as alpha
-                canvas.alpha = i;
-                yield return null;
+                yield return new WaitForSeconds(delay);
+                
+                float target = 0;
+                float initial = canvas.alpha;
+                // loop over 1 second
+                for (float i = initial; i >= target; i -= Time.deltaTime)
+                {
+                    // set color with i as alpha
+                    canvas.alpha = i;
+                    yield return null;
+                }
+                
+                canvas.blocksRaycasts = false;
+                canvas.interactable = false;
+                state = FadingState.None;
+                
+                ResetLoadingText();
+                yield break;
             }
+        
         }
+
+
         #endregion
 
         // set the close button to visible.

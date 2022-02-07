@@ -40,13 +40,13 @@ namespace Raindrop.UI.Views
 
         private void OnEnable()
         {
-            CamerasManager.Instance.ActivateCamera("MinimapCamera");
+            CamerasManager.Instance.ActivateCamera(CameraIdentifier.CameraType.Minimap);
             mapSceneGraph_Root.gameObject.SetActive(true);
         }
 
         private void OnDisable()
         {
-            CamerasManager.Instance.ActivateCamera("MainCamera");
+            CamerasManager.Instance.ActivateCamera(CameraIdentifier.CameraType.Main);
             mapSceneGraph_Root.gameObject.SetActive(false);
         }
 
