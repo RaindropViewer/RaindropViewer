@@ -136,8 +136,18 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.23
+  bundleVersion: 0.24
   preloadedAssets:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -166,7 +176,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: 
+    Android: com.UnityTestRunner.UnityTestRunner
     Standalone: com.RaindropCafe.RaindropViewer
   buildNumber:
     Standalone: 0
@@ -284,7 +294,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: 8af3ddf02b4e5d948a3faa283c99648c, type: 3}
+      m_Icon: {fileID: 2800000, guid: 178262b4b2207154f83615a602a296f3, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0

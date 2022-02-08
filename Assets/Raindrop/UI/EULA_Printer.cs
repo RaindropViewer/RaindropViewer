@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Windows;
 using File = System.IO.File;
 
 [RequireComponent(typeof(TMP_Text))]

@@ -19,8 +19,8 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
     [TestFixture()]
     public class LoginTests
     {
-        private static string _username = "***REMOVED*** Resident"; // fixme: move this to some xml
-        private static string _password = "***REMOVED***";
+        private static string _username = "tanukidev Resident"; // fixme: move this to some xml
+        private static string _password = "25xy53de";
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
 

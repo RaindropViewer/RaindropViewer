@@ -14,8 +14,9 @@ namespace Tests.Raindrop.RaindropIntegrationTests.ChatTests
         //test the local chat UI, send and receive functions.
         public IEnumerator AbleOpenLocalChatUI()
         {
-            SceneManager.LoadScene("LocalChatWindowScene");
-
+            Debug.Log("test is not implemented.");
+            // SceneManager.LoadScene("LocalChatWindowScene");
+            //
             yield break;
         }
     }

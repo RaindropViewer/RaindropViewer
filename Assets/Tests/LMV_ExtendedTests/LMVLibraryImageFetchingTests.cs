@@ -40,8 +40,8 @@ namespace Raindrop.Tests
             // some message like:   Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV Resident>: Setting server side baking failed'. Use UnityEngine.TestTools.LogAssert.Expect
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
             
-            var fullusername = "***REMOVED*** resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "***REMOVED***"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+            var fullusername = "tanukidev resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
+            var password = "25xy53de"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername),
                 "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password),

@@ -4,9 +4,7 @@ using OpenMetaverse;
 using OpenMetaverse.Rendering;
 using Raindrop.Netcom;
 using Raindrop.Rendering;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using Mesh = UnityEngine.Mesh;
 using RenderSettings = Raindrop.Rendering.RenderSettings;
 
 namespace Raindrop.Unity3D

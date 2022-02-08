@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
@@ -17,11 +16,10 @@ public class ExitAppButton : MonoBehaviour
 
     private void OnAppExitRequested()
     {
-        if (Application.isEditor)
-        {
+        #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-        }
-        
-        Application.Quit();
+        #else
+            Application.Quit();
+        #endif
     }
 }

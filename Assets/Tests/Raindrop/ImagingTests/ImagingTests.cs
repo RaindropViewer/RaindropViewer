@@ -70,10 +70,9 @@ namespace Raindrop.Tests.ImagingTests
                     string outPath_GetAndroidExternalFilesDir_external =  
                         Disk.DirectoryHelpers.GetAndroidExternalFilesDir(true) + "/ImagingTests/menhara_out_GetAndroidExternalFilesDir_external.jpg";
                     
-                    Helper.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_internal);
-                    Helper.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_external);
-                    
-                #endif
+                    Disk.DirectoryHelpers.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_internal);
+                    Disk.DirectoryHelpers.WriteToFile(outbytes, outPath_GetAndroidExternalFilesDir_external);
+#endif
 
                 float timeEnd = Time.realtimeSinceStartup;
                 Debug.Log($"took time to read jp2, convert to jpg, and save : {(timeEnd - timeStart).ToString()} ");
