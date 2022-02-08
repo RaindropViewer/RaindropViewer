@@ -13,6 +13,7 @@ using Raindrop.Presenters;
 using Vector2 = UnityEngine.Vector2;
 using System.Collections;
 using Raindrop.UI.Presenters;
+using Raindrop.Utilities;
 
 namespace Raindrop.UI.Views
 {
@@ -23,7 +24,7 @@ namespace Raindrop.UI.Views
     public class MapSceneView : MonoBehaviour
     {
         [SerializeField]
-        private const float RenderUpdatePeriod = 5f;
+        private const float RenderUpdatePeriod = 2f;
         [SerializeField]
         public bool fetchOn = false;
 
@@ -31,15 +32,14 @@ namespace Raindrop.UI.Views
         public GameObject mapRoot;
 
         [SerializeField]
-        public GameObject mapPrefab;
+        public GameObject mapTilePrefab;
 
         //camera. contains the viewable range.
         [SerializeField]
-        public GameObject cameraViewGO;
-        private DownwardOrthoCameraView cameraView;
-        private MapScenePresenter mapPoolPresenter;
+        public DownwardOrthoCameraView cameraView;
+        private MapSceneController _mapPoolController;
         private Dictionary<ulong, GameObject> map_collection = new Dictionary<ulong, GameObject>(); //tiles that are in the scene.
-        private Dictionary<UUID, MapEntity> agent_collection = new Dictionary<UUID, MapEntity>(); //agents that are in the scene.
+        //private Dictionary<UUID, MapEntity> agent_collection = new Dictionary<UUID, MapEntity>(); //agents that are in the scene.
 
         internal void resetView()
         {
@@ -48,8 +48,8 @@ namespace Raindrop.UI.Views
 
 
         //viewable area of the current map_collection.
-        public int max_X, max_Y;
-        public int min_X, min_Y;
+        // public int max_X, max_Y;
+        // public int min_X, min_Y;
 
         /// <summary>
         ///zoom level of map. 
@@ -62,8 +62,8 @@ namespace Raindrop.UI.Views
 
         private void Awake()
         {
-            cameraView = cameraViewGO.GetComponent<DownwardOrthoCameraView>();
-         
+            
+            
         }
 
         private void Start()
@@ -87,7 +87,7 @@ namespace Raindrop.UI.Views
 
         private void resetCamera_DABOOM()
         {
-            max_X = max_Y = max_X = max_Y = 1000;
+            // max_X = max_Y = max_X = max_Y = 1000;
             zoomLevel = 1;
         }
 
@@ -150,19 +150,60 @@ namespace Raindrop.UI.Views
         //    {
         //        visibleMapTiles.fetch(list regionAreas);
         //    }
-
-
         //}
 
-        private void RedrawMap(DownwardOrthoCameraView cameraView)
+        private void RedrawMap()
         {
-
-            bool needRedraw = true;
-
-            if (needRedraw)
+            //only redraw if the root of mapGraph is activated.
+            if (! this.isActiveAndEnabled)
             {
-                mapPoolPresenter.RedrawMap();
+                return;
             }
+            
+
+            //1. get the camera's location
+            // var x = cameraView.centerX;
+            // var y = cameraView.centerY;
+
+            //2. obtain the range of its view in grid coordinates.
+            var handles =
+                MapSceneController.getVisibleRegionHandles(
+                    cameraView.min,
+                    cameraView.max + Vector2.one); // add 1 int to the result, as each sim is 1-large.
+
+            
+            //3. spawn the tiles that are in this space.
+            foreach (var handle in handles)
+            {
+                if (! map_collection.ContainsKey(handle))
+                {
+                    //not avail in scene, so instantiate the tile.
+                    var tileGO = SpawnOnMapPlane(handle);
+                    map_collection.Add(handle,tileGO);
+                }
+            }
+
+            // bool needRedraw = true;
+            //
+            // if (needRedraw)
+            // {
+            //     _mapPoolController.RedrawMap();
+            // }
         }
+        
+        //in the crazy large global handle coordinates
+        public GameObject SpawnOnMapPlane(ulong handle)
+        {
+            UnityEngine.Vector3 posInScene = 
+                Raindrop.Utilities.MapSpaceConverters.Handle2Vector3(handle, mapTileZBuffer);
+
+            var map = 
+                Instantiate(mapTilePrefab, posInScene, UnityEngine.Quaternion.identity, mapRoot.transform);
+            // map.layer = mapRoot.layer; //inherit layer.
+            return map;
+        }
+
+
+        public static uint mapTileZBuffer { get; set; }
     }
 }

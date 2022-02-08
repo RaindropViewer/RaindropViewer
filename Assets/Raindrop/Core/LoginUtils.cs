@@ -13,6 +13,7 @@ namespace Raindrop
 {
     class LoginUtils
     {
+        // An instance of a saved login from previous successful logins. 
         public class SavedLogin
         {
             public string Username;

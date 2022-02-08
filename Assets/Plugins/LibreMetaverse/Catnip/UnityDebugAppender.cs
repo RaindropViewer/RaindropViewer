@@ -2,6 +2,7 @@
 using log4net.Core;
 using UnityEngine;
 
+// any Logs to log4net will also appear in debug console.
 public class UnityDebugAppender : AppenderSkeleton
 {
     protected override void Append(LoggingEvent loggingEvent)

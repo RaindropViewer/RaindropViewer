@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Raindrop.Services.Bootstrap;
 using UniRx.Triggers;
 using UE = UnityEngine ;
 using UnityEngine ;
@@ -39,7 +40,7 @@ namespace Raindrop.Presenters
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
-            if (isOnMainThread())
+            if (Globals.isOnMainThread())
             {
                 updateAvatarPosition(e);
             } else
@@ -66,10 +67,6 @@ namespace Raindrop.Presenters
         }
 
 
-        private bool isOnMainThread()
-        {
-            return mainThread.Equals(System.Threading.Thread.CurrentThread);
-        }
 
         public Thread mainThread;
 
@@ -78,7 +75,7 @@ namespace Raindrop.Presenters
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
-            if (isOnMainThread())
+            if (Globals.isOnMainThread())
             {
                 updateAvatar(e);
             } else
@@ -134,7 +131,7 @@ namespace Raindrop.Presenters
         //give the object for the main camera to track.
         private void cameraTrackAgent(GameObject aviGo)
         {
-            var _ = UE.Camera.main.gameObject.GetComponent<simpleFollow>();
+            var _ = UE.Camera.main.gameObject.GetComponent<OrbitCamera>();
             _.target = aviGo.transform;
         }
 

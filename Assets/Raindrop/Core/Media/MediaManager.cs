@@ -54,29 +54,29 @@ namespace Raindrop.Media
             Instance = instance;
             manager = this;
 
-            // OSD media_on;
-            // OSD node_present = instance.GlobalSettings["media_on"];
-            // if (!node_present)
-            // {
-            //     // instance.GlobalSettings.Add(media_on, false);
-            // } else if (false)
-            // {
-            //     SoundSystemAvailable = false;
-            //     return;
-            // }
-            
-            
-            if (true /*MainProgram.s_CommandLineOpts.DisableSound*/)
+            OSD media_on = instance.GlobalSettings["media_on"];
+            if (! instance.GlobalSettings.ContainsKey("media_on"))
             {
-                SoundSystemAvailable = false;
+                instance.GlobalSettings.Add("media_on", true); //default to false.
+            } 
+            
+            SoundSystemAvailable = media_on.AsBoolean();
+            if (!SoundSystemAvailable)
+            {
                 return;
             }
-
+            
             endCallback = new CHANNELCONTROL_CALLBACK(DispatchEndCallback);
             allBuffers = new Dictionary<UUID, BufferSound>();
 
 
-            UnityEngine.Debug.Log("Mediamanager being constructed");
+            Logger.DebugLog("Mediamanager being constructed");
+
+            // Initialize the FMOD sound package
+            InitFMOD();
+            initDone.Set();
+            if (!SoundSystemAvailable) return;
+            
             // Start the background thread that does all the FMOD calls.
             soundThread = new System.Threading.Thread(CommandLoop)
             {
@@ -147,11 +147,11 @@ namespace Raindrop.Media
 
             // Initialize the command queue.
             queue = new Queue<SoundDelegate>();
-
-            // Initialize the FMOD sound package
-            InitFMOD();
-            initDone.Set();
-            if (!SoundSystemAvailable) return;
+            //
+            // // Initialize the FMOD sound package
+            // InitFMOD();
+            // initDone.Set();
+            // if (!SoundSystemAvailable) return;
 
             SoundDelegate action = null;
 
@@ -294,6 +294,7 @@ namespace Raindrop.Media
             {
                 UnityEngine.Debug.LogError("Failed to initialize the sound system: ");
                 Logger.Log("Failed to initialize the sound system: " + ex, Helpers.LogLevel.Warning);
+                SoundSystemAvailable = false;
             }
         }
 
@@ -314,11 +315,11 @@ namespace Raindrop.Media
 
             sounds = null;
 
-            //if (system != null)
+            if (system.hasHandle())
             {
                 Logger.Log("FMOD interface stopping", Helpers.LogLevel.Info);
                 system.release();
-                //system = null;
+                system.clearHandle();
             }
 
             if (listenerThread != null)

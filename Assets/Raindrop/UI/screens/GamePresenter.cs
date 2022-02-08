@@ -62,7 +62,7 @@ namespace Raindrop.Presenters
             configTimer = new System.Threading.Timer(SaveConfig, null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
 
             ChatButton.onClick.AsObservable().Subscribe(_ => OnChatBtnClick()); //when clicked, runs this method.
-            MapButton.onClick.AsObservable().Subscribe(_ => OnMapBtnClick()); //when clicked, runs this method.
+            MapButton?.onClick.AsObservable().Subscribe(_ => OnMapBtnClick()); //when clicked, runs this method.
             SoundToggle.OnValueChangedAsObservable().Subscribe(_ => OnToggleSounds(_));
 
             //simName.AsObservable().Subscribe(_ => UpdateSimLocDisplay(_));
@@ -163,11 +163,11 @@ namespace Raindrop.Presenters
 
         public void OnChatBtnClick()
         {
-            uimanager.canvasManager.Push(CanvasType.Chat);
+            uimanager.ScreensManager.Push(CanvasType.Chat);
         }
         public void OnMapBtnClick()
         {
-            uimanager.canvasManager.Push(CanvasType.Map);
+            uimanager.ScreensManager.Push(CanvasType.Map);
 
 
         }

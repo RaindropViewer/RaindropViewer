@@ -40,7 +40,8 @@ public class EulaView : MonoBehaviour
         }
 
         bool isAcceptedEULA = instance.GlobalSettings["EulaAccepted"];
-        onToggleChanged(isAcceptedEULA);
+        EulaToggle.isOn = isAcceptedEULA;
+        //onToggleChanged(isAcceptedEULA);
         
         closeBtn.onClick.AddListener(closeEula);
     }
@@ -52,7 +53,7 @@ public class EulaView : MonoBehaviour
         if (instance.GlobalSettings["EulaAccepted"] == false)
             return;
         
-        ServiceLocator.Instance.Get<UIService>().canvasManager.resetToInitialScreen();
+        ServiceLocator.Instance.Get<UIService>().ScreensManager.ResetToInitialScreen();
     }
 
     private void onToggleChanged(bool isEulaAccepted)

@@ -638,6 +638,14 @@ namespace OpenMetaverse
                 return;
             }
 
+            // Guard clause:
+            // if the sound is not cached, and we are not connected, 
+            // then we skip any network download.
+            if (!Client.Network.Connected)
+            {
+                return;
+            }
+
             // If ViewerAsset capability exists, use that, if not, fallback to UDP (which is obsoleted on Second Life.)
             if (Client.Network.CurrentSim.Caps != null
                 && Client.Network.CurrentSim.Caps.CapabilityURI("ViewerAsset") != null)

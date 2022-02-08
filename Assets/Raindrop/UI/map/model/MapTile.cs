@@ -11,18 +11,19 @@ namespace Raindrop.Map.Model
     public class MapTile
     {
         // it seems that a tile from the http is ~ 17KB in JPEG format; making it kind of spammable at the highest zoom level of 4.
-        private int size; //in sims.
+        //private int size; //in sims.
         private Texture2D texture;
 
         private ulong gridHandle;
 
-        public bool isReady = false; 
+        public bool isReady = false;
 
-        private static Texture2D emptyTexture = Texture2D.redTexture;
+        //private static Texture2D emptyTexture; //= new Texture2D(Texture2D.blackTexture);
 
         public MapTile(int width, int height)
         {
-            clearTex();
+            texture = new Texture2D(width, height); //todo: texture factory.
+            //destroyTex();
         }
 
         /// <summary>
@@ -36,10 +37,10 @@ namespace Raindrop.Map.Model
 
 
         //clear the internal texture and location of the maptile.
-        public void clearTex()
+        public void destroyTex()
         {
-            texture = emptyTexture; //TODO : have not called Destroy(texture) to free memory.
-            size = 0;
+            //texture = emptyTexture; //TODO : have not called Destroy(texture) to free memory.
+            //UnityEngine.Object.Destroy(texture);
             gridHandle = 0;
         }
 
@@ -59,7 +60,6 @@ namespace Raindrop.Map.Model
         private void setTex(Texture2D tex)
         {
             texture = tex;
-            size = 1;
         }
 
         //set the location of sim that the maptile represents.

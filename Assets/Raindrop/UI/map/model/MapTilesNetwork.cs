@@ -22,6 +22,7 @@ namespace Raindrop.Map.Model
 
         //get region tile using SL map API -- JPEG images.
         // obtains the image from URL, decodes it in main thread, the stores data in the appropriate maptile.
+        // handle : Global (huge) coordinates
         public MapTile GetRegionTileExternal(ulong handle, int zoom)
         {
             zoom = 1;
@@ -44,8 +45,8 @@ namespace Raindrop.Map.Model
                 regX /= MapService.regionSize;
                 regY /= MapService.regionSize;
                 //int zoom = 1;
-                MapTile res = new MapTile(256,256);
-                downloader.QueueDownload(new DownloadRequest(
+                MapTile res = new MapTile(256,256); //todo, use the objectpool pattern here.
+                var req = new DownloadRequest(
                     new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", zoom, regX, regY)),
                     20 * 1000,
                     null,
@@ -70,10 +71,10 @@ namespace Raindrop.Map.Model
                                 // {
                                 //     receivedDataQueue.Enqueue(new MapService.MapData(handle, responseData));
                                 // }
-                                
+
                                 //start to run jpeg decoding on the main thread.
                                 mainThreadInstance.Enqueue(DecodeDataToTexAsync(res, responseData));
-                                
+
                                 // remove from request list
                                 lock (tileRequests)
                                 {
@@ -87,8 +88,9 @@ namespace Raindrop.Map.Model
                             }
                         }
                     }
-                )
                 );
+                req.Retries = 1;
+                downloader.QueueDownload( req);
 
                 return res; // the tile is created. but inside the tile, it is not ready and the texture is the empty texture static
 
@@ -110,8 +112,8 @@ namespace Raindrop.Map.Model
             {
                 lock (tile) //lock the tile that you want to write into.
                 {
-                    Texture2D _tex = tile.getTex();
-                    bool success = _tex.LoadImage(responseData); //warn: main thread only. fixme.
+                    Texture2D tex = tile.getTex();
+                    bool success = tex.LoadImage(responseData); //warn: main thread only. fixme.
                     tile.isReady = true;    
                 }
                 

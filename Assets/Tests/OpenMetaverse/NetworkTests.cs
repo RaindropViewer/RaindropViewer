@@ -59,8 +59,8 @@ namespace OpenMetaverse.Tests
         [OneTimeSetUp]
         public void Init()
         {
-            var fullusername = "***REMOVED*** resident";//Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "***REMOVED***";// Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+            var fullusername = "tanukidev resident";//Environment.GetEnvironmentVariable("LMVTestAgentUsername");
+            var password = "25xy53de";// Environment.GetEnvironmentVariable("LMVTestAgentPassword");
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername), "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password), "LMVTestAgentPassword is empty. Live NetworkTests cannot be performed.");
             var username = fullusername.Split(' ');

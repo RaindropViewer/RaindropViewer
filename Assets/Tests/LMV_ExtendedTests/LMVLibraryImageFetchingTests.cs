@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using System.Net;
+using Disk;
 using OpenMetaverse.Http;
 using Raindrop.Map.Model;
 using Raindrop.ServiceLocator;
@@ -31,10 +32,6 @@ namespace Raindrop.Tests
             mainThreadDispatcher_Test.AddComponent<UnityMainThreadDispatcher>();
             
             instance = new RaindropInstance(new GridClient());
-            // Client.Self.Movement.Fly = true;
-            // Register callbacks
-            // Client.Network.RegisterCallback(PacketType.ObjectUpdate, ObjectUpdateHandler);
-            //Client.Self.OnTeleport += new MainAvatar.TeleportCallback(OnTeleportHandler)
         }
         
         void login()
@@ -43,8 +40,8 @@ namespace Raindrop.Tests
             // some message like:   Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV Resident>: Setting server side baking failed'. Use UnityEngine.TestTools.LogAssert.Expect
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
             
-            var fullusername = "***REMOVED*** resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "***REMOVED***"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+            var fullusername = "tanukidev resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
+            var password = "25xy53de"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername),
                 "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password),
@@ -84,7 +81,6 @@ namespace Raindrop.Tests
                 }
             ));
             
-            Assert.Pass();
             yield break;
         }
         
@@ -109,8 +105,6 @@ namespace Raindrop.Tests
             void FinishWebRequest(IAsyncResult ar)
             {
                 Debug.Log("net done.");
-            
-                Assert.Pass();
 
             }
         }
@@ -313,6 +307,9 @@ namespace Raindrop.Tests
             yield return new WaitForSeconds(10);
             instance.Client.Network.Logout();
             yield return new WaitForSeconds(10);
+            
+            instance.CleanUp();
+            
             yield break;
         }
 
@@ -329,7 +326,7 @@ namespace Raindrop.Tests
             //save that image, j2p
             var basepath = instance.ClientDir + "/test_cache/";
             var relativepath1 = assettexture.AssetID.ToString() +  ".j2p";
-            Helper.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
+            DirectoryHelpers.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
             
             //j2p -> t2d -> png 
             //needs to be on main thread...
@@ -341,7 +338,7 @@ namespace Raindrop.Tests
             
                 //save that image, png
                 var relativepath2 = assettexture.AssetID.ToString() +  ".png";
-                Helper.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
+                DirectoryHelpers.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
                 
             });
 
