@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 //Add the panning behavior to the current GO.
 public class AddTouchGesturesHandler : MonoBehaviour
@@ -11,8 +12,8 @@ public class AddTouchGesturesHandler : MonoBehaviour
 	[SerializeField]
 	private MapUIView mapUIView;
 
-	[SerializeField]
-	public DownwardOrthoCameraView camera; 
+	[FormerlySerializedAs("camera")] [SerializeField]
+	public OrthographicCameraView orthoCam; 
 	[SerializeField]
 	public GameObject pannableFrame; 
 	[SerializeField]
@@ -52,7 +53,7 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
 				Vector2 start = recognizer.startPoint;
-				var worldpointStart = camera.camera.ScreenToWorldPoint(start);
+				var worldpointStart = orthoCam.Cam.ScreenToWorldPoint(start);
 				
 				if (false)
 				{
@@ -64,7 +65,7 @@ public class AddTouchGesturesHandler : MonoBehaviour
 					var pixelstomove = new Vector3(recognizer.deltaTranslation.x, recognizer.deltaTranslation.y, 0);
 					//float half_vertical_visibleheight = camera.orthographicSize;
 					var DPI = Screen.dpi;
-					camera.transform.position -= (pixelstomove / DPI) * camera.getZoom()  * panningSpeed ;
+					orthoCam.transform.position -= (pixelstomove / DPI) * orthoCam.Zoom  * panningSpeed ;
 				}
 
 				Debug.Log("pan recognizer fired: " + r.ToString());
@@ -85,14 +86,14 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			var recognizer = new TKPinchRecognizer();
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
-				camera.setZoom(prevCameraZoom / recognizer.accumulatedScale);
+				orthoCam.Zoom = (prevCameraZoom / recognizer.accumulatedScale);
 				//Debug.Log("pinch recognizer fired: " + r);
 			};
 			TouchKit.addGestureRecognizer(recognizer);
 
 			recognizer.gestureCompleteEvent += (r) =>
 			{
-				prevCameraZoom = camera.getZoom();
+				prevCameraZoom = orthoCam.Zoom;
 				//Debug.Log("pinch gesture complete");
 			};
 		}
@@ -102,8 +103,8 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			var recognizer = new TKTapRecognizer();
 			recognizer.gestureRecognizedEvent += (r) =>
 			{
-				Vector3 worldPoint = camera.camera.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
-				ulong regionCoords = MapSpaceConverters.Vector32Handle(worldPoint);
+				Vector3 worldPoint = orthoCam.Cam.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
+				ulong regionCoords = MapSpaceConverters.MapSpace2Handle(worldPoint);
 				mapUIView.getPresenter().OnMapClick(regionCoords);
 				//Debug.Log("tap recognizer fired: " + r);
 			};
