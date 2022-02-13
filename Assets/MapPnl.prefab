@@ -681,7 +681,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2203384267323940376}
   m_HandleRect: {fileID: 2203384267323940383}
   m_Direction: 3
-  m_Value: 0.9999996
+  m_Value: 0.9999998
   m_Size: 0.7755547
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -910,7 +910,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d929559ec54b636459f6c55f96c044f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  me: {fileID: 0}
+  panel: {fileID: 0}
 --- !u!1 &2203384268264428012
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,9 +2920,7 @@ GameObject:
   - component: {fileID: 8895937512750044239}
   - component: {fileID: 8895937512750044238}
   - component: {fileID: 8895937512750044233}
-  - component: {fileID: 8895937512750044245}
   - component: {fileID: 8895937512750044244}
-  - component: {fileID: 8895937512750044246}
   m_Layer: 5
   m_Name: ParcelInfo
   m_TagString: Untagged
@@ -3015,18 +3013,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &8895937512750044245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8895937512750044235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4280f04056c2af4d8774fd8157e9acb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8895937512750044244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3039,19 +3025,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d929559ec54b636459f6c55f96c044f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  me: {fileID: 0}
---- !u!114 &8895937512750044246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8895937512750044235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aceb65ef7fef47f1ac180587dffebd75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  panel: {fileID: 0}
 --- !u!1001 &2756835316002786675
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3125,7 +3099,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6335038328556851509, guid: e397534993a3daa4fb62356a2b6e1856, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2306.3318
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6335038328556851509, guid: e397534993a3daa4fb62356a2b6e1856, type: 3}
       propertyPath: m_LocalRotation.w

@@ -32,7 +32,7 @@ namespace Raindrop.UI.Views
         {
             if (_mapUIView != null)
             {
-                _mapUIView.setZoom(value);
+                // _mapUIView.setZoom(value);
             }
         }
 

@@ -38,11 +38,11 @@ namespace Raindrop.Services
          *          +UIService.showScreen(UIBuilder(CanvasType.Login))
          *          +UIService.showModal
          */
-        public UIService(ScreensManager cm, ModalManager mm, LoadingCanvasPresenter loadingCanvasPresenter)
+        public UIService(ScreensManager cm, ModalManager mm, LoadingPresenter loadingPresenter)
         {
             ScreensManager = cm;
             modalManager = mm;
-            _loadingController = new LoadingController(loadingCanvasPresenter);
+            _loadingController = new LoadingController(loadingPresenter);
 
             // UI depends on raindrop business layer.
             try

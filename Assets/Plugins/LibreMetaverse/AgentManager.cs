@@ -1433,7 +1433,7 @@ namespace OpenMetaverse
                 return relativeRotation;
             }
         }
-        /// <summary>Returns the global grid position of the avatar</summary>
+        /// <summary>Returns the global grid position of the avatar - in meters.</summary>
         public Vector3d GlobalPosition
         {
             get

@@ -12,14 +12,20 @@ using UnityEngine ;
 namespace Raindrop.Presenters
 {
     //presents agents in the sim as boxes
+    // also update the position of minimap avatars.
     public class AgentPresenter : MonoBehaviour
     {
         public GameObject AgentPrefab;
-        //public GameObject MainAgent;
+        public GameObject MinimapAgentPrefab;
+        public Transform MinimapRoot;
+        public uint z_MinimapAgents;
 
         private object avatarsDictLock = new object();
         private Dictionary<UUID, UnityEngine.GameObject> avatarsDict 
             = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject 
+        private Dictionary<UUID, UnityEngine.GameObject> avatarsDictMinimap
+            = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject in minimap
+        public GameObject agentReference; //reference to the agent, if rezzed - it should.
 
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         //private RaindropNetcom netcom { get { return instance.Netcom; } }
@@ -93,49 +99,50 @@ namespace Raindrop.Presenters
         private void updateAvatar(AvatarUpdateEventArgs e)
         {
             
-
             lock (avatarsDictLock)
             {
                 GameObject aviGO = null;
+                GameObject mapGO = null;
                 avatarsDict.TryGetValue(e.Avatar.ID, out aviGO);
+                avatarsDictMinimap.TryGetValue(e.Avatar.ID, out mapGO);
 
-                if (aviGO == null)
+                if (aviGO == null) //is new avatar.
                 {
-                    Debug.Log("newly seen avi. rezzing " + e.Avatar.Name);
+                    Debug.Log("rezzing " + e.Avatar.Name);
                     aviGO = CreateAgentGameObject(e.Avatar.Name);
+                    mapGO = CreateMinimapGameObject(e.Avatar.Name);
 
                     avatarsDict[e.Avatar.ID] = aviGO;
+                    avatarsDictMinimap[e.Avatar.ID] = mapGO;
                     if (e.Avatar.Name == instance.Client.Self.Name)
                     {
-                        cameraTrackAgent(aviGO);
+                        agentReference = aviGO;
+                        //cameraTrackAgent(aviGO);
                     }
                     
                 }
-                else
-                {
-                    Debug.Log("updating known-avi position. " + e.Avatar.Name);
-                }
 
                 UpdateAvatarTransforms(e.Avatar, aviGO);
+                UpdateMinimapTransforms(e.Avatar.RegionHandle, e.Avatar.Position, mapGO);
             }
         }
 
         private static void UpdateAvatarTransforms(Primitive e, GameObject aviGO)
         {
             UE.Vector3 pos = RHelp.TKVector3(e.Position);
-            UE.Quaternion rot = RHelp.TKQuaternion4(e.Rotation);
+            // UE.Quaternion rot = RHelp.TKQuaternion4(e.Rotation);
             aviGO.transform.position = pos;
-            aviGO.transform.rotation = rot;
+            // aviGO.transform.rotation = rot;
         }
 
-        //give the object for the main camera to track.
-        private void cameraTrackAgent(GameObject aviGo)
+        private void UpdateMinimapTransforms(ulong regionHandle, OpenMetaverse.Vector3 position, GameObject aviGO)
         {
-            var _ = UE.Camera.main.gameObject.GetComponent<OrbitCamera>();
-            _.target = aviGo.transform;
+            var region = Utilities.MapSpaceConverters.Handle2MapSpace(regionHandle, z_MinimapAgents);
+            var ObjectCoordinatesWithinSim = RHelp.TKVector3(position);
+            var ObjectOffsetWithinSim_InRegionCoordinates = ObjectCoordinatesWithinSim / 256.0f;
+            aviGO.transform.position = region + ObjectOffsetWithinSim_InRegionCoordinates;
         }
-
-
+        
         //make the agent:
         // mesh
         // nametag
@@ -149,5 +156,14 @@ namespace Raindrop.Presenters
             
             return avi;
         }
+
+        private GameObject CreateMinimapGameObject(string name)
+        {
+            GameObject avi = Instantiate(MinimapAgentPrefab, MinimapRoot);
+
+            return avi;
+        }
+
     }
+
 }

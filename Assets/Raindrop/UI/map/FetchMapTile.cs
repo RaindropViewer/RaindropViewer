@@ -14,8 +14,8 @@ using Logger = UnityEngine.Logger;
 public class FetchMapTile : MonoBehaviour
 {
     //[Header("Fetch my maptile and display it, based on the location i am assigned to.")]
-    public uint Grid_X => MapSpaceConverters.Vector32_GridX(this.transform.position);//  1000;
-    public uint Grid_Y => MapSpaceConverters.Vector32_GridY(this.transform.position);
+    public uint Grid_X => MapSpaceConverters.MapSpace2Grid_X(this.transform.position);//  1000;
+    public uint Grid_Y => MapSpaceConverters.MapSpace2Grid_Y(this.transform.position);
     //public ulong handle => MapSpaceConverters.Vector32Handle(this.transform.position);
     
     private bool _needsTextureRefresh = false; 

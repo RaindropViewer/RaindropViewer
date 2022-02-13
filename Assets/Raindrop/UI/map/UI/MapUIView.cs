@@ -22,43 +22,25 @@ namespace Raindrop.UI.Views
     {
         // map manager. keeps track of mapsGOs. creates new mapGOs from prefabs. culls those that are no longer visible. fetches those that need to be viewed.
         [SerializeField]
-        public MapSceneView mapSceneGraph_Root;
+        public MapScenePresenter mapSceneGraph_Root;
 
         private MapSceneController msp;
-            
-        //reset the view to daboom.
-        [SerializeField]
-        public Button button;
-
 
         private void Awake()
         {
-            button.onClick.AddListener(OnClick_ResetView);
-
             msp = new MapSceneController(this, mapSceneGraph_Root);
         }
 
         private void OnEnable()
         {
             CamerasManager.Instance.ActivateCamera(CameraIdentifier.CameraType.Minimap);
-            mapSceneGraph_Root.gameObject.SetActive(true);
+            //mapSceneGraph_Root.gameObject.SetActive(true);
         }
 
         private void OnDisable()
         {
             CamerasManager.Instance.ActivateCamera(CameraIdentifier.CameraType.Main);
-            mapSceneGraph_Root.gameObject.SetActive(false);
-        }
-
-        private void OnClick_ResetView()
-        {
-            mapSceneGraph_Root.resetView();
-        }
-
-
-        public void setZoom(float value)
-        {
-            mapSceneGraph_Root.setZoom(value);
+            //mapSceneGraph_Root.gameObject.SetActive(false);
         }
 
         public MapSceneController getPresenter()
