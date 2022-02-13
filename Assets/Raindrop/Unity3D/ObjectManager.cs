@@ -33,31 +33,26 @@ namespace Raindrop.Presenters
             //instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate; //prims, avatars (for those that move often and hap-hazardly)
         }
 
+
         private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
         {
-            // if (isOnMainThread())
-            // {
-                lock (objectsLock)
+            if (e.Simulator != instance.Client.Network.CurrentSim)
+                return;
+
+            lock (objectsLock)
+            {
+                GameObject obj;
+                objects.TryGetValue(e.Prim.ID, out obj);
+                if (obj != null)
                 {
-                    GameObject obj;
-                    objects.TryGetValue(e.Prim.ID, out obj);
-                    if (obj != null)
-                    {
-                        SetPrimTransformsOnMainThread(e.Prim, obj);
-                    }
-                    else
-                    {
-                        RezNewObjectOnMainThread(e.Prim);
-                        objects[e.Prim.ID] = obj;
-                    }
-                }  
-            // } else
-            // {
-            //     UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            //     {
-            //         ObjectsOnTerseObjectUpdate(sender, e);
-            //     });
-            // }
+                    SetPrimTransformsOnMainThread(e.Prim, obj);
+                }
+                else
+                {
+                    RezNewObjectOnMainThread(e.Prim);
+                    objects[e.Prim.ID] = obj;
+                }
+            }  
         }
         
         private void ObjectsOnObjectUpdate(object sender, PrimEventArgs e)
@@ -69,13 +64,30 @@ namespace Raindrop.Presenters
             
             if (isOnMainThread())
             {
-                updatePrim(e);
+                lock (objectsLock)
+                {
+                    GameObject primGO = null;
+                    objects.TryGetValue(e.Prim.ID, out primGO);
+
+                    if (primGO == null)
+                    {
+                        RezNewObjectOnMainThread(e.Prim);
+                    }
+                    else
+                    {
+                        //Debug.Log("updating obj position. " + e.Prim.ID);
+                    }
+
+                    SetPrimTransformsOnMainThread(e.Prim, primGO);
+                }
+
+
             } else
             {
 
                 UnityMainThreadDispatcher.Instance().Enqueue(() => {
                     // Debug.Log(" dispatching of update-obj to main thread"); //wow mega spam!
-                    updatePrim(e);
+                    ObjectsOnObjectUpdate(sender, e);
                 });
             }
 
@@ -86,31 +98,6 @@ namespace Raindrop.Presenters
         {
             return mainThread.Equals(System.Threading.Thread.CurrentThread);
         }
-
- 
-
-        //  1. create prim if not exists yet.
-        //  2. move prim if already exist
-        private void updatePrim(PrimEventArgs e)
-        {
-            lock (objectsLock)
-            {
-                GameObject primGO = null;
-                objects.TryGetValue(e.Prim.ID, out primGO); 
-
-                if (primGO == null)
-                {
-                    RezNewObjectOnMainThread(e.Prim);
-                }
-                else
-                {
-                    //Debug.Log("updating obj position. " + e.Prim.ID);
-                }
-
-                SetPrimTransformsOnMainThread(e.Prim, primGO);
-            }
-        }
-
 
         private void RezNewObjectOnMainThread(Primitive e)
         {
