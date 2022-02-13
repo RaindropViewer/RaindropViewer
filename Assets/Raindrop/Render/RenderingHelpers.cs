@@ -274,35 +274,41 @@ namespace Raindrop.Rendering
             return curPos;
         }
 
-        public static UnityEngine.Vector2 TKVector3(Vector2 v)
+        public static UnityEngine.Vector2 TKVector2(Vector2 v)
         {
             return new UnityEngine.Vector2(v.X, v.Y);
         }
 
-        //z and y are swapped when converting from SL and unity frames
-        public static UnityEngine.Vector3 TKVector3(Vector3 v)
+        // unity: Z forward, x right, y upwards
+        // SL:  x forward, y left, Z upwards
+        public static UnityEngine.Vector3 TKVector3(Vector3 vSL)
         {
-            return new UnityEngine.Vector3(v.X, v.Z, v.Y);
+            return new UnityEngine.Vector3(-vSL.Y, vSL.Z, vSL.X);
         }
 
-        //same as above (fp.) for now.
-        public static UnityEngine.Vector3 TKVector3d(Vector3d v)
+        //same as above, but doubles.
+        public static UnityEngine.Vector3 TKVector3d(Vector3d vSL)
         {
-            return new UnityEngine.Vector3((float)v.X, (float)v.Z, (float)v.Y);
+            var new_v = new Vector3(vSL);
+            return TKVector3(new_v);
         }
 
         //is this correct???
+        // W remains as-is, axis swap happens like usual.
         public static UnityEngine.Vector4 TKVector4(Vector4 v)
         {
-            return new UnityEngine.Vector4(v.X, v.Y, v.X, v.W);
+            return new UnityEngine.Vector4(-v.Y, v.Z, v.X, v.W);
         }
         
-        //is this correct???
+        //I just follow like above, as quaternion axes are same as the vector axes.
         public static UnityEngine.Quaternion TKQuaternion4(Quaternion v)
         {
-            return new UnityEngine.Quaternion(v.X, v.Z, v.Y, v.W);
+            // return new UnityEngine.Quaternion(-v.Y, v.Z, v.X, v.W); //before inverting handed-ness
+            return new UnityEngine.Quaternion(v.Y, -v.Z, -v.X, v.W);
         }
 
+        //we do not current use this..
+        [Obsolete]
         public static Vector2 OMVVector2(UnityEngine.Vector2 v)
         {
             return new Vector2(v.x, v.y);
@@ -310,49 +316,23 @@ namespace Raindrop.Rendering
 
         public static Vector3 OMVVector3(UnityEngine.Vector3 v)
         {
-            return new Vector3(v.x, v.z, v.y);
+            return new Vector3(v.z, -v.x, v.y);
         }
 
         //todo:is this correct???
         public static Vector4 OMVVector4(UnityEngine.Vector4 v)
         { 
-            return new Vector4(v.x, v.y, v.z, v.w);
+            return new Vector4(v.z, -v.x, v.y, v.w);
         }
 
 
         //todo:is this correct???
         public static Quaternion OMVQuaternion4(UnityEngine.Quaternion v)
         {
-            return new Quaternion(v.x, v.z, v.y, v.w);
+            // return new Quaternion(v.z, -v.x, v.y, v.w);//before inverting handed-ness
+            return new Quaternion(-v.z, v.x, -v.y, v.w);
         }
 
-
-
-        //change the rotation of 2d agent to point in same dir as the input
-        public static void SetMapItemRotation(Transform transform, UnityEngine.Vector3 rotation_InMap)
-        {
-            transform.eulerAngles = rotation_InMap;
-        }
-
-        // moves the transform to the 2d map position (x,y).
-        public static void SetMapItemPosition(Transform entitiyTransform, UnityEngine.Vector2 mapPos)
-        {
-            //            UnityEngine.Vector3 newPos = fromMapCoord(mapPos);
-            entitiyTransform.position = mapPos;
-        }
-
-        // given the large global coordinate of this item, where is it in unity coordinates? can get quite large (>> 4000m away)
-        // translate the vector2 globalMapPositions into scene vector3 transform positions
-        public static UnityEngine.Vector3 fromMapCoord(UnityEngine.Vector2 mapPos, float mapItemDepthConstant)
-        {
-            return new UnityEngine.Vector3(mapPos.x, mapPos.y, mapItemDepthConstant);
-        }
-
-        // if there was an object in this position in unity engine space, where would we put it on the minimap?
-        public static UnityEngine.Vector2 GlobalUnity2MapPlane(UnityEngine.Vector3 V3Offset)
-        {
-            return new UnityEngine.Vector2(V3Offset.x / 256, V3Offset.z / 256);
-        }
 
 
         //public static Color WinColor(OpenTK.Graphics.Color4 color)
