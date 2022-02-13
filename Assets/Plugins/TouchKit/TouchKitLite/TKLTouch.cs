@@ -55,16 +55,18 @@ public class TKLTouch
 	/// </summary>
 	public void populate()
 	{
-#if UNITY_EDITOR || UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_WEBPLAYER || UNITY_WEBGL
+#if UNITY_EDITOR 
 	if (!UnityEditor.EditorApplication.isRemoteConnected)
+		populateFromMouse();
+#elif UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_WEBPLAYER || UNITY_WEBGL
 		populateFromMouse();
 #else
 		populateWithTouch( Input.touches[0] );
 #endif
-	}
+		}
 
 
-	public bool hasMouseInput()
+		public bool hasMouseInput()
 	{
 		return Input.GetMouseButtonUp( 0 ) || Input.GetMouseButton( 0 );
 	}
