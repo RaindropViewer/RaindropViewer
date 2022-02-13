@@ -33,8 +33,9 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
 
         [UnityTest]
         //assert that the loading main scene have no huge errors.
-        public IEnumerator AbleToAssertPass()
+        public IEnumerator LoadScene_MainScene_IsOK()
         {
+            yield return new WaitForSeconds(10);
             Assert.Pass();
             yield break;
         }
@@ -101,7 +102,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
 
                 //for login successful, the loading will fade by itself.
                 //UIHelpers.Click_ButtonByUnityName("CloseLoadingScreenButton");
-                yield return new WaitForSeconds(2);
+                yield return new WaitForSeconds(8);
                 Assert.False(uiSrv._loadingController.isInteractable, "expected: loading screen is not interactable (and closed; todo).");
             
                 //assert the backend API; that we are logged in.
