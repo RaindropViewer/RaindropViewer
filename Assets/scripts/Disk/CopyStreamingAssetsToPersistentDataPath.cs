@@ -24,7 +24,7 @@ namespace Disk
         private void CheckOmvDataFolderAndUpdateItIfNecessary()
         {
             List<string> updatedFiles = CopyIfRequired_StreamingAssetsFolder(
-                DirectoryHelpers.GetInternalCacheDir()
+                DirectoryHelpers.GetInternalStorageDir()
             );
         
             if (updatedFiles.Count > 0)
@@ -41,7 +41,7 @@ namespace Disk
             {
                 OpenMetaverse.Logger.Log(
                     "staticAssets are already latest version in : " 
-                    + DirectoryHelpers.GetInternalCacheDir(),
+                    + DirectoryHelpers.GetInternalStorageDir(),
                     Helpers.LogLevel.Info
                 );
             }
