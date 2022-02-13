@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenMetaverse;
+using Raindrop.Netcom;
 using UnityEngine;
 
 namespace Raindrop.UI.chat
@@ -8,6 +9,7 @@ namespace Raindrop.UI.chat
     public class LocalChatPresenter : MonoBehaviour
     {
         private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropNetcom netcom => instance.Netcom;
         
         public TMPTextFieldPrinter printer; //the component in the textbox
         public LocalChatManager LocalChatManager;
@@ -16,7 +18,12 @@ namespace Raindrop.UI.chat
         private void Start()
         {
             LocalChatManager = new LocalChatManager(instance, printer); //kind of like inject logic into the textbox.
-            
+            netcom.ChatSent += Netcom_ChatSent;
+        }
+
+        private void Netcom_ChatSent(object sender, ChatSentEventArgs e)
+        {
+            ClearTextInput();
         }
 
         // allow UI input field to send outgoing chat to the simulator.

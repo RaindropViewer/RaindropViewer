@@ -16,7 +16,7 @@ namespace Raindrop.Services.Bootstrap
 
         [SerializeField] public ModalManager mm;
         [SerializeField] public ScreensManager sm;
-        [SerializeField] public LoadingCanvasPresenter ll;
+        [SerializeField] public LoadingPresenter ll;
         
         
         // bootstraps the UI.
