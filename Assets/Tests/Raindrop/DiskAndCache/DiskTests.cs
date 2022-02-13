@@ -29,7 +29,7 @@ namespace Raindrop.Tests.DiskAndCache
             // Assert.Fail();
 
 
-            Debug.Log("GetInternalCacheDir " + Disk.DirectoryHelpers.GetInternalCacheDir());
+            Debug.Log("GetInternalCacheDir " + Disk.DirectoryHelpers.GetInternalStorageDir());
             // //should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
             // target = Path.Combine(DirectoryHelpers.GetInternalCacheDir(), "ImportantPaths_Platforms_IsWritable.txt");
             // File.WriteAllLines(target, new List<string> {"success!"});
@@ -38,9 +38,9 @@ namespace Raindrop.Tests.DiskAndCache
         [Test]
         public void InternalCachePath_Platforms_Writeable()
         {
-            Debug.Log("GetInternalCacheDir " + Disk.DirectoryHelpers.GetInternalCacheDir());
+            Debug.Log("GetInternalCacheDir " + Disk.DirectoryHelpers.GetInternalStorageDir());
             //should be  /storage/emulated/0/Android/data/com.UnityTestRunner.UnityTestRunner/files/Pictures/
-            var target = Path.Combine(DirectoryHelpers.GetInternalCacheDir(), "ImportantPaths_Platforms_IsWritable.txt");
+            var target = Path.Combine(DirectoryHelpers.GetInternalStorageDir(), "ImportantPaths_Platforms_IsWritable.txt");
             File.WriteAllLines(target, new List<string> {"success!"});
         }
 
@@ -48,7 +48,7 @@ namespace Raindrop.Tests.DiskAndCache
         public IEnumerator StaticAssets_MonobehaviorOnInstantiate_AreCopied()
         {
             //1. delete grids.xml
-            string GridsXmlFile = Path.Combine(DirectoryHelpers.GetInternalCacheDir(),
+            string GridsXmlFile = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
                 "grids.xml");
             File.Delete(GridsXmlFile);
             Assert.False(File.Exists(GridsXmlFile),

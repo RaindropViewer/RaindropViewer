@@ -54,8 +54,6 @@ namespace Raindrop
         private RaindropNetcom _netcom;
 
         private StateManager _state;
-        private string _appDataDir;
-        private string _streamingAssetsDir;
 
         //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
         
@@ -263,10 +261,6 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client)
         {
-            _appDataDir = DirectoryHelpers.GetInternalCacheDir();
-            // _extAppDataDir = DirectoryHelpers.GetExternalCacheDir_WithInternalAsFallback();
-            // _streamingAssetsDir = Application.streamingAssetsPath;
-
             InitializeLoggingAndConfig();
 
             _client = client;
@@ -297,7 +291,7 @@ namespace Raindrop
             InitializeClient(_client);
 
             //rlv = new RLVManager(this);
-            _gridManager = new GridManager(_appDataDir);
+            _gridManager = new GridManager(UserDir);
 
             _names = new NameManager(this);
             Cof = new CurrentOutfitFolder(this);
@@ -340,6 +334,7 @@ namespace Raindrop
 
             client.Self.Movement.AutoResetControls = false;
             client.Self.Movement.UpdateInterval = 2500; //2.5 seconds?
+            client.Settings.DISABLE_AGENT_UPDATE_DUPLICATE_CHECK = false; //lets be not-rude.
 
             RegisterClientEvents(client);
         }
@@ -618,7 +613,8 @@ namespace Raindrop
         {
             try
             {
-                UserDir = Path.Combine(_appDataDir, _programname);
+                var internalDir = DirectoryHelpers.GetInternalStorageDir();
+                UserDir = internalDir;
                 if (!Directory.Exists(UserDir))
                 {
                     Directory.CreateDirectory(UserDir);
@@ -626,8 +622,10 @@ namespace Raindrop
             }
             catch (Exception)
             {
-                Logger.DebugLog("unable to create UserDir: " + UserDir);
-                //UserDir = System.Environment.CurrentDirectory;
+                Logger.Log("App termination due to: unable to create UserDir: " + UserDir, Helpers.LogLevel.Error);
+                #if !UNITY_EDITOR
+                Application.Quit();
+                #endif
             };
 
             _globalLogFile = Path.Combine(UserDir, _programname + ".log");

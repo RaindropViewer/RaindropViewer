@@ -18,7 +18,7 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests.GridManager
         {
             var instance = new RaindropInstance(new GridClient());
             
-            instance.GridManger.SaveCustomGrids( DirectoryHelpers.GetInternalCacheDir());
+            instance.GridManger.SaveCustomGrids( DirectoryHelpers.GetInternalStorageDir());
 
             instance.CleanUp();
         }
@@ -38,7 +38,7 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests.GridManager
                 );
 
             
-            instance.GridManger.SaveCustomGrids( DirectoryHelpers.GetInternalCacheDir());
+            instance.GridManger.SaveCustomGrids( DirectoryHelpers.GetInternalStorageDir());
             
             instance.CleanUp();
         }

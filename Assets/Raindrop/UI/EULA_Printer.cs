@@ -12,7 +12,7 @@ public class EULA_Printer : MonoBehaviour
     private string Eulatext => 
         System.IO.File.ReadAllText(
             Path.Combine(
-                Disk.DirectoryHelpers.GetInternalCacheDir(),
+                Disk.DirectoryHelpers.GetInternalStorageDir(),
                 "RD_Eula.txt")
             )
         ;

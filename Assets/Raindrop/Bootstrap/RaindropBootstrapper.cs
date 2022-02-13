@@ -67,7 +67,7 @@ namespace Raindrop.Services.Bootstrap
         {
             Logger.Log("Logger is ready", Helpers.LogLevel.Debug);
             Logger.Log("Logger is logging to : "+  Path.Combine(
-                    DirectoryHelpers.GetInternalCacheDir(),
+                    DirectoryHelpers.GetInternalStorageDir(),
                     "log.txt")
                 , Helpers.LogLevel.Debug);
         }

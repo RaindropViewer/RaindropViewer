@@ -49,7 +49,7 @@ namespace OpenMetaverse
         public const string ADITI_LOGIN_SERVER = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi";
 
         /// <summary>The relative directory where external resources are kept</summary>
-        public static string RESOURCE_DIR = "openmetaverse_data"; //in streamingassets folder...
+        public static string RESOURCE_DIR = "openmetaverse_data"; //the original implementation is a relative path. We should not use relative path for android.
 
         /// <summary>Login server to connect to</summary>
         public string LOGIN_SERVER = AGNI_LOGIN_SERVER;
@@ -284,7 +284,7 @@ namespace OpenMetaverse
         public bool USE_ASSET_CACHE = true;
 
         /// <summary>Path to store cached texture data</summary>
-        public string ASSET_CACHE_DIR = RESOURCE_DIR + "/cache";
+        public string ASSET_CACHE_DIR = RESOURCE_DIR + "/cache"; // can be changed after initisalised raindrop. can change during runtime.
 
         /// <summary>Maximum size cached files are allowed to take on disk (bytes)</summary>
         public long ASSET_CACHE_MAX_SIZE = 1024 * 1024 * 1024; // 1GB

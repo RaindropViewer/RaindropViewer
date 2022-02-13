@@ -47,7 +47,7 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
             yield return new WaitForSeconds(10);
             // Assert.True(startupCopier.copyIsDone);
             
-            string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalCacheDir(),
+            string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
                 "grids.xml");
             
             Assert.True(File.Exists(expectedToExist),"file not exist: " + expectedToExist);

@@ -44,9 +44,9 @@ namespace Disk
 
         // gives us the base directory where we should be storing the cache files
         // returns the internal storage if android.
-        public static string GetInternalCacheDir()
+        public static string GetInternalStorageDir()
         {
-            #if UNITY_EDITOR
+            #if UNITY_EDITOR || UNITY_STANDALONE_WIN
                 return Application.persistentDataPath;
             #endif
             #if UNITY_ANDROID
