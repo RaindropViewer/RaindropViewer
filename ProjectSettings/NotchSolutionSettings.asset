@@ -18,6 +18,23 @@
                     "<GameViewSize>k__BackingField": 0
                 }
             ]
+        },
+        {
+            "buildTarget": 19,
+            "configurations": [
+                {
+                    "configurationName": "Config A",
+                    "<DeviceIndex>k__BackingField": 1,
+                    "<Orientation>k__BackingField": 2,
+                    "<GameViewSize>k__BackingField": 0
+                },
+                {
+                    "configurationName": "Config B",
+                    "<DeviceIndex>k__BackingField": 0,
+                    "<Orientation>k__BackingField": 0,
+                    "<GameViewSize>k__BackingField": 0
+                }
+            ]
         }
     ],
     "<EnableSimulation>k__BackingField": true,
