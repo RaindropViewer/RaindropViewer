@@ -313,10 +313,47 @@ namespace Raindrop.Rendering
             return new Vector3(v.x, v.z, v.y);
         }
 
+        //todo:is this correct???
         public static Vector4 OMVVector4(UnityEngine.Vector4 v)
-        {
+        { 
             return new Vector4(v.x, v.y, v.z, v.w);
         }
+
+
+        //todo:is this correct???
+        public static Quaternion OMVQuaternion4(UnityEngine.Quaternion v)
+        {
+            return new Quaternion(v.x, v.z, v.y, v.w);
+        }
+
+
+
+        //change the rotation of 2d agent to point in same dir as the input
+        public static void SetMapItemRotation(Transform transform, UnityEngine.Vector3 rotation_InMap)
+        {
+            transform.eulerAngles = rotation_InMap;
+        }
+
+        // moves the transform to the 2d map position (x,y).
+        public static void SetMapItemPosition(Transform entitiyTransform, UnityEngine.Vector2 mapPos)
+        {
+            //            UnityEngine.Vector3 newPos = fromMapCoord(mapPos);
+            entitiyTransform.position = mapPos;
+        }
+
+        // given the large global coordinate of this item, where is it in unity coordinates? can get quite large (>> 4000m away)
+        // translate the vector2 globalMapPositions into scene vector3 transform positions
+        public static UnityEngine.Vector3 fromMapCoord(UnityEngine.Vector2 mapPos, float mapItemDepthConstant)
+        {
+            return new UnityEngine.Vector3(mapPos.x, mapPos.y, mapItemDepthConstant);
+        }
+
+        // if there was an object in this position in unity engine space, where would we put it on the minimap?
+        public static UnityEngine.Vector2 GlobalUnity2MapPlane(UnityEngine.Vector3 V3Offset)
+        {
+            return new UnityEngine.Vector2(V3Offset.x / 256, V3Offset.z / 256);
+        }
+
 
         //public static Color WinColor(OpenTK.Graphics.Color4 color)
         //{

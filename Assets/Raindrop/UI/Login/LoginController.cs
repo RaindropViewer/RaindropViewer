@@ -186,10 +186,10 @@ namespace Raindrop.Presenters
         }
         
         
-        // input: tanukidev resident
+        // input: ***REMOVED*** resident
         //
         // result:
-        // first: tanukidev    last: resident
+        // first: ***REMOVED***    last: resident
         // return: true if success.
         public bool splitUserName(string username, out string firstname, out string lastname)
         {
