@@ -12,7 +12,7 @@ using UnityEngine.UI;
 namespace Raindrop.Presenters
 {
     // loading bar view.
-    public class LoadingCanvasPresenter : MonoBehaviour
+    public class LoadingPresenter : MonoBehaviour
     {
         public TMP_Text text;
         public Button CloseButton;

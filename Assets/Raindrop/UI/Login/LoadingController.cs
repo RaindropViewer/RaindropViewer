@@ -8,13 +8,13 @@ namespace Raindrop.Presenters
 {
     public class LoadingController : IDisposable
     {
-        private LoadingCanvasPresenter view;
+        private LoadingPresenter view;
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
         public bool isInteractable => view.canvas.interactable;
         
-        public LoadingController(LoadingCanvasPresenter _view)
+        public LoadingController(LoadingPresenter _view)
         {
             view = _view;
 
@@ -30,6 +30,8 @@ namespace Raindrop.Presenters
         {
             netcom.ClientLoggingIn += new EventHandler<OverrideEventArgs>(netcom_ClientLoggingIn);
             netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+            
+            // netcom.Teleporting
         }
 
         private void RemoveLoginEvents()
