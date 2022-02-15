@@ -14,12 +14,8 @@ using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop.Unity3D
 {
-    // sets the attached gameobject to the location of the user in the sim.
-    
-    // the location of the mapEntities in the scene hierachy is defined as 
-    // "global" coordinates / 256 - that is, an entity existing in the sim Daboom (1000, 1000)
-    // at the sim coordinates 0,0,0, will be shown at the Unityscene position of
-    // (1000,1000, mapItemDepthConstant) 
+    // Attach to minimap player to set its location in mapspace.
+    // see @ MapCoordinatesConversionTests
     class MapPlayerLocationUpdater : MonoBehaviour
     {
         private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
@@ -32,10 +28,6 @@ namespace Raindrop.Unity3D
         public GameObject agent;
         //the height at which all map items are at (unity y axis.)
         private readonly float mapItemDepthConstant = 10;
-
-        private void Start()
-        {
-        }
 
         private void Update()
         {

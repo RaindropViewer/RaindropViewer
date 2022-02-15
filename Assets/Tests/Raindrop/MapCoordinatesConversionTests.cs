@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using OpenMetaverse;
-using OpenMetaverse.ImportExport.Collada14;
-using Raindrop;
-using Raindrop.Media;
-using Raindrop.Rendering;
-using Raindrop.ServiceLocator;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.TestTools;
-using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using Raindrop.Utilities;
 
 namespace Tests.Raindrop
 {
+    // the location of the mapEntities in the scene hierachy is defined as 
+    // "global" coordinates / 256 - that is, an entity existing in the sim Daboom (1000, 1000)
+    // at the sim coordinates 0,0,0, will be shown at the Unityscene position of
+    // (1000,1000, mapItemDepthConstant) 
+
     [TestFixture()]
     public class MapCoordinatesConversionTests
     {
@@ -41,21 +38,45 @@ namespace Tests.Raindrop
         }
 
         //test handle can convert to map space correctly, within the tile of 1000x1000.
-        //takes 5 mins.
+        // important idea is that you can obtain the accuracy up to 1m. sufficient for minimap purpose.
+        // each handle int is a meter ; 1/256 of a sim's width.
         [Test]
         public void Handle2MapSpace_IntraTile_Test()
         {
-            for (uint i = 0; i < 256; i += 1)
+            // in sims:
+            ulong daboom = OpenMetaverse.Utils.UIntsToLong( 1000 , 1000 );
+            ulong zero = OpenMetaverse.Utils.UIntsToLong(0, 0 );
+            ulong largest = OpenMetaverse.Utils.UIntsToLong(65535 , 65535);
+            List<ulong> handlesToTest_ingrids = new List<ulong>() {daboom, zero, largest};
+            
+            foreach (ulong _ in handlesToTest_ingrids)
             {
-                for (uint j = 0; j < 256; j += 1)
-                {
-                    ulong handle = Utils.UIntsToLong((1000 * 256) + i,(1000 * 256) + j); //daboom's handle @ origin.
-                    var mapSpace = MapSpaceConverters.Handle2MapSpace(handle, 0);
-                    Assert.True(mapSpace == new Vector3(1000 + (i/256),1000 + (j/256),0) , 
-                        "error: " + i +  " " + j);
-                }
+                Test_Handle2MapSpace_WithinSimulator(_);                
             }
 
+            void Test_Handle2MapSpace_WithinSimulator(ulong simHandle_InGrids)
+            {
+                uint SimX_ingrids; 
+                uint SimY_ingrids;
+                OpenMetaverse.Utils.LongToUInts(simHandle_InGrids , out SimX_ingrids, out SimY_ingrids);
+                
+                for (uint i = 0; i < 256; i += 1)
+                {
+                    for (uint j = 0; j < 256; j += 1)
+                    {
+                        uint handle_x_meters = (uint) (SimX_ingrids * 256 + i);
+                        uint handle_y_meters = (uint) (SimY_ingrids * 256 + j);
+                        ulong handle = Utils.UIntsToLong(handle_x_meters, handle_y_meters);
+                        var mapSpace = MapSpaceConverters.Handle2MapSpace(handle, 0);
+                        
+                        float expected_mapSpace_x = SimX_ingrids + (i / 256.0f);
+                        float expected_mapSpace_y = SimY_ingrids + (j / 256.0f);
+                        
+                        Assert.True(mapSpace == new Vector3(expected_mapSpace_x, expected_mapSpace_y, 0),
+                            "error: " + i + " " + j + " " + " @ " +  SimX_ingrids +" " + SimY_ingrids );
+                    }
+                }
+            }
         }
         
         [Test]

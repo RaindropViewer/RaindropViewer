@@ -15,7 +15,7 @@ namespace Raindrop.Utilities
         {
             uint x, y;
             OpenMetaverse.Utils.LongToUInts(handle, out x, out y);
-            return new UE.Vector3(x / 256, y / 256, zBuffer );
+            return new UE.Vector3(x / 256.0f, y / 256.0f, zBuffer );
         }
         
         // convert game space map entities into their positions in the grid-space(handle space)
