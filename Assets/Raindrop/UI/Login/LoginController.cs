@@ -2,8 +2,9 @@
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
 using Raindrop.Netcom;
+using Raindrop.Services.Bootstrap;
 
-namespace Raindrop.Presenters
+namespace Raindrop.UI.Login
 {
     public class LoginController
     {
@@ -17,7 +18,7 @@ namespace Raindrop.Presenters
             view = viewPresenter;
             
             //1 load default UI fields.
-            initialiseFields();
+            // initialiseFields();
 
             //2 load various loginInformation from the settings.
             InitializeConfig();
@@ -31,24 +32,26 @@ namespace Raindrop.Presenters
             
         }
         
-        
-        private void initialiseFields()
-        {
-            //reset user and pw fields
-            view.Username = "";
-            view.Password = "";
-            
-        }
+        //
+        // private void initialiseFields()
+        // {
+        //     //reset user and pw fields
+        //     view.Username = "";
+        //     view.Password = "";
+        //     
+        //     
+        // }
 
         // initialise UI state to previous state
         private void InitializeConfig()
         {
             Settings s = instance.GlobalSettings;
-            view.isSaveCredentials = LoginUtils.getRememberFromSettings(s);
+            
+            //retrieve previous checkbox value
+            Init_RememberLogin_Checkbox();
 
-            string savedUsername = s["username"];
-            view.Username = (savedUsername);
-            //Username = (savedUsername);
+            //retrieve last logins.
+            Init_UserAndPassword_Fields();
 
             //try to get saved username
             try
@@ -59,7 +62,7 @@ namespace Raindrop.Presenters
                     foreach (string loginKey in savedLogins.Keys)
                     {
                         LoginUtils.SavedLogin sl = LoginUtils.SavedLogin.FromOSD(savedLogins[loginKey]);
-                        //Debug.Log("username cache: " + sl.ToString());
+                        OpenMetaverse.Logger.Log("username cache entry: " + sl.ToString(), Helpers.LogLevel.Info);
                         //cbxUsername.Items.Add(sl);
                         //usernameDropdownMenuWithEntry.Items.Add(sl);
                     }
@@ -73,8 +76,7 @@ namespace Raindrop.Presenters
             }
 
             //cbxUsername.SelectedIndex = 0;
-
-            // Fill in saved password or use one specified on the command line
+            
             var pass = s["password"].AsString();
             view.Password = pass;
             //Debug.Log("password cache (MD5-ed): " + pass);
@@ -84,19 +86,38 @@ namespace Raindrop.Presenters
             if (s["login_location_type"].Type == OSDType.Unknown) //if not in cache file?
             {
                 // humble.loginLocation = humble.loginLocation; //loginLocationDropdown.select(1);
-                s["login_location_type"] = OSD.FromInteger(view.loginLocation); //default set to last
+                s["login_location_type"] = OSD.FromInteger(2); //default set to last
             }else
             {
                 //not supported: custom login locations. onyl support home or last. 
 
                 int loginLocationId = s["login_location_type"].AsInteger();
-                // loginLocationDropdown.select(loginLocationId);
-                //loginLocationDropdown.select(loginLocationId);
+                view.loginLocationDropdown.value = loginLocationId;
                 //locationDropdown.Text = s["login_location"].AsString();
             } 
              
             //txtCustomLoginUri.Text = s["login_uri"].AsString();
-             
+
+            void Init_RememberLogin_Checkbox()
+            {
+                if (!instance.GlobalSettings.ContainsKey("remember_login"))
+                {
+                    instance.GlobalSettings["remember_login"] = true;
+                }
+
+                view.isSaveCredentials = instance.GlobalSettings["remember_login"];
+            }
+
+            void Init_UserAndPassword_Fields()
+            {
+                //only retrieve if the grid is matching.
+                // if (s["username"])
+                //
+                // string lastUsername = s["username"];
+                // view.Username = lastUsername;
+                // string lastPassword = s["password"];
+                // view.Password = lastPassword;
+            }
         }
 
         
@@ -114,7 +135,6 @@ namespace Raindrop.Presenters
             string password,
             bool agreeToTos)
         {
-            isDoingLogin = true;
             
             _ = netcom;
 
@@ -122,12 +142,11 @@ namespace Raindrop.Presenters
             netcom.LoginOptions.LastName = last;
 
             netcom.LoginOptions.Password = password;
-            netcom.LoginOptions.Channel = "Channel"; // Channel
-            netcom.LoginOptions.Version = "Version"; // Version
+            netcom.LoginOptions.Channel = Globals.SimpleAppName; // "Raindrop"
+            netcom.LoginOptions.Version = Globals.FullAppName; // "Raindrop 5.1.2"
             netcom.AgreeToTos = agreeToTos;
 
             //startlocation parsing
-
             switch (view.loginLocation)
             {
                 case 0: //Custom
@@ -161,7 +180,7 @@ namespace Raindrop.Presenters
             //}
 
             //placeholder to select SL as grid.
-            netcom.LoginOptions.Grid = instance.GridManger.Grids[0]; //0 means sl i think
+            //netcom.LoginOptions.Grid = instance.GridManger.Grids[0]; //0 means sl i think
              
 
             //note: setting this ridiculously low yields log: "< >: Login status: Failed: A task was canceled."
@@ -182,7 +201,6 @@ namespace Raindrop.Presenters
 
             netcom.Login();
             SaveConfig(netcom.LoginOptions, instance.GlobalSettings, view.isSaveCredentials);
-            isDoingLogin = false;
         }
         
         

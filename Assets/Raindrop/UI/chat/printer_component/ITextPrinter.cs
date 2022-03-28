@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Raindrop
+namespace Raindrop.UI.chat.printer_component
 {
     // classes implement this interface to print content to screen.
     public interface ITextPrinter

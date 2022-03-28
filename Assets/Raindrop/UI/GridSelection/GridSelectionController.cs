@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using OpenMetaverse;
 using UnityEngine;
 
 namespace Raindrop.GridSelection
@@ -7,36 +8,43 @@ namespace Raindrop.GridSelection
     public class GridSelectionController
     {
         //refernce to view-presenter
-        private DropdownViewPresenter viewPresenter;
+        private GridSelectionView _view;
         private List<string> grids;
 
         //reference to model
         private RaindropInstance instance => 
             ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-        private bool Ready => (instance != null);
+        private bool Ready => !(instance is null);
         private bool Connected => instance.Client.Network.Connected;
 
-        public GridSelectionController(DropdownViewPresenter dropdownViewPresenter)
-        // instead of injecting from the bootstrapper, we can also use getComponent<DropdownViewPresenter>
+        public GridSelectionController(GridSelectionView gridSelectionView)
         {
             if (!Ready)
             {
+                OpenMetaverse.Logger.Log("instance not ready yet", Helpers.LogLevel.Error);
                 return;
             }
 
+            _view = gridSelectionView;
             List<Grid> gridMangerGrids = instance.GridManger.Grids;
             grids = GridList2StringList(gridMangerGrids);
-            dropdownViewPresenter.ClearAndSetOptions(grids);
+            _view.ClearAndSetOptions(grids);
             
-            dropdownViewPresenter.DropdownItemSelected += GridSelected;
+            _view.DropdownItemSelected += OnGridSelected; //todo: unsub?
+            
+            //set default-selected grid.
+            OnGridSelected(null, new DropdownPresenterEventArgs(_view.dropdown));
         }
 
-        private void GridSelected(object sender, DropdownPresenterEventArgs e)
+
+        private void OnGridSelected(object sender, DropdownPresenterEventArgs e)
         {
             int selectionIdx = e.DropdownValue;
             // update model:
-            // LoginController.updateGrids = grids[selectionIdx];
-
+            var chosen = instance.GridManger.Grids[selectionIdx];
+            instance.Netcom.LoginOptions.Grid = chosen;
+            // update front end url display:
+            _view.uritext.setText(chosen.LoginURI);
         }
 
         private List<string> GridList2StringList(List<Grid> gridMangerGrids)
@@ -47,7 +55,7 @@ namespace Raindrop.GridSelection
 
         public int GetGridsCount()
         {
-            return viewPresenter.GetOptionsCount();
+            return _view.GetOptionsCount();
         }
     }
 }

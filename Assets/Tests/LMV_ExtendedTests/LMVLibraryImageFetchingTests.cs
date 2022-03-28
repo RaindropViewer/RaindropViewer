@@ -12,11 +12,8 @@ using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using System.Net;
 using Disk;
 using OpenMetaverse.Http;
-using Raindrop.Map.Model;
-using Raindrop.ServiceLocator;
 
 namespace Raindrop.Tests
 {

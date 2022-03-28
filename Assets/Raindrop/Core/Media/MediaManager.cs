@@ -292,7 +292,6 @@ namespace Raindrop.Media
             }
             catch (Exception ex)
             {
-                UnityEngine.Debug.LogError("Failed to initialize the sound system: ");
                 Logger.Log("Failed to initialize the sound system: " + ex, Helpers.LogLevel.Warning);
                 SoundSystemAvailable = false;
             }

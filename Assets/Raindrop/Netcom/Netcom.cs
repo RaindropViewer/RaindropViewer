@@ -52,8 +52,7 @@ namespace Raindrop.Netcom
         private bool teleporting = false;
         private bool agreeToTos = false;
         public bool AgreeToTos { get { return agreeToTos; } set { agreeToTos = value; } }
-        private Grid grid;
-        public Grid Grid { get { return grid; } }
+        public Grid Grid => loginOptions.Grid;
 
         // NetcomSync is used for raising certain events on the
         // GUI/main thread. Useful if you're modifying GUI controls
@@ -365,10 +364,9 @@ namespace Raindrop.Netcom
                 loginOptions.FirstName, loginOptions.LastName, password,
                 loginOptions.Channel, loginOptions.Version);
 
-            grid = loginOptions.Grid;
             loginParams.Start = startLocation;
             loginParams.AgreeToTos = AgreeToTos;
-            loginParams.URI = grid.LoginURI;
+            loginParams.URI = Grid.LoginURI;
             loginParams.LastExecEvent = loginOptions.LastExecEvent;
             client.Network.BeginLogin(loginParams);
         }

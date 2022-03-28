@@ -62,7 +62,7 @@
       <key>platform</key>
       <string>OpenSim</string>
       <key>loginuri</key>
-      <string>http://hypergrid.org:8002/</string>
+      <string>http://login.metro.land/</string>
       <key>loginpage</key>
       <string>http://metropolis.hypergrid.org</string>
       <key>helperuri</key>

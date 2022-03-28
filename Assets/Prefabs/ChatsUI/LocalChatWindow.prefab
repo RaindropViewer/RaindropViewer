@@ -1065,7 +1065,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db4ffcad09f8494894233824ed3e9f8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DestChatInputAcceptor: {fileID: 3569416747332443002}
+  DestChatInputAcceptor: {fileID: 0}
   ChatInputField: {fileID: 3569416748185201347}
   SendButton: {fileID: 3569416747492323496}
 --- !u!1 &3569416747285251776
@@ -2534,7 +2534,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3569416746466999048}
   m_HandleRect: {fileID: 3569416746466999051}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2749,6 +2749,7 @@ GameObject:
   - component: {fileID: 3569416748396480285}
   - component: {fileID: 3569416748396480284}
   - component: {fileID: 3569416748396480287}
+  - component: {fileID: 1017426359738601571}
   m_Layer: 5
   m_Name: chatHistoryBox
   m_TagString: Untagged
@@ -2861,3 +2862,16 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1017426359738601571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3569416748396480281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b016682f9b874ac7ab37c8636c1fa8f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chatTextboxPrefab: {fileID: 0}

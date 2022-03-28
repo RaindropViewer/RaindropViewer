@@ -6,6 +6,7 @@ using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityScripts.Disk;
 
 namespace Raindrop.Tests.DiskAndCache
 {
@@ -45,7 +46,7 @@ namespace Raindrop.Tests.DiskAndCache
         }
 
         [UnityTest]
-        public IEnumerator StaticAssets_MonobehaviorOnInstantiate_AreCopied()
+        public IEnumerator StaticAssets_MonobehaviorOnInstantiate_MissingFile()
         {
             //1. delete grids.xml
             string GridsXmlFile = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
@@ -55,12 +56,40 @@ namespace Raindrop.Tests.DiskAndCache
                 "delete grids.xml failed : " + GridsXmlFile);
 
             //2. do the startup copy.
-            var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
+            var copier = StaticFilesCopier.GetInstance();
+            copier.Work();
+            // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
 
             //wait for files to be copied...
             yield return new WaitForSeconds(3);
-            Assert.True(startupCopier.copyIsDone);
+            Assert.True(copier.CopyIsDoneAndNoErrors);
+            
+            //3. grids.xml is expected to be copied
+            Assert.True(File.Exists(GridsXmlFile),
+                "failed to copy grids.xml from Streaming assets to this location: " + GridsXmlFile);
+            
+            yield break;
+        }
+        
+        
+        [UnityTest]
+        public IEnumerator StaticAssets_MonobehaviorOnInstantiate_ChangedFile()
+        {
+            //1. change grids.xml
+            string GridsXmlFile = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
+                "grids.xml");
+            File.WriteAllBytes(GridsXmlFile, new byte[]{0x01});
+
+            //2. do the startup copy.
+            var copier = StaticFilesCopier.GetInstance();
+            copier.Work();
+            // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
+
+            //wait for files to be copied...
+            yield return new WaitForSeconds(3);
+            Assert.True(copier.CopyIsDoneAndNoErrors);
             
             //3. grids.xml is expected to be copied
             Assert.True(File.Exists(GridsXmlFile),

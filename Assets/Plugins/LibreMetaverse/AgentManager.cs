@@ -4498,7 +4498,21 @@ namespace OpenMetaverse
             {
                 foreach (var gesture in reply.Gestures)
                 {
-                    ActiveGestures.Add(gesture.Key, gesture.Value);
+                    try
+                    {
+                        ActiveGestures.Add(gesture.Key, gesture.Value);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log($"Login Response Gestures had a collsion:" +
+                                   $"key: {gesture.Key.ToString()}" + 
+                                   $"original value: {ActiveGestures[gesture.Key].ToString()}" + 
+                                   $"replace with this value: {gesture.Value.ToString()}"
+                            
+                            ,Helpers.LogLevel.Warning);
+                        
+                    }
                 }
             }
         }

@@ -39,7 +39,7 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
             // }
             
             // 2. start main scene, which includes the startupCopier
-            SceneManager.LoadScene("Scenes/MainScene");
+            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
             // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
 

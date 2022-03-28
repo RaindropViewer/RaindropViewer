@@ -350,7 +350,7 @@ namespace OpenMetaverse.Http
                     Logger.Log(ex.Message, Helpers.LogLevel.Error, ex);
                 }
             }
-            Logger.DebugLog("CapsCleint, firecompletecallback : "+ error.ToString()); 
+            Logger.DebugLog("CapsClient, FireCompleteCallback : "+ error.ToString()); 
 
             _Response = result;
             _ResponseEvent.Set();

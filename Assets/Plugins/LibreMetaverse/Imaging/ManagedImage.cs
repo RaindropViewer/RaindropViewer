@@ -265,6 +265,7 @@ namespace OpenMetaverse.Imaging
         /// Convert the channels in the image. Channels are created or destroyed as required.
         /// </summary>
         /// <param name="channels">new channel flags</param>
+        [Obsolete] // do not wish to use managed image when there are better alternatives for this raindrop.
         public void ConvertChannels(ImageChannels channels)
         {
             if (Channels == channels)

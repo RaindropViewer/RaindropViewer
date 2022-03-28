@@ -85,19 +85,19 @@ namespace Raindrop
             s["password"] = string.Empty;
         }
 
-
-        public static bool getRememberFromSettings (Settings settings)
-        {
-            Settings s = settings;
-            return (bool) s["remember_login"];
-
-        }
-        public static void setRememberToSettings(Settings settings, bool isRemember)
-        {
-            Settings s = settings;
-            settings["remember_login"] = isRemember;
-
-        }
+        //
+        // public static bool getRememberFromSettings (Settings settings)
+        // {
+        //     Settings s = settings;
+        //     return (bool) s["remember_login"];
+        //
+        // }
+        // public static void setRememberToSettings(Settings settings, bool isRemember)
+        // {
+        //     Settings s = settings;
+        //     settings["remember_login"] = isRemember;
+        //
+        // }
 
 
 

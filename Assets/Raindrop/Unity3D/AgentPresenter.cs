@@ -51,7 +51,6 @@ namespace Raindrop.Presenters
                 updateAvatarPosition(e);
             } else
             {
-
                 UnityMainThreadDispatcher.Instance().Enqueue(() => {
                     updateAvatarPosition(e);
                 });

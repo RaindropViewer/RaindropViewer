@@ -3,6 +3,7 @@ using OpenMetaverse;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
 using Raindrop.ServiceLocator;
+using Raindrop.UI.LoadingScreen;
 using UnityEngine;
 
 namespace Raindrop.Services
@@ -18,19 +19,23 @@ namespace Raindrop.Services
         //  Notification - manages app-wide notifications. 
         //  <deprecated> LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
 
-        private RaindropInstance instance;
+        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
         // canvases are stack-based. only 1 is top-most and active at any time.
-        public ScreensManager ScreensManager { set; get; }
+        public ScreenStackManager ScreenStackManager { set; get; }
 
         // modals are single-display. however, there is a modal queue, such that when the current modal is dismissed, the next-in-queue will appear.
         //care has to be taken not to spam the user with modals.
-        public ModalManager modalManager { set; get; }
+        public ModalsManager ModalsManager { set; get; }
         
         // fade into loading screen.
         public LoadingController _loadingController;
+        
+        //chat screen.
+        public ChatPresenter chatFacade;
+
 
         // refactor:
         /* initial:  UIService(ScreensManager cm, ModalManager mm)
@@ -38,25 +43,14 @@ namespace Raindrop.Services
          *          +UIService.showScreen(UIBuilder(CanvasType.Login))
          *          +UIService.showModal
          */
-        public UIService(ScreensManager cm, ModalManager mm, LoadingPresenter loadingPresenter)
+        public UIService(ScreenStackManager cm, ModalsManager mm, LoadingView loadingView,
+            ChatPresenter ChatPresenter)
         {
-            ScreensManager = cm;
-            modalManager = mm;
-            _loadingController = new LoadingController(loadingPresenter);
-
-            // UI depends on raindrop business layer.
-            try
-            {
-                this.instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            } catch (InvalidOperationException)
-            {
-                Debug.LogError("UIService failed to get raindrop service");
-                //failed to find service.
-                return;    
-            }
-
-
-
+            ScreenStackManager = cm;
+            ModalsManager = mm;
+            _loadingController = new LoadingController(loadingView);
+            chatFacade = ChatPresenter;
+            
             // Callbacks
             netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
             netcom.ClientLoggedOut += new EventHandler(netcom_ClientLoggedOut);
@@ -88,13 +82,13 @@ namespace Raindrop.Services
 
         protected void startUIInitialView()
         {
-            ScreensManager.ResetToInitialScreen();
-            modalManager.showModalNotification("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
+            ScreenStackManager.ResetToInitialScreen();
+            ModalsManager.showModal_NotificationGeneric("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
         }
 
         public GameObject getCurrentForegroundPresenter()
         {
-            return ScreensManager.GetForegroundCanvas();
+            return ScreenStackManager.GetForegroundCanvas();
         }
 
         private void RegisterClientEvents(GridClient client)
@@ -110,7 +104,11 @@ namespace Raindrop.Services
             client.Self.MoneyBalanceReply -= new EventHandler<MoneyBalanceReplyEventArgs>(Self_MoneyBalanceReply);
             client.Self.MoneyBalance -= new EventHandler<BalanceEventArgs>(Self_MoneyBalance);
         }
+        
+        
+        #region chats
 
+        #endregion
 
 
 
@@ -151,7 +149,7 @@ namespace Raindrop.Services
         {
             //modalManager.showModalNotification("Logged out", "you have/were logged out");
 
-            ScreensManager.ResetToInitialScreen();
+            ScreenStackManager.ResetToInitialScreen();
             
             //RefreshStatusBar();
             //RefreshWindowTitle();
@@ -166,7 +164,7 @@ namespace Raindrop.Services
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
 
-            ScreensManager.ResetToInitialScreen();
+            ScreenStackManager.ResetToInitialScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{
@@ -244,5 +242,8 @@ namespace Raindrop.Services
                 throw new NotImplementedException();
             }
         }
+        
+        
     }
+
 }

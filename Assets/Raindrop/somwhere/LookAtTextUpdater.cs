@@ -1,25 +1,32 @@
+using System;
 using Raindrop.UI.Views;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 //subscribe to event and updates the current sim text accordingly
-[RequireComponent(typeof(TMPro.TextMeshPro))]
+[RequireComponent(typeof(TMPro.TextMeshProUGUI))]
 public class LookAtTextUpdater : MonoBehaviour
 {
     public GameObject mapUIGO;
     private MapUIView _mapUIView;
 
-    private TMPro.TextMeshPro tmp;
+    private TMP_Text tmp;
 
     private void Awake()
     {
         _mapUIView = mapUIGO.GetComponent<MapUIView>();
-        tmp = this.GetComponent<TMPro.TextMeshPro>();
+        tmp = this.GetComponent<TMP_Text>();
 
         //sub
-        _mapUIView.getPresenter().MapClicked += bl_UserMapClick; // register with an event
         //mapUI.StartProcess();
+    }
+
+    private void Start()
+    {
+        var prez = _mapUIView.getPresenter();
+        prez.MapClicked += bl_UserMapClick; // register with an event
     }
 
 

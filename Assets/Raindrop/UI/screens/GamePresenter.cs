@@ -163,11 +163,11 @@ namespace Raindrop.Presenters
 
         public void OnChatBtnClick()
         {
-            uimanager.ScreensManager.Push(CanvasType.Chat);
+            uimanager.ScreenStackManager.Push(CanvasType.Chat);
         }
         public void OnMapBtnClick()
         {
-            uimanager.ScreensManager.Push(CanvasType.Map);
+            uimanager.ScreenStackManager.Push(CanvasType.Map);
 
 
         }

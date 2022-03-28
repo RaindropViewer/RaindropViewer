@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Raindrop.Services.Bootstrap
 {
@@ -11,19 +12,21 @@ namespace Raindrop.Services.Bootstrap
         // if the app terminated normally, I will ask the user if they want to reconnect. 
     public class PersistenceLayer : MonoBehaviour
     {
-        private void Awake()
+        private void Start()
         {
             AskUser_LoginUsingPreviousCredentials();
         }
 
+        // "would you like to login to the last active connection?"
         private void AskUser_LoginUsingPreviousCredentials()
         {
             var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
-            var instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            ui.modalManager.showModalNotification("Quick Re-log",
-                "Would you like to login with previous credentials: \n" +
-                instance.GlobalSettings["a"]
-                );
+            Assert.IsNotNull(ui, "ui is not found.");
+            // var instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+            // ui.modalManager.showModal_NtfGeneric("Quick Re-log",
+            //     "Would you like to login with previous credentials: \n" +
+            //     instance.GlobalSettings["a"]
+            //     );
         }
     }
 }

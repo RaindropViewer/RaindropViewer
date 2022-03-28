@@ -4,7 +4,7 @@ using OpenMetaverse;
 using TMPro;
 using UnityEngine;
 
-namespace Raindrop
+namespace Raindrop.UI.chat.printer_component
 {
     //this class allows you to print into a TMP Text
     //consider refactoring ITextPrinter into an adaptor class.
@@ -73,7 +73,6 @@ namespace Raindrop
         private void AppendText(string v)
         {
             rtb.text = rtb.text + v;
-            //throw new NotImplementedException();
         }
 
         #region ITextPrinter Members

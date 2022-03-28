@@ -1,37 +1,33 @@
-﻿// using System;
-//
-// namespace Raindrop
-// {
-//     //generic blue modal with a message and a "ok" button.
-//     public class ntfGeneric
-//     {
-//         private RaindropInstance instance;
-//
-//         public ntfGeneric(RadegastInstance instance, string msg)
-//             : base(NotificationType.Generic)
-//         {
-//             InitializeComponent();
-//
-//             this.instance = instance;
-//             txtMessage.BackColor = instance.MainForm.NotificationBackground;
-//             txtMessage.Text = msg.Replace("\n", "\r\n");
-//             if (msg.Length < 100)
-//             {
-//                 txtMessage.ScrollBars = ScrollBars.None;
-//             }
-//             btnOk.Focus();
-//
-//             // Fire off event
-//             NotificationEventArgs args = new NotificationEventArgs(instance) {Text = txtMessage.Text};
-//             args.Buttons.Add(btnOk);
-//             FireNotificationCallback(args);
-//
-//             GUI.GuiHelpers.ApplyGuiFixes(this);
-//         }
-//
-//         private void btnOk_Click(object sender, EventArgs e)
-//         {
-//             instance.Notification.RemoveNotification(this);
-//         }
-//     }
-// }
+﻿using System;
+using Raindrop.Services;
+using UnityEngine;
+
+namespace Raindrop
+{
+    //generic blue modal with a message and a "ok" button.
+    public class ntfGeneric : MonoBehaviour
+    {
+        private RaindropInstance instance =>
+            ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+
+        public TMPro.TMP_Text txtMessage;
+        public void Init(string msg)
+        {
+            // txtMessage.BackColor = instance.MainForm.NotificationBackground;
+            txtMessage.text = msg.Replace("\n", "\r\n");
+            
+            // Fire off event
+            // NotificationEventArgs args = new NotificationEventArgs(instance) {Text = txtMessage.Text};
+            // args.Buttons.Add(btnOk);
+            // FireNotificationCallback(args);
+        }
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+
+            var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            ui.ModalsManager.UnShow(this.gameObject);
+            // instance.Notification.RemoveNotification(this);
+        }
+    }
+}

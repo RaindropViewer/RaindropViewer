@@ -19,7 +19,7 @@ namespace Tests.Raindrop
         [SetUp]
         public void Setup()
         {
-            SceneManager.LoadScene("Scenes/MainScene");
+            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
         }
 
         // copy sample audio to cache.

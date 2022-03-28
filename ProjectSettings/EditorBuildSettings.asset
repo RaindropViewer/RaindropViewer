@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainScene.unity
+    path: Assets/Raindrop/Bootstrap/MainScene.unity
     guid: bb761ad61c4e4c74aaa552fad3c8b089
   - enabled: 1
     path: Assets/Tests/HeadlessBootstrapScene.unity

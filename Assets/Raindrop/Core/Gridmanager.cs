@@ -110,6 +110,10 @@ namespace Raindrop
         }
     }
 
+    /*
+     * Grid.xml manager + reader/writer class.
+     * user-accessible grids_custom.xml file replaces entries in the packaged grids.xml
+     */
     public class GridManager : IDisposable
     {
         public List<Grid> Grids;
@@ -165,10 +169,14 @@ namespace Raindrop
                     customGrids.Add(item);
                 }
 
-                var bytesToWrite = OSDParser.SerializeLLSDXmlBytes(customGrids);
+                // var bytesToWrite = OSDParser.SerializeLLSDXmlBytes(customGrids);
+                // string customGridsFile = Path.Combine(datadir, gridsFileCustom);
+                // DirectoryHelpers.WriteToFile(bytesToWrite, customGridsFile);
+
                 string customGridsFile = Path.Combine(datadir, gridsFileCustom);
-                
-                DirectoryHelpers.WriteToFile(bytesToWrite, customGridsFile);
+                string toWrite = OSDParser.SerializeLLSDXmlString(customGrids);
+                DirectoryHelpers.WriteToFile(toWrite, customGridsFile);
+
             }
             catch (Exception ex)
             {

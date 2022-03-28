@@ -66,14 +66,18 @@ namespace Raindrop.Utilities
 
             UnityEngine.Vector3 agentInMapSpace = MapSpaceConverters.Handle2MapSpace(handle, 0);
 
-            Assert.IsTrue(agentInMapSpace.x > 0);
-            Assert.IsTrue(agentInMapSpace.y > 0);
-            Assert.IsTrue(agentInMapSpace.x < 65536);
-            Assert.IsTrue(agentInMapSpace.y < 65536);
+            Assert.IsFalse(PostionIsOOB(agentInMapSpace), "OOB: Present map-pos is : " + agentInMapSpace);
 
             return agentInMapSpace;
         }
-        
+
+        private static bool PostionIsOOB(UE.Vector3 agentInMapSpace)
+        {
+            return ((agentInMapSpace.x < 0) || 
+                   (agentInMapSpace.y < 0) ||
+                   agentInMapSpace.x > 65536 ||
+                   agentInMapSpace.y > 65536 );
+        }
 
         #endregion
 

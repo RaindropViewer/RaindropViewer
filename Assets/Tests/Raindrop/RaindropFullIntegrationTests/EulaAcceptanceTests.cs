@@ -51,7 +51,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         // 4. restart the ui and check it is showing welcome screen
         public IEnumerator Can_Accept_EULA()
         {
-            SceneManager.LoadScene("Scenes/MainScene");
+            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
             yield return new WaitForSeconds(2);
 
             //1. reject the EULA
@@ -65,10 +65,10 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             uiSrv.initialise();
             
             //2a. assert the eula prompt is present
-            Assert.True(uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Eula);
+            Assert.True(uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Eula);
             
             //2b. accept the eula
-            if (uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Eula)
+            if (uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Eula)
             {
                 // well, we need to agree to eula first.
                 yield return Login.accepttheeula();
@@ -80,12 +80,12 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             yield return new WaitForSeconds(2);
 
             //3b. should not be eula screen
-            if (uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Eula)
+            if (uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Eula)
             {
                 Assert.Fail("eula is accepted, but the eula screen is appearing on startup");
             }
 
-            if (uiSrv.ScreensManager.TopCanvas.canvasType == CanvasType.Welcome)
+            if (uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Welcome)
             {
                 Assert.Pass();
             }
