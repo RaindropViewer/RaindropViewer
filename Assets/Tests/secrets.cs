@@ -26,9 +26,9 @@ namespace Tests
         // password
         public static List<string> GridPass = new List<string>()
         {
-            "***REMOVED***",
-            "***REMOVED***",
-            "password"
+            "I am a little ",
+            "silly to put the password ",
+            "into source control "
         };
     }
 }
