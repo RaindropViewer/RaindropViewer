@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections;
 using NUnit.Framework;
-using Raindrop;
-using Raindrop.GridSelection;
-using Raindrop.ServiceLocator;
-using Raindrop.Tests;
-using Tests.Raindrop.RaindropIntegrationTests.Helpers;
+using Plugins.CommonDependencies;
+using Raindrop.Tests.RaindropIntegrationTests.Helpers;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
 
-namespace Tests.Raindrop.RaindropIntegrationTests.GridSelectorTests
+namespace Raindrop.Tests.RaindropIntegrationTests.GridSelectorTests
 {
     [TestFixture()]
     public class GridSelectorTests
@@ -27,7 +22,7 @@ namespace Tests.Raindrop.RaindropIntegrationTests.GridSelectorTests
                 
                 //+++++++++++++load test scene+++++++
                 // load the base scene 
-                yield return Helpers.SceneLoader.LoadHeadlessScene();
+                yield return SceneLoader.LoadHeadlessScene();
             
                 //at this point, raindropInstance is ready.
                 var instance = ServiceLocator.Instance.Get<RaindropInstance>();
@@ -59,14 +54,14 @@ namespace Tests.Raindrop.RaindropIntegrationTests.GridSelectorTests
             //click dropdown UI to reveal its full content
             var dropdown_GO = GameObject.Find("Dropdown");
             Assert.True(dropdown_GO,"the GO with name Dropdown is not found");
-            DropdownViewPresenter gridDropdown = dropdown_GO.GetComponent<DropdownViewPresenter>();
-            Assert.True(gridDropdown,"the dropdown doesnt have DropdownViewPresenter");
+            GridSelectionView gridGridSelection = dropdown_GO.GetComponent<GridSelectionView>();
+            Assert.True(gridGridSelection,"the dropdown doesnt have DropdownViewPresenter");
 
             yield return new WaitForSeconds(2); // seems if you don't wait, the options count are not updated yet.
             
             //Assert that there is more than 5 grids in that list.
-            Assert.True(gridDropdown.GetOptionsCount() > 5
-                , "dropdown has insufficient options : "+ gridDropdown.GetOptionsCount());
+            Assert.True(gridGridSelection.GetOptionsCount() > 5
+                , "dropdown has insufficient options : "+ gridGridSelection.GetOptionsCount());
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using NUnit.Framework;
-using Raindrop;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Tests.Raindrop.RaindropIntegrationTests.Helpers
+namespace Raindrop.Tests.RaindropIntegrationTests.Helpers
 {
     public static class SceneLoader
     {

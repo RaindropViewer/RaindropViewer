@@ -206,10 +206,21 @@ namespace OpenMetaverse
                                             handler(request, response, responseData, error);
                                         }
                                     }
+                                    else if (error.Message.Contains("403")) //forbidden - means no point in retrying, i think.
+                                    {
+                                        Logger.Log($"{item.Address} HTTP download failed with 403 forbidden: {error.Message}, trying again retry {item.Attempt}/{item.Retries}", 
+                                            Helpers.LogLevel.Warning);
+                                        
+                                        foreach (CapsBase.RequestCompletedEventHandler handler in activeDownload.CompletedHandlers)
+                                        {
+                                            handler(request, response, responseData, error);
+                                        }
+                                    }
                                     else
                                     {
+                                        //do retry:
                                         item.Attempt++;
-                                        Logger.Log($"{item.Address} HTTP download failed, trying again retry {item.Attempt}/{item.Retries}", 
+                                        Logger.Log($"{item.Address} HTTP download failed with error message {error.Message}, trying again retry {item.Attempt}/{item.Retries}", 
                                             Helpers.LogLevel.Warning);
                                         lock (queue) queue.Enqueue(item);
                                     }

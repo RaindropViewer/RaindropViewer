@@ -500,7 +500,7 @@ namespace OpenMetaverse
         protected void NetworkInvaildWarning(string source,string function)
         {
             long now = DateTimeOffset.Now.ToUnixTimeSeconds();
-            long dif = lastpacketwarning - now;
+            long dif = now - lastpacketwarning;
             if (dif > 10)
             {
                 lastpacketwarning = now;

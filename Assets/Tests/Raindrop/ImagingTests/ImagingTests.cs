@@ -43,7 +43,7 @@ namespace Raindrop.Tests.ImagingTests
 
             //can read and decode the jp2 from streamingassets. then save to local caching directory.
             [Test]
-            public void readAndDecodeAndSave_ImagePath()
+            public void ImagingTests_ReadJP2FromDisk_LoadIntoTexture2D_WriteToDiskAsJpeg()
             {
                 float timeStart = Time.realtimeSinceStartup;
 
@@ -54,8 +54,8 @@ namespace Raindrop.Tests.ImagingTests
 
 
                 Texture2D texture 
-                    = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-                T2D.LoadT2DWithoutMipMaps(thebytes, texture);
+                    = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                T2D_JP2.LoadT2DWithoutMipMaps(thebytes, texture);
 
                 Assert.True(texture.height > 5); //todo   so arbitrary
                 

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -14,11 +14,6 @@ public class LogoutButton : MonoBehaviour
     {
         Button btn = this.GetComponent<Button>();
         btn.onClick.AddListener(Logout);
-    }
-    
-    //get others' references, if required.
-    void Start()
-    {
     }
 
     private void Logout()

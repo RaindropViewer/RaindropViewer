@@ -12,6 +12,20 @@ public class TextView : MonoBehaviour
     {
         this.GetComponent<TMPro.TMP_Text>().text = text;
     }
+    
+    public void setText_DistanceInt(int distance)
+    {
+        if (distance < 0)
+        {
+            this.GetComponent<TMPro.TMP_Text>().text = "Unknown";
+            return;
+        }
+        this.GetComponent<TMPro.TMP_Text>().text = distance.ToString() + 'm';
+    }
+    public string getText()
+    {
+        return this.GetComponent<TMPro.TMP_Text>().text;
+    }
 
     internal void setText(float v)
     {

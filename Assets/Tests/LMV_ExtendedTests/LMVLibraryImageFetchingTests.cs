@@ -2,21 +2,15 @@
 using System.Collections;
 using System.IO;
 using System.Net;
-using System.Text;
 using NUnit.Framework;
 using OpenMetaverse;
 using OpenMetaverse.Assets;
-using OpenMetaverse.Packets;
-using Raindrop.Netcom;
-using Raindrop.Services.Bootstrap;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using System.Net;
 using Disk;
 using OpenMetaverse.Http;
-using Raindrop.Map.Model;
-using Raindrop.ServiceLocator;
+using Plugins.ObjectPool;
+using Tests;
 
 namespace Raindrop.Tests
 {
@@ -25,8 +19,17 @@ namespace Raindrop.Tests
     {
         private static RaindropInstance instance;
 
-        void RaindropInit()
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
         {
+            instance.CleanUp();
+        }
+        
+        
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {    
             //make the main thread dispatcher
             GameObject mainThreadDispatcher_Test = new GameObject("mainThreadDispatcher_Test");
             mainThreadDispatcher_Test.AddComponent<UnityMainThreadDispatcher>();
@@ -34,14 +37,14 @@ namespace Raindrop.Tests
             instance = new RaindropInstance(new GridClient());
         }
         
-        void login()
+        void LoginHeadless()
         {
             // required to prevent throwing exception later on:
             // some message like:   Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV Resident>: Setting server side baking failed'. Use UnityEngine.TestTools.LogAssert.Expect
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
-            
-            var fullusername = "tanukidev resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "25xy53de"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+
+            var fullusername = Secrets.GridUsers[0];
+            var password = Secrets.GridPass[0];
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername),
                 "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password),
@@ -292,14 +295,13 @@ namespace Raindrop.Tests
         [UnityTest]
         public IEnumerator LoginAndDownloadJ2P()
         {
-            RaindropInit();
-            login();
+            LoginHeadless();
 
             yield return new WaitForSeconds(15);
             
             //request that image (using DownloadManager)
             instance.Client.Assets.RequestImage(UUID.Parse(
-                    "ed891aaa-b031-cd08-77d7-4d0a15a2b8c5"),
+                    "ed891aaa-b031-cd08-77d7-4d0a15a2b8c5"), //nuki face. SL.
                 ImageType.Normal,
                 Callback_DecodeAndSaveFileAsPNG,
                 false);
@@ -307,9 +309,7 @@ namespace Raindrop.Tests
             yield return new WaitForSeconds(10);
             instance.Client.Network.Logout();
             yield return new WaitForSeconds(10);
-            
-            instance.CleanUp();
-            
+
             yield break;
         }
 
@@ -317,15 +317,16 @@ namespace Raindrop.Tests
         // this callback is known to run on non-main thread.
         private void Callback_DecodeAndSaveFileAsPNG(TextureRequestState state, AssetTexture assettexture)
         {
+            //assert download is finished
             Debug.Log("downloaded bytes: " + assettexture.AssetData.Length);
             if (state != TextureRequestState.Finished)
             {
                 Assert.Fail();
             }
 
-            //save that image, j2p
+            //save that image, jp2
             var basepath = instance.ClientDir + "/test_cache/";
-            var relativepath1 = assettexture.AssetID.ToString() +  ".j2p";
+            var relativepath1 = assettexture.AssetID.ToString() +  ".jp2";
             DirectoryHelpers.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
             
             //j2p -> t2d -> png 
@@ -333,11 +334,12 @@ namespace Raindrop.Tests
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
                 assettexture.Decode(); //needs to be on main thread...
-                var t2d = assettexture.Image.ExportTex2D();
-                var bytes = t2d.EncodeToPNG();
+                var t2d = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.ARGB32);
+                assettexture.Image.ExportTex2D(t2d); //decode: assetData -> texture
+                var bytes = t2d.EncodeToPNG(); 
             
                 //save that image, png
-                var relativepath2 = assettexture.AssetID.ToString() +  ".png";
+                var relativepath2 = assettexture.AssetID.ToString() +  ".png";//this is a image with wrong channels.
                 DirectoryHelpers.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
                 
             });

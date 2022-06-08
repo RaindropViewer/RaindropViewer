@@ -1,29 +1,34 @@
 ﻿using System.Collections;
 using NUnit.Framework;
+using Plugins.CommonDependencies;
 using Raindrop.Map.Model;
-using Raindrop.ServiceLocator;
-using Raindrop.Unity;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Utils = OpenMetaverse.Utils;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests
+
+namespace Raindrop.Tests.RaindropFullIntegrationTests
 {
     //test the map service.
     public class MapServiceTests
     {
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            //load the main scene.
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
+        }
         
         // test that the (external) map fetcher code is working.
         [UnityTest]
         public IEnumerator Test_MapService_SingleTile()
         {
-            SceneBootstrapperGenerator.Init();
-            yield return new WaitForSeconds(2);
-            Assert.True(ServiceLocator.Instance != null);
-            SceneBootstrapperGenerator.AddMainThreadDispatcher();
-
             BeginMapFetcher();
             var fetcher = ServiceLocator.Instance.Get<MapService>();
+            
+            if (! fetcher.isReady)
+                Assert.Fail("new version of map fetcher is not able to pass this test. Considering adding 2 types of fetcher methods; one for SL_external, one for CAPS/grid api ");
 
             //initally, the maptile is just a empty pocket
             //bool isReady;

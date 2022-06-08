@@ -39,7 +39,7 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
             // }
             
             // 2. start main scene, which includes the startupCopier
-            SceneManager.LoadScene("Scenes/MainScene");
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
             // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
 
@@ -47,10 +47,15 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
             yield return new WaitForSeconds(10);
             // Assert.True(startupCopier.copyIsDone);
             
-            string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalCacheDir(),
+            string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
                 "grids.xml");
             
             Assert.True(File.Exists(expectedToExist),"file not exist: " + expectedToExist);
+            //
+            // SceneManager.LoadScene("Scenes/empty");
+            // SceneManager.UnloadSceneAsync("Raindrop/Bootstrap/BootstrapScene");
+            // yield return new WaitForSeconds(2);
+
             
             yield break;
         }

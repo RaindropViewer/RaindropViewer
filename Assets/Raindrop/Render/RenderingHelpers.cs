@@ -1,34 +1,13 @@
-﻿/**
- * Radegast Metaverse Client
- * Copyright(c) 2009-2014, Radegast Development Team
- * Copyright(c) 2016-2020, Sjofn, LLC
- * All rights reserved.
- *  
- * Radegast is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.If not, see<https://www.gnu.org/licenses/>.
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
 //using OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Drawing.Imaging;
 using OpenMetaverse;
 using OpenMetaverse.Rendering;
+using Plugins.CommonDependencies;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
 using Quaternion = OpenMetaverse.Quaternion;
@@ -70,18 +49,18 @@ namespace Raindrop.Rendering
         public bool FetchFailed;
     }
 
-    //public class TextureLoadItem
-    //{
-    //    public FaceData Data;
-    //    public Primitive Prim;
-    //    public Primitive.TextureEntryFace TeFace;
-    //    public byte[] TextureData = null;
-    //    public byte[] TGAData = null;
-    //    public bool LoadAssetFromCache = false;
-    //    public ImageType ImageType = ImageType.Normal;
-    //    public string BakeName = string.Empty;
-    //    public UUID AvatarID = UUID.Zero;
-    //}
+    public class TextureLoadItem
+    {
+        public FaceData Data;
+        public Primitive Prim;
+        public Primitive.TextureEntryFace TeFace;
+        public byte[] TextureData = null;
+        public byte[] TGAData = null;
+        public bool LoadAssetFromCache = false;
+        public ImageType ImageType = ImageType.Normal;
+        public string BakeName = string.Empty;
+        public UUID AvatarID = UUID.Zero;
+    }
 
     //public enum RenderPass
     //{
@@ -187,7 +166,7 @@ namespace Raindrop.Rendering
             if (BasePrim.Velocity != Vector3.Zero)
             {
                 BasePrim.Position = InterpolatedPosition = BasePrim.Position + BasePrim.Velocity * time
-                    * 0.98f * ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>()
+                    * 0.98f * ServiceLocator.Instance.Get<RaindropInstance>()
                         .Client.Network.CurrentSim.Stats.Dilation;
                 BasePrim.Velocity += BasePrim.Acceleration * time;
             }
@@ -274,35 +253,41 @@ namespace Raindrop.Rendering
             return curPos;
         }
 
-        public static UnityEngine.Vector2 TKVector3(Vector2 v)
+        public static UnityEngine.Vector2 TKVector2(Vector2 v)
         {
             return new UnityEngine.Vector2(v.X, v.Y);
         }
 
-        //z and y are swapped when converting from SL and unity frames
-        public static UnityEngine.Vector3 TKVector3(Vector3 v)
+        // unity: Z forward, x right, y upwards
+        // SL:  x forward, y left, Z upwards
+        public static UnityEngine.Vector3 TKVector3(Vector3 vSL)
         {
-            return new UnityEngine.Vector3(v.X, v.Z, v.Y);
+            return new UnityEngine.Vector3(-vSL.Y, vSL.Z, vSL.X);
         }
 
-        //same as above (fp.) for now.
-        public static UnityEngine.Vector3 TKVector3d(Vector3d v)
+        //same as above, but doubles.
+        public static UnityEngine.Vector3 TKVector3d(Vector3d vSL)
         {
-            return new UnityEngine.Vector3((float)v.X, (float)v.Z, (float)v.Y);
+            var new_v = new Vector3(vSL);
+            return TKVector3(new_v);
         }
 
         //is this correct???
+        // W remains as-is, axis swap happens like usual.
         public static UnityEngine.Vector4 TKVector4(Vector4 v)
         {
-            return new UnityEngine.Vector4(v.X, v.Y, v.X, v.W);
+            return new UnityEngine.Vector4(-v.Y, v.Z, v.X, v.W);
         }
         
-        //is this correct???
+        //I just follow like above, as quaternion axes are same as the vector axes.
         public static UnityEngine.Quaternion TKQuaternion4(Quaternion v)
         {
-            return new UnityEngine.Quaternion(v.X, v.Z, v.Y, v.W);
+            // return new UnityEngine.Quaternion(-v.Y, v.Z, v.X, v.W); //before inverting handed-ness
+            return new UnityEngine.Quaternion(v.Y, -v.Z, -v.X, v.W);
         }
 
+        //we do not current use this..
+        [Obsolete]
         public static Vector2 OMVVector2(UnityEngine.Vector2 v)
         {
             return new Vector2(v.x, v.y);
@@ -310,23 +295,24 @@ namespace Raindrop.Rendering
 
         public static Vector3 OMVVector3(UnityEngine.Vector3 v)
         {
-            return new Vector3(v.x, v.z, v.y);
+            return new Vector3(v.z, -v.x, v.y);
         }
 
+        //todo:is this correct???
         public static Vector4 OMVVector4(UnityEngine.Vector4 v)
-        {
-            return new Vector4(v.x, v.y, v.z, v.w);
+        { 
+            return new Vector4(v.z, -v.x, v.y, v.w);
         }
 
-        //public static Color WinColor(OpenTK.Graphics.Color4 color)
-        //{
-        //    return Color.FromArgb((int)(color.A * 255), (int)(color.R * 255), (int)(color.G * 255), (int)(color.B * 255));
-        //}
 
-        //public static Color WinColor(Color4 color)
-        //{
-        //    return Color.FromArgb((int)(color.A * 255), (int)(color.R * 255), (int)(color.G * 255), (int)(color.B * 255));
-        //}
+        //todo:is this correct???
+        public static Quaternion OMVQuaternion4(UnityEngine.Quaternion v)
+        {
+            // return new Quaternion(v.z, -v.x, v.y, v.w);//before inverting handed-ness
+            return new Quaternion(-v.z, v.x, -v.y, v.w);
+        }
+
+
 
         public static int NextPow2(int start)
         {
@@ -345,7 +331,10 @@ namespace Raindrop.Rendering
 
             try
             {
-                string fname = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = 
+                    ServiceLocator.Instance.Get<RaindropInstance>()
+                        .ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>()
+                            .Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
@@ -393,7 +382,7 @@ namespace Raindrop.Rendering
         {
             try
             {
-                string fname = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Create, FileAccess.Write, FileShare.None))
                 {

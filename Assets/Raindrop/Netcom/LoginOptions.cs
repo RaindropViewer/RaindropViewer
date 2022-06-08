@@ -47,7 +47,7 @@ namespace Raindrop.Netcom
         private Grid grid;
         private string gridLoginUri = string.Empty;
         private LastExecStatus lastExecEvent = LastExecStatus.Normal;
-        private bool isSaveCredentials;
+        // private bool isSaveCredentials;
 
 
         public LoginOptions()

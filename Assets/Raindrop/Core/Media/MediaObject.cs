@@ -251,7 +251,9 @@ namespace Raindrop.Media
         /// <param name="commanddata1"></param>
         /// <param name="commanddata2"></param>
         /// <returns></returns>
-        protected RESULT DispatchEndCallback(
+        /// We changed this to static, in hope that it will fix that nasty IL2cpp does not support marshalling runtime error
+        [AOT.MonoPInvokeCallback(typeof(CHANNELCONTROL_CALLBACK))]
+        protected static RESULT DispatchEndCallback(
             IntPtr channelraw,
             CHANNELCONTROL_TYPE controltype,
             CHANNELCONTROL_CALLBACK_TYPE type,

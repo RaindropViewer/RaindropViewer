@@ -1,8 +1,10 @@
 ﻿using System;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
-using Raindrop.ServiceLocator;
+using Raindrop.UI.LoadingScreen;
+using Raindrop.UI.Views;
 using UnityEngine;
 
 namespace Raindrop.Services
@@ -12,25 +14,30 @@ namespace Raindrop.Services
         //UI is a service. it will always be available.
         // presenters themselves provide the logic of ui-traversal.
         // modals on the other hand are provided and popped in by the presenters themselves. for example a confirmation prompt for the user - obviously that should fall under the responsibility of the UI-logic layer.
-        // UIservice contains:
+        //   UIservice contains:
         //   CanvasManager - manages the UI stack. Access this to pop and push views onto the ui stack.
         //   ModalManager - manages the modals. access this to pop and show modals. 
-        //  Notification - manages app-wide notifications. 
-        //  <deprecated> LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
+        //   Notification - manages app-wide notifications. 
+        //   <deprecated> LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
 
-        private RaindropInstance instance;
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
         // canvases are stack-based. only 1 is top-most and active at any time.
-        public ScreensManager ScreensManager { set; get; }
+        private ScreenStackManager ScreenStackManager { set; get; }
 
         // modals are single-display. however, there is a modal queue, such that when the current modal is dismissed, the next-in-queue will appear.
         //care has to be taken not to spam the user with modals.
-        public ModalManager modalManager { set; get; }
+        public ModalsManager ModalsManager { set; get; }
         
         // fade into loading screen.
         public LoadingController _loadingController;
+        
+        //chat screen.
+        public ChatPresenter chatFacade;
+
+        public MapUIView MapFacade;
 
         // refactor:
         /* initial:  UIService(ScreensManager cm, ModalManager mm)
@@ -38,25 +45,14 @@ namespace Raindrop.Services
          *          +UIService.showScreen(UIBuilder(CanvasType.Login))
          *          +UIService.showModal
          */
-        public UIService(ScreensManager cm, ModalManager mm, LoadingCanvasPresenter loadingCanvasPresenter)
+        public UIService(ScreenStackManager cm, ModalsManager mm, LoadingView loadingView,
+            ChatPresenter ChatPresenter)
         {
-            ScreensManager = cm;
-            modalManager = mm;
-            _loadingController = new LoadingController(loadingCanvasPresenter);
-
-            // UI depends on raindrop business layer.
-            try
-            {
-                this.instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-            } catch (InvalidOperationException)
-            {
-                Debug.LogError("UIService failed to get raindrop service");
-                //failed to find service.
-                return;    
-            }
-
-
-
+            ScreenStackManager = cm;
+            ModalsManager = mm;
+            _loadingController = new LoadingController(loadingView);
+            chatFacade = ChatPresenter;
+            
             // Callbacks
             netcom.ClientLoginStatus += new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
             netcom.ClientLoggedOut += new EventHandler(netcom_ClientLoggedOut);
@@ -66,12 +62,10 @@ namespace Raindrop.Services
             RegisterClientEvents(client);
 
             initialise();
-
         }
 
         ~UIService()
         {
-
             netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
             netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
             netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
@@ -88,13 +82,8 @@ namespace Raindrop.Services
 
         protected void startUIInitialView()
         {
-            ScreensManager.ResetToInitialScreen();
-            modalManager.showModalNotification("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
-        }
-
-        public GameObject getCurrentForegroundPresenter()
-        {
-            return ScreensManager.GetForegroundCanvas();
+            ScreenStackManager.ResetToInitialScreen();
+            ModalsManager.showModal_NotificationGeneric("Disclaimer", "This software is a work in progress. There is no guarantee about its stability. ");
         }
 
         private void RegisterClientEvents(GridClient client)
@@ -110,10 +99,7 @@ namespace Raindrop.Services
             client.Self.MoneyBalanceReply -= new EventHandler<MoneyBalanceReplyEventArgs>(Self_MoneyBalanceReply);
             client.Self.MoneyBalance -= new EventHandler<BalanceEventArgs>(Self_MoneyBalance);
         }
-
-
-
-
+        
         #region client event implementation
 
 
@@ -142,8 +128,6 @@ namespace Raindrop.Services
 
                 //statusTimer.Start();
                 //RefreshWindowTitle();
-
-
             }
         }
 
@@ -151,10 +135,7 @@ namespace Raindrop.Services
         {
             //modalManager.showModalNotification("Logged out", "you have/were logged out");
 
-            ScreensManager.ResetToInitialScreen();
-            
-            //RefreshStatusBar();
-            //RefreshWindowTitle();
+            ScreenStackManager.ResetToInitialScreen();
         }
 
         private void netcom_ClientDisconnected(object sender, DisconnectedEventArgs e)
@@ -166,7 +147,7 @@ namespace Raindrop.Services
             if (e.Reason == NetworkManager.DisconnectType.ClientInitiated) return;
             netcom_ClientLoggedOut(sender, EventArgs.Empty);
 
-            ScreensManager.ResetToInitialScreen();
+            ScreenStackManager.ResetToInitialScreen();
 
             //if (instance.GlobalSettings["auto_reconnect"].AsBoolean())
             //{
@@ -195,7 +176,6 @@ namespace Raindrop.Services
                 if (delta > 50)
                 {
                     
-                    
                 }
             }
         }
@@ -204,9 +184,6 @@ namespace Raindrop.Services
         void Names_NameUpdated(object sender, UUIDNameReplyEventArgs e)
         {
             if (!e.Names.ContainsKey(client.Self.AgentID)) return;
-            
-
-            
         }
 
         void Self_MoneyBalanceReply(object sender, MoneyBalanceReplyEventArgs e)
@@ -219,22 +196,14 @@ namespace Raindrop.Services
                 //    TabConsole.DisplayNotificationInChat(e.Description);
             }
         }
-
-
         #endregion
 
 
         #region Update status
-
         void Parcels_ParcelProperties(object sender, ParcelPropertiesEventArgs e)
         {
-            
-
             Parcel parcel = instance.State.Parcel = e.Parcel;
-
         }
-
-
         #endregion
 
         public class Notification
@@ -244,5 +213,33 @@ namespace Raindrop.Services
                 throw new NotImplementedException();
             }
         }
+
+        #region screen poppin
+        public void ResetToInitialScreen()
+        {
+            ScreenStackManager.ResetToInitialScreen();
+        }
+
+        public void PopCanvas()
+        {
+            ScreenStackManager.PopCanvas();
+        }
+
+        public void PopAndPush(CanvasType canvasTypeToPush)
+        {
+            ScreenStackManager.PopAndPush(canvasTypeToPush);
+        }
+
+        public void Push(CanvasType canvasTypeToPush)
+        {
+            ScreenStackManager.Push(canvasTypeToPush);
+        }
+
+        public CanvasType GetPresentCanvasType()
+        {
+            return ScreenStackManager.TopCanvas.canvasType;
+        }
+        #endregion
+
     }
 }

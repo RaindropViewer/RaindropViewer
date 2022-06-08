@@ -21,11 +21,6 @@ namespace Raindrop.Tests.NetTests
             // Content type is JSON.
             request.ContentType = "application/json";
      
-            // Fill body.
-            // byte[] contentBytes = new UTF8Encoding().GetBytes(data);
-            // request.ContentLength = contentBytes.LongLength;
-            // request.GetRequestStream().Write(contentBytes, 0, contentBytes.Length);
-     
             try
             {
                 using(HttpWebResponse response = (HttpWebResponse)request.GetResponse())

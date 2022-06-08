@@ -1,43 +1,45 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 //using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
 
 namespace Raindrop.Presenters
 {
-    internal class LoginLocationDropdown
+    public class LoginLocationDropdown : MonoBehaviour
     {
-        TMP_Dropdown dropdown;
-        List<TMP_Dropdown.OptionData> data;
+        public TMP_Dropdown dropdown;
+        List<TMP_Dropdown.OptionData> options => dropdown.options;
 
-        public string selected => data[dropdown.value].text;
-        public int selectedId => dropdown.value;
-
-        //List<string> items;
-        public LoginLocationDropdown(TMP_Dropdown dd)
+        public string selected => options[dropdown.value].text;
+        public int value
         {
-            dropdown = dd;
-            data = new List<TMP_Dropdown.OptionData>();
-            string[] init = { "My Home", "My Last Location" };
+            get => dropdown.value;
+            set => dropdown.value = value;
+        }
+
+        private void Awake()
+        {
+            string[] init = { "My Home", "My Last Location" }; //home, last, custom.
             setDropdownItems(new List<string>(init));
-            dropdown.options = data;
         }
 
         public void addLast(string item)
         {
-            data.Add( new TMP_Dropdown.OptionData(item) );
+            options.Add( new TMP_Dropdown.OptionData(item) );
         }
 
         public void setDropdownItems(List<string> items)
         {
-            data.Clear();
+            options.Clear();
             foreach (string item in items)
             {
-                data.Add(new TMP_Dropdown.OptionData(item));
+                options.Add(new TMP_Dropdown.OptionData(item));
             }
         }
         public void clear()
         {
-            data.Clear();
+            options.Clear();
         }
 
         public void select(int id)

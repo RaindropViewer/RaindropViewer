@@ -643,6 +643,7 @@ namespace OpenMetaverse
             // then we skip any network download.
             if (!Client.Network.Connected)
             {
+                Logger.Log("Sound not played: \nSound clip " + assetID.ToString() + "was not found in the cache, and we are not connected to the network to fetch it.", Helpers.LogLevel.Info);
                 return;
             }
 

@@ -32,6 +32,7 @@ using System.IO.Compression;
 using System.Reflection;
 using OpenMetaverse.StructuredData;
 using ComponentAce.Compression.Libs.zlib;
+using UnityEngine;
 
 namespace OpenMetaverse
 {
@@ -469,6 +470,25 @@ namespace OpenMetaverse
         /// was not successfully loaded</returns>
         public static System.IO.Stream GetResourceStream(string resourceName, string searchPath)
         {
+            // unity-engine override, as we use our own api to get the root folder. 
+            //Asembly path is inaccurate for unityeditor
+            bool use_OpenMetaverse_Settings_Resource_Dir = true; //todo: use some api to know if library is running in unity
+            if (use_OpenMetaverse_Settings_Resource_Dir)
+            {
+                string dirname = OpenMetaverse.Settings.RESOURCE_DIR;
+                string filename = System.IO.Path.Combine(dirname, resourceName);
+                try
+                {
+                    return new System.IO.FileStream(
+                        filename,
+                        System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log($"Failed opening resource from file {filename}: {ex.Message}", LogLevel.Error);
+                }
+            }
+
             if (searchPath != null)
             {
                 Assembly gea = Assembly.GetEntryAssembly();
@@ -507,6 +527,7 @@ namespace OpenMetaverse
 
             return null;
         }
+        
         /// <summary>
         /// Converts a list of primitives to an object that can be serialized
         /// with the LLSD system

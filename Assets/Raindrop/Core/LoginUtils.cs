@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Plugins.CommonDependencies;
 using UnityEngine;
 
 namespace Raindrop
@@ -58,7 +59,7 @@ namespace Raindrop
 
             public override string ToString()
             {
-                RaindropInstance instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+                RaindropInstance instance = ServiceLocator.Instance.Get<RaindropInstance>();
                 string gridName;
                 if (GridID == "custom_login_uri")
                 {
@@ -85,19 +86,19 @@ namespace Raindrop
             s["password"] = string.Empty;
         }
 
-
-        public static bool getRememberFromSettings (Settings settings)
-        {
-            Settings s = settings;
-            return (bool) s["remember_login"];
-
-        }
-        public static void setRememberToSettings(Settings settings, bool isRemember)
-        {
-            Settings s = settings;
-            settings["remember_login"] = isRemember;
-
-        }
+        //
+        // public static bool getRememberFromSettings (Settings settings)
+        // {
+        //     Settings s = settings;
+        //     return (bool) s["remember_login"];
+        //
+        // }
+        // public static void setRememberToSettings(Settings settings, bool isRemember)
+        // {
+        //     Settings s = settings;
+        //     settings["remember_login"] = isRemember;
+        //
+        // }
 
 
 

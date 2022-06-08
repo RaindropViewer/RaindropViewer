@@ -1506,5 +1506,11 @@ namespace OpenMetaverse
         }
 
         #endregion Parameter Unpacking Methods
+        
+        public bool HasNoParent()
+        {
+            return (ParentID == 0);
+        }
+        
     }
 }

@@ -1,23 +1,14 @@
 using OpenMetaverse;
-using OpenMetaverse.StructuredData;
-using Raindrop;
 using Raindrop.Netcom;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 using System;
-using FMOD;
 using OpenMetaverse.Assets;
+using Plugins.CommonDependencies;
+using Plugins.ObjectPool;
 using Raindrop.Services;
-using Settings = Raindrop.Settings;
-using UnityEngine.UI;
-using UniRx;
 using TMPro;
-using static Raindrop.LoginUtils;
-using Avatar = OpenMetaverse.Avatar;
+using UnityEngine.Serialization;
 using Logger = OpenMetaverse.Logger;
-
 
 namespace Raindrop.Presenters
 {
@@ -25,9 +16,9 @@ namespace Raindrop.Presenters
 
     public class AvatarInfoPresenter : MonoBehaviour
     {
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private UIService uimanager => ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+        private UIService uimanager => ServiceLocator.Instance.Get<UIService>();
         
         #region UI elements - the 'view' in MVP
         public RawImageView avatarImg;
@@ -35,29 +26,61 @@ namespace Raindrop.Presenters
         #endregion
 
         #region internal data representation 
-
-        // public Avatar avatarShown;
-        public UUID aviID;
-        public UUID aviImgID { get; set; }
+        public UUID aviID = UUID.Zero;
+        [FormerlySerializedAs("avi2ndLifeImage")] public UUID avi2ndLifeImageID;
+        public Texture2D t2d_2;
+        public Texture2D t2d;
         #endregion
 
-         
+        enum State
+        {
+            Uninitialised,
+            Initialised
+            
+        }
+
+        private State state = State.Uninitialised;
+        
         void Start()
         {
-
-            AddNetcomEvents();
+            
+            if (instance != null)
+            {
+                if (netcom != null)
+                {
+                    init(instance.Client.Self.AgentID);
+                }
+            }
         }
 
-        private void UpdateAviName(string s)
+        public void init(UUID aviID)
         {
-            aviName.text = s;
+            this.aviID = aviID;
+            
+            t2d_2 = new Texture2D(69, 69);
+            t2d = new Texture2D(69, 69);
+            AddNetcomEvents();
+            state = State.Initialised;
         }
 
+        //on enable runs even before start...
+        private void OnEnable()
+        {
+            
+            if (state != State.Initialised)
+            {
+                return;
+            }
+            
+            //ask server for avatar info.
+            instance.Client.Avatars.RequestAvatarProperties(aviID);
+        }
         
-
         private void AddNetcomEvents()
         {
-            netcom.ClientConnected += NetcomOnClientConnected;
+            //raised by the call to  <see vref = "Netcom.Network_LoginProgress()" />
+            netcom.ClientConnected += NetcomOnClientConnected; 
+            
         }
 
         private void NetcomOnClientConnected(object sender, EventArgs e)
@@ -83,25 +106,27 @@ namespace Raindrop.Presenters
             // ID.
             this.aviID = e.AvatarID;
             
-            //Image UUID and image
-            this.aviImgID = e.Properties.ProfileImage;
-            instance.Client.Assets.RequestImage(e.AvatarID, ImageReady_Callback);
-            
             //UI - set name
             this.aviName.text = instance.Names.Get(aviID);
+            
+            //Image UUID and image
+            this.avi2ndLifeImageID = e.Properties.ProfileImage;
+            instance.Client.Assets.RequestImage(e.AvatarID, ImageReady_Callback);
+            
         }
 
         private void ImageReady_Callback(TextureRequestState state, AssetTexture assettexture)
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                var ok = assettexture.Decode(); //call openjpg to decode j2k->managedimage
-                if (ok)
+                var decodeSuccess = assettexture.Decode(); //call openjpg to decode j2k->managedimage
+                if (decodeSuccess)
                 {
-                    var img =   assettexture.Image;
-                    Texture2D t2d = img.ExportTex2D();
+                    var img = assettexture.Image;
+                    Texture2D t2d = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGB24);
+                    img.ExportTex2D(t2d);
                     
-                    this.avatarImg.setRawImage(t2d);
+                    avatarImg.setRawImage(t2d);
                 }
                 else
                 {
@@ -111,12 +136,11 @@ namespace Raindrop.Presenters
         }
 
 
+        //todo: make destor call this.
         private void RemoveNetcomEvents()
         {
             netcom.ClientLoggingIn -= new EventHandler<OverrideEventArgs>(NetcomOnClientConnected);
         }
-
-
 
     }
 

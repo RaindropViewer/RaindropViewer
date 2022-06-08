@@ -1,10 +1,9 @@
 ﻿using NUnit.Framework;
-using Raindrop;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
-using Raindrop.ServiceLocator;
 using UnityEngine.SceneManagement;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests
+namespace Raindrop.Tests.RaindropFullIntegrationTests
 {
     /*
      * UI-intensive tests for the chat functionality. the main scene will be loaded.

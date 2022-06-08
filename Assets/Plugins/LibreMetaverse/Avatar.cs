@@ -554,6 +554,5 @@ namespace OpenMetaverse
         }
 
         #endregion Properties
-
     }
 }

@@ -10,7 +10,9 @@
         "Unity.TextMeshPro",
         "AsyncImageLoader.Runtime",
         "Better",
-        "Main"
+        "GenericScripts",
+        "CommonDepedencies",
+        "ObjectPool"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

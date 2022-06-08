@@ -448,7 +448,7 @@
       <string>1</string>
     </map>
 
-    <!-- Local Host -->
+    <!-- Local Host (grid proxy) -->
 
     <map>
       <key>gridnick</key>

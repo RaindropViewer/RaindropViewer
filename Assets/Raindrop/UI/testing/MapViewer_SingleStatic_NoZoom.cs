@@ -15,7 +15,7 @@ using Raindrop.UI.Views;
 // lets you view the maps by choosing parameters.
 // use external API. does not need login.
 //for testing...
-
+[Obsolete]
 public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
 {
     
@@ -24,7 +24,7 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
 
     [SerializeField]
     public GameObject mapTileGO;
-    private MapTileView iv;
+    //private MapTileView iv;
 
     [SerializeField]
     public GameObject zoomSliderGO;
@@ -58,11 +58,11 @@ public class MapViewer_SingleStatic_NoZoom : MonoBehaviour
         InvokeRepeating("redrawMap", 5f, 5f);
 
         //get reference to the view.
-        iv = mapTileGO.GetComponent<MapTileView>();
-        if (iv == null)
-        {
-            throw new System.Exception("Imageview is fucked"); // fix exception type plz
-        }
+        //iv = mapTileGO.GetComponent<MapTileView>();
+        // if (iv == null)
+        // {
+        //     throw new System.Exception("Imageview is fucked"); // fix exception type plz
+        // }
 
         //get reference to the view.
         zoomSlider = zoomSliderGO.GetComponent<Slider>();

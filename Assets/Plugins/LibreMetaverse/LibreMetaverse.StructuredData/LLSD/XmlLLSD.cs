@@ -130,6 +130,7 @@ namespace OpenMetaverse.StructuredData
         /// </summary>
         /// <param name="data">OSD object to serialize</param>
         /// <returns>Serialized data as a byte aray</returns>
+        /// the bytes is UTF-8 formatted text. 
         public static byte[] SerializeLLSDXmlBytes(OSD data)
         {
             return Encoding.UTF8.GetBytes(SerializeLLSDXmlString(data));
@@ -145,8 +146,11 @@ namespace OpenMetaverse.StructuredData
             StringWriter sw = new StringWriter();
             using (XmlTextWriter writer = new XmlTextWriter(sw))
             {
-                writer.Formatting = Formatting.None;
-
+                // writer.Formatting = Formatting.None;
+                //Use indentation for readability.
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 2;
+                
                 writer.WriteStartElement(string.Empty, "llsd", string.Empty);
                 SerializeLLSDXmlElement(writer, data);
                 writer.WriteEndElement();

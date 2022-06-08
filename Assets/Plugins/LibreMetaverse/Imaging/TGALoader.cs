@@ -1,38 +1,8 @@
-/*
- * Copyright (c) 2006-2016, openmetaverse.co
- * All rights reserved.
- *
- * - Redistribution and use in source and binary forms, with or without
- *   modification, are permitted provided that the following conditions are met:
- *
- * - Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * - Neither the name of the openmetaverse.co nor the names
- *   of its contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
 
 using System;
 using System.IO;
-//using System.Drawing;
-//using System.Drawing.Imaging;
-//using Catnip.Drawing;
-//using Catnip.Drawing.Imaging;
-using Unity.Collections;
+using Plugins.ObjectPool;
 using UnityEngine;
-//using UnityEngine;
 
 namespace OpenMetaverse.Imaging
 {
@@ -43,7 +13,7 @@ namespace OpenMetaverse.Imaging
     /// </summary>
     public class LoadTGAClass
     {
-        struct tgaColorMap
+        public struct tgaColorMap
         {
             public ushort FirstEntryIndex;
             public ushort Length;
@@ -57,7 +27,7 @@ namespace OpenMetaverse.Imaging
             }
         }
 
-        struct tgaImageSpec
+        public struct tgaImageSpec
         {
             public ushort XOrigin;
             public ushort YOrigin;
@@ -101,7 +71,7 @@ namespace OpenMetaverse.Imaging
             }
         }
 
-        struct tgaHeader
+        public struct tgaHeader
         {
             public byte IdLength;
             public byte ColorMapType;
@@ -441,26 +411,49 @@ namespace OpenMetaverse.Imaging
                 decodePlain(b, texWidth, texHeight, 4, cd, br, hdr.ImageSpec.BottomUp);
         }
 
-        //load the tga and get a texture using a TGA byte array.
-        public static Texture2D LoadTGA(byte[] source)
+        
+        //Decode TGA file given in stream form.
+        public static Color32[] LoadTGAColors(System.IO.Stream source, out int width, out int height)
         {
+            using (System.IO.BinaryReader br = new System.IO.BinaryReader(source))
+            {
+                tgaHeader header = new tgaHeader();
+                header.Read(br);
 
-            System.IO.MemoryStream stream = new System.IO.MemoryStream();
-            stream.Write(source, 0, source.Length);
-            stream.Seek(0, SeekOrigin.Begin); //FUCKKK
+                if (header.ImageSpec.PixelDepth != 8 &&
+                    header.ImageSpec.PixelDepth != 16 &&
+                    header.ImageSpec.PixelDepth != 24 &&
+                    header.ImageSpec.PixelDepth != 32)
+                    throw new ArgumentException("Not a supported tga file.");
 
-            return LoadTGA(stream); // better refactor this mess later
+                //if (header.ImageSpec.PixelDepth == 8)
+                //    throw new ArgumentException("TGA texture had 8 bit depth.");
+                if (header.ImageSpec.PixelDepth == 16)
+                    throw new ArgumentException("TGA texture had 16 bit depth.");
 
+                if (header.ImageSpec.AlphaBits > 8)
+                    throw new ArgumentException("Not a supported tga file: too many Alpha bits");
+
+                if (header.ImageSpec.Width > 4096 ||
+                    header.ImageSpec.Height > 4096)
+                    throw new ArgumentException("Image too large.");
+
+                width = header.ImageSpec.Width;
+                height = header.ImageSpec.Height;
+                Color32[] pulledColors = new Color32[width * height];
+
+                //should support compressed texture too!
+                DoDecode(header, pulledColors, width, height, br);
+
+                return pulledColors;
+            }
         }
+        
+        
 
         //Decode TGA file given in stream form.
         public static Texture2D LoadTGA(System.IO.Stream source)
         {
-            //byte[] buffer = new byte[source.Length];
-            //int _readbytes = source.Read(buffer, 0, buffer.Length);
-
-            //System.IO.MemoryStream ms = new System.IO.MemoryStream(buffer);
-
             using (System.IO.BinaryReader br = new System.IO.BinaryReader(source))
             {
                 tgaHeader header = new tgaHeader();
@@ -485,104 +478,71 @@ namespace OpenMetaverse.Imaging
                     throw new ArgumentException("Image too large.");
 
 
-                //long len = br.BaseStream.Length;
-                //if (header.ImageSpec.PixelDepth == 24)
-                //{
-                //    long expectedBytes = header.ImageSpec.Width * header.ImageSpec.Height * 3;
-                //    if (len < expectedBytes)
-                //    {
-                //        //throw new ArgumentException("TGA texture has 24 bit depth, height and width of " +header.ImageSpec.Width+ " " + header.ImageSpec.Height+ " but the number of bytes in file is " + len);
-                //        throw new ArgumentException("the 24bit TGA file is smaller than expected");
-                //    }
-
-                //}
-                //if (header.ImageSpec.PixelDepth == 32)
-                //{
-                //    long expectedBytes = header.ImageSpec.Width * header.ImageSpec.Height * 4;
-                //    if (len < expectedBytes)
-                //    {
-                //        //throw new ArgumentException("TGA texture has 32 bit depth, height and width of " +header.ImageSpec.Width+ " " + header.ImageSpec.Height+ " but the number of bytes in file is " + len);
-                //        throw new ArgumentException("the 32bit TGA file is smaller than expected");
-                //    }
-
-                //}
-                //if (header.ImageSpec.PixelDepth == 8)
-                //{
-                //    long expectedBytes = header.ImageSpec.Width * header.ImageSpec.Height * 1;
-                //    if (len < expectedBytes)
-                //    {
-                //        //throw new ArgumentException("TGA texture has 32 bit depth, height and width of " +header.ImageSpec.Width+ " " + header.ImageSpec.Height+ " but the number of bytes in file is " + len);
-                //        throw new ArgumentException("the 8bit TGA file is smaller than expected");
-                //    }
-
-                //}
-
 
                 Texture2D b;
-                int width = header.ImageSpec.Width;
-                int height = header.ImageSpec.Height;
-                Color32[] pulledColors = new Color32[width * height];
-
-                //should support compressed texture too!
-
                 // Create a bitmap for the image.
                 // Only include an alpha layer when the image requires one.
                 if (header.ImageSpec.AlphaBits > 0 ||
                     header.ImageSpec.PixelDepth == 8 || // Assume  8 bit images are alpha only
                     header.ImageSpec.PixelDepth == 32)	// Assume 32 bit images are ARGB
                 {   // Image needs an alpha layer
-                    b = new Texture2D(
-                        header.ImageSpec.Width,
-                        header.ImageSpec.Height,
-                        TextureFormat.ARGB32,
-                        false
-                        /*PixelFormat.Format32bppArgb*/); 
-
-                    //Debug.Log("Debug the color: " + pulledColors[5]);  //ok we know these are correct.
-                    //Debug.Log("Debug the color: " + pulledColors[500]);
-                    //Debug.Log("Debug the color: " + pulledColors[50000]);
+                    b = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGBA32);
+                    
                 }
                 else
                 {   // Image does not need an alpha layer, so do not include one.
-                    b = new Texture2D(
-                        header.ImageSpec.Width,
-                        header.ImageSpec.Height,
-                        TextureFormat.RGB24,
-                        false
-                        /*PixelFormat.Format32bppRgb*/);
-
+                    //todo:
+                    b = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGB24);
                 }
 
-                switch (header.ImageSpec.PixelDepth)
-                {
-                    case 8:
-                        decodeStandard8(pulledColors, width,height, header, br);
-                        break;
-                    case 16:
-                        if (header.ImageSpec.AlphaBits > 0)
-                            decodeSpecial16(pulledColors, width, height, header, br);
-                        else
-                            decodeStandard16(pulledColors, width, height, header, br);
-                        break;
-                    case 24:
-                        if (header.ImageSpec.AlphaBits > 0)
-                            decodeSpecial24(pulledColors, width, height, header, br);
-                        else
-                            decodeStandard24(pulledColors, width, height, header, br);
-                        break;
-                    case 32:
-                        decodeStandard32(pulledColors, width, height, header, br);
-                        break;
-                    default:
-                        //b.UnlockBits(bd);
-                        //b.Dispose();
-                        return null;
-                }
+                
+                
+                int width = header.ImageSpec.Width;
+                int height = header.ImageSpec.Height;
+                Color32[] pulledColors = new Color32[width * height];
 
-                b.SetPixels32(pulledColors);
-                b.Apply();
+                //should support compressed texture too!
+                DoDecode(header, pulledColors, width, height, br);
+
+                //do setpixels + apply on main thread.
+                UnityMainThreadDispatcher.Instance().Enqueue(
+                    () =>
+                    {
+                        b.SetPixels32(pulledColors);
+                        b.Apply();
+                    });
+                //warn: b is not drawn yet.
 
                 return b;
+            }
+        }
+
+        public static void DoDecode(tgaHeader header, Color32[] pulledColors, int width, int height, BinaryReader br)
+        {
+            switch (header.ImageSpec.PixelDepth)
+            {
+                case 8:
+                    decodeStandard8(pulledColors, width, height, header, br);
+                    break;
+                case 16:
+                    if (header.ImageSpec.AlphaBits > 0)
+                        decodeSpecial16(pulledColors, width, height, header, br);
+                    else
+                        decodeStandard16(pulledColors, width, height, header, br);
+                    break;
+                case 24:
+                    if (header.ImageSpec.AlphaBits > 0)
+                        decodeSpecial24(pulledColors, width, height, header, br);
+                    else
+                        decodeStandard24(pulledColors, width, height, header, br);
+                    break;
+                case 32:
+                    decodeStandard32(pulledColors, width, height, header, br);
+                    break;
+                default:
+                    //b.UnlockBits(bd);
+                    //b.Dispose();
+                    return;
             }
         }
 
@@ -613,102 +573,19 @@ namespace OpenMetaverse.Imaging
 
         static public Color32 makeColor32fromUInt(uint x)
         {
-            return new Color32( (byte)( (x & 0x00FF0000) >> 16),
-                                (byte)( (x & 0x0000FF00) >> 8),
-                                (byte)(( x & 0x000000FF) >> 0),
-                                (byte)((x & 0xFF000000) >> 24)); //alpha
+            //ARGB32
+            //return new Color32( (byte)( (x & 0x00FF0000) >> 16),
+                                // (byte)( (x & 0x0000FF00) >> 8),
+                                // (byte)(( x & 0x000000FF) >> 0),
+                                // (byte)((x & 0xFF000000) >> 24)); //alpha
+            //RGBA32
+            return new Color32( (byte)( (x & 0xFF000000) >> 24), //R
+                                (byte)( (x & 0x00FF0000) >> 16), //G
+                                (byte)(( x & 0x0000FF00) >> 8), //B
+                                (byte)((x & 0x000000FF) >> 0)); //A
         }
 
     }
 
 #endif
 }
-
-
-//using System;
-//using System.IO;
-//using UnityEngine;
-//public static class TGALoader
-//{
-//    // Loads 32-bit (RGBA) uncompressed TGA. Actually, due to TARGA file structure, BGRA32 is good option...
-//    // Disabled mipmaps. Disabled read/write option, to release texture memory copy.
-//    public static Texture2D LoadTGA(string fileName)
-//    {
-//        try
-//        {
-//            BinaryReader reader = new BinaryReader(File.OpenRead(fileName));
-//            reader.BaseStream.Seek(12, SeekOrigin.Begin);
-//            short width = reader.ReadInt16();
-//            short height = reader.ReadInt16();
-//            reader.BaseStream.Seek(2, SeekOrigin.Current);
-//            byte[] source = reader.ReadBytes(width * height * 4);
-//            reader.Close();
-//            Texture2D texture = new Texture2D(width, height, TextureFormat.BGRA32, false);
-//            texture.LoadRawTextureData(source);
-//            texture.name = Path.GetFileName(fileName);
-//            texture.Apply(false, true);
-//            return texture;
-//        }
-//        catch (Exception)
-//        {
-//            return Texture2D.blackTexture;
-//        }
-//    }
-
-
-//    public static Texture2D LoadTGA(Stream TGAStream)
-//    {
-
-//        using (BinaryReader r = new BinaryReader(TGAStream))
-//        {
-//            // Skip some header info we don't care about.
-//            // Even if we did care, we have to move the stream seek point to the beginning,
-//            // as the previous method in the workflow left it at the end.
-//            r.BaseStream.Seek(12, SeekOrigin.Begin);
-
-//            short width = r.ReadInt16();
-//            short height = r.ReadInt16();
-//            int bitDepth = r.ReadByte();
-
-//            // Skip a byte of header information we don't care about.
-//            r.BaseStream.Seek(1, SeekOrigin.Current);
-
-//            Texture2D tex = new Texture2D(width, height);
-//            Color32[] pulledColors = new Color32[width * height];
-
-//            if (bitDepth == 32)
-//            {
-//                for (int i = 0; i < width * height; i++)
-//                {
-//                    byte red = r.ReadByte();
-//                    byte green = r.ReadByte();
-//                    byte blue = r.ReadByte();
-//                    byte alpha = r.ReadByte();
-
-//                    pulledColors[i] = new Color32(blue, green, red, alpha);
-//                }
-//            }
-//            else if (bitDepth == 24)
-//            {
-//                for (int i = 0; i < width * height; i++)
-//                {
-//                    byte red = r.ReadByte();
-//                    byte green = r.ReadByte();
-//                    byte blue = r.ReadByte();
-
-//                    pulledColors[i] = new Color32(blue, green, red, 1);
-//                }
-//            }
-//            else
-//            {
-//                throw new Exception("TGA texture had non 32/24 bit depth.");
-//            }
-
-//            tex.SetPixels32(pulledColors);
-//            tex.Apply();
-//            return tex;
-
-//        }
-//    }
-
-//}

@@ -30,7 +30,7 @@ public static partial class AsyncImageLoader {
 
     LoaderSettings _loaderSettings;
 
-    IntPtr _bitmap;
+    IntPtr _bitmap; //the freeimage bitmap
     int _width;
     int _height;
     TextureFormat _textureFormat;
@@ -46,6 +46,7 @@ public static partial class AsyncImageLoader {
         IntPtr memoryStream = IntPtr.Zero;
 
         try {
+          // 1. open memory to the input image bytes
           memoryStream = FreeImage.OpenMemory(
             Marshal.UnsafeAddrOfPinnedArrayElement(imageData, 0),
             (uint)imageData.Length
@@ -58,7 +59,7 @@ public static partial class AsyncImageLoader {
           if (_loaderSettings.format == FreeImage.Format.FIF_UNKNOWN) {
             throw new Exception("Cannot automatically determine the image format. Consider explicitly specifying image format.");
           }
-
+          // 2. do decode of the file into FIBitmap
           _bitmap = FreeImage.LoadFromMemory(_loaderSettings.format, memoryStream, 0);
           _width = (int)FreeImage.GetWidth(_bitmap);
           _height = (int)FreeImage.GetHeight(_bitmap);
@@ -70,6 +71,7 @@ public static partial class AsyncImageLoader {
 
           DetermineTextureFormat();
         } finally {
+          //3. close the memory stream in (1)
           if (memoryStream != IntPtr.Zero) FreeImage.CloseMemory(memoryStream);
         }
       }
@@ -106,6 +108,7 @@ public static partial class AsyncImageLoader {
       return texture;
     }
 
+    // write the data stored in _bitmap to the texture2d  
     public void LoadIntoTexture(Texture2D texture) {
       using (LoadIntoTextureMarker.Auto()) {
         var mipmapCount = CalculateMipmapCount(true);
@@ -206,7 +209,7 @@ public static partial class AsyncImageLoader {
       }
     }
 
-    void ProcessRawTextureData(NativeArray<byte> rawTextureView, int mipmapCount) {
+    public void ProcessRawTextureData(NativeArray<byte> rawTextureView, int mipmapCount) {
       using (ProcessRawTextureDataMarker.Auto()) {
         var mipmapDimensions = CalculateMipmapDimensions(0);
         var mipmapSize = mipmapDimensions.x * mipmapDimensions.y;

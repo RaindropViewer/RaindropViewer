@@ -1,34 +1,4 @@
-﻿// 
-// Radegast Metaverse Client
-// Copyright (c) 2009-2014, Radegast Development Team
-// All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 
-//     * Redistributions of source code must retain the above copyright notice,
-//       this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the application "Radegast", nor the names of its
-//       contributors may be used to endorse or promote products derived from
-//       this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// $Id$
-//
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -39,7 +9,8 @@ using Raindrop.Netcom;
 using Raindrop.Media;
 using Raindrop.UI.Notification;
 using OpenMetaverse;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
+using UnityEditor;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
 
@@ -54,20 +25,11 @@ namespace Raindrop
         private RaindropNetcom _netcom;
 
         private StateManager _state;
-        private string _appDataDir;
-        private string _streamingAssetsDir;
-
-        //private frmMain mainForm; //frmMain is a class that inherits RadegastForm. It seems to be the code-behind of the overall UI, that includes the view and buttons.
         
-        // Singleton, there can be only one instance
-
-
         // managed the chats that are loaded in memory. (including local chat.)
-        public ChatManager ChatManger { get { return chatManger; } }
-        private ChatManager chatManger;
-
-
-
+        // public ChatManager ChatManger { get { return chatManger; } }
+        // private ChatManager chatManger;
+        
         /// <summary>
         /// Manages retrieving avatar names
         /// </summary>
@@ -263,11 +225,7 @@ namespace Raindrop
 
         public RaindropInstance(GridClient client)
         {
-            _appDataDir = DirectoryHelpers.GetInternalCacheDir();
-            // _extAppDataDir = DirectoryHelpers.GetExternalCacheDir_WithInternalAsFallback();
-            // _streamingAssetsDir = Application.streamingAssetsPath;
-
-            InitializeLoggingAndConfig();
+            InitializeLoggingAndConfigAndUserDirectory();
 
             _client = client;
 
@@ -282,8 +240,8 @@ namespace Raindrop
                 Logger.Log("Mono runtime is detected. This should not happen except in the editor.", Helpers.LogLevel.Warning);
             }
 
-            //Keyboard = new Keyboard();
-            //Application.AddMessageFilter(Keyboard);
+            //init client file paths, client settings, and client events.
+            InitializeClient(_client);
 
             _netcom = new RaindropNetcom(this);
             _state = new StateManager(this);
@@ -294,14 +252,14 @@ namespace Raindrop
             //RegisterContextActions();
             _movement = new RaindropMovement(this);
 
-            InitializeClient(_client);
 
             //rlv = new RLVManager(this);
-            _gridManager = new GridManager(_appDataDir);
+            _gridManager = new GridManager(UserDir);
 
             _names = new NameManager(this);
             Cof = new CurrentOutfitFolder(this);
-            
+
+            _agentsTracker = new AgentsTracker(this);
 
             //ui_manager = new UIManager(this);
             //mainCanvas.InitializeControls();
@@ -310,36 +268,88 @@ namespace Raindrop
             //pluginManager = new PluginManager(this);
             //pluginManager.ScanAndLoadPlugins();
 
-            //chatManger = new ChatManager(this);
+            // chatManger = new ChatManager(this);
         }
 
         private void InitializeClient(GridClient client)
         {
+            string LightweightNetwork = "LightweightNetwork"; //i think this is like a only-retrieve simple data like chats mode.
+            bool isLightweightNetwork = false;
+            try
+            {
+                isLightweightNetwork = GlobalSettings[LightweightNetwork];
+
+            } catch (Exception ex)
+            {
+                Logger.Log("Failed loading Settings.LightweightNetwork: ", Helpers.LogLevel.Warning, client, ex);
+                GlobalSettings[LightweightNetwork] = isLightweightNetwork; //set some defaults so that next run may succeed.
+            }
+
+            string LightweightCPU = "LightweightCPU"; //i think this is like a no-render mode.
+            bool isLightweightCPU = false;
+            try
+            {
+                isLightweightCPU = GlobalSettings[LightweightCPU];
+
+            } catch (Exception ex)
+            {
+                Logger.Log("Failed loading Settings.LightweightCPU: ", Helpers.LogLevel.Warning, client, ex);
+                GlobalSettings[LightweightCPU] = isLightweightCPU; //set some defaults so that next run may succeed.
+            }
+
+            if (isLightweightNetwork)
+            {
+                client.Settings.ALWAYS_REQUEST_OBJECTS = false;
+                client.Settings.SEND_AGENT_UPDATES = false;
+
+            }
+            else
+            {
+                client.Settings.ALWAYS_REQUEST_OBJECTS = true;
+                client.Settings.SEND_AGENT_UPDATES = true;
+
+            }
+
+            if (isLightweightCPU)
+            {
+                client.Settings.STORE_LAND_PATCHES = false;
+                client.Settings.ALWAYS_DECODE_OBJECTS = false;
+                client.Settings.ENABLE_SIMSTATS = false;
+
+            }
+            else
+            {
+                client.Settings.STORE_LAND_PATCHES = true;
+                client.Settings.ALWAYS_DECODE_OBJECTS = true;
+                client.Settings.ENABLE_SIMSTATS = true;
+
+            }
+            
             client.Settings.MULTIPLE_SIMS = false;
 
             client.Settings.USE_INTERPOLATION_TIMER = false;
-            client.Settings.ALWAYS_REQUEST_OBJECTS = true;
-            client.Settings.ALWAYS_DECODE_OBJECTS = true;
             client.Settings.OBJECT_TRACKING = true;
-            client.Settings.ENABLE_SIMSTATS = true;
-            // client.Settings.FETCH_MISSING_INVENTORY = true;
             client.Settings.SEND_AGENT_THROTTLE = true;
-            client.Settings.SEND_AGENT_UPDATES = true;
-            client.Settings.STORE_LAND_PATCHES = true;
 
             client.Settings.USE_ASSET_CACHE = true;
-            client.Settings.ASSET_CACHE_DIR = Path.Combine(UserDir, "cache");
+            //1. init res dir: internalStrgeRoot/openmetavese_data.
+            OpenMetaverse.Settings.RESOURCE_DIR = Path.Combine(UserDir, "openmetaverse_data");
+            Logger.Log("resource root: " + OpenMetaverse.Settings.RESOURCE_DIR, Helpers.LogLevel.Info);
+            //2. init asset cache dir: internalStrgeRoot/openmetavese_data/cache.
+            client.Settings.ASSET_CACHE_DIR = Path.Combine(OpenMetaverse.Settings.RESOURCE_DIR, "cache");
+            Logger.Log("Asset cache: " + client.Settings.ASSET_CACHE_DIR, Helpers.LogLevel.Info);
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
             client.Throttle.Total = 5000000f; //0.625 megabytes.
             client.Settings.THROTTLE_OUTGOING_PACKETS = true; //please throttle to be good boy.
-            client.Settings.LOGIN_TIMEOUT = 120 * 1000;
-            client.Settings.SIMULATOR_TIMEOUT = 180 * 1000;
+            client.Settings.LOGIN_TIMEOUT = 47 * 1000; //120
+            client.Settings.SIMULATOR_TIMEOUT = 180 * 1000; //180
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
 
             client.Self.Movement.AutoResetControls = false;
             client.Self.Movement.UpdateInterval = 2500; //2.5 seconds?
+            client.Settings.DISABLE_AGENT_UPDATE_DUPLICATE_CHECK = false; //lets be not-rude.
 
             RegisterClientEvents(client);
         }
@@ -614,11 +624,12 @@ namespace Raindrop
         }
 
         // for simplicity, we will always use internal dir for settings.
-        private void InitializeLoggingAndConfig()
+        private void InitializeLoggingAndConfigAndUserDirectory()
         {
             try
             {
-                UserDir = Path.Combine(_appDataDir, _programname);
+                var internalDir = DirectoryHelpers.GetInternalStorageDir();
+                UserDir = internalDir;
                 if (!Directory.Exists(UserDir))
                 {
                     Directory.CreateDirectory(UserDir);
@@ -626,8 +637,14 @@ namespace Raindrop
             }
             catch (Exception)
             {
-                Logger.DebugLog("unable to create UserDir: " + UserDir);
-                //UserDir = System.Environment.CurrentDirectory;
+                Logger.Log("App termination due to: unable to create UserDir: " + UserDir, Helpers.LogLevel.Error);
+                #if !UNITY_EDITOR
+                Application.Quit();
+                #endif
+
+                #if UNITY_EDITOR
+                EditorApplication.isPlaying = false;
+                #endif
             };
 
             _globalLogFile = Path.Combine(UserDir, _programname + ".log");
@@ -649,6 +666,11 @@ namespace Raindrop
         {
             get { return _state; }
         }
+
+        public AgentsTracker AgentsTracker {
+            get { return _agentsTracker; }
+        }
+        private AgentsTracker _agentsTracker;
 
         //public TabsConsole TabConsole
         //{

@@ -34,6 +34,45 @@ public static partial class AsyncImageLoader {
     }
   }
 
+  
+  // load the bitmap inside texture2d into a byte array of desired encoding
+  public static object SaveImage(Texture2D texture, ref byte[] jp2, LoaderSettings loaderSettings)
+  {
+    try {
+      if (texture == null || !texture.isReadable) throw new System.Exception("Input data is null or empty.");
+
+      using (var exporter = new ImageExporter(texture, loaderSettings)) {
+        exporter.ExportFromTexture(ref jp2);
+      }
+
+      return true;
+    } catch (System.Exception e) {
+      if (loaderSettings.logException) Debug.LogException(e);
+
+      return false;
+    }
+  }
+  
+  // load the color32-bitmap into a byte array of desired encoding
+  public static object SaveImage(Color32[] texture, ref byte[] jp2, LoaderSettings loaderSettings)
+  {
+    try {
+      if (texture == null || texture.Length == 0) throw new System.Exception("Input data is null or empty.");
+
+      todo:
+      // using (var exporter = new ImageExporter(texture, loaderSettings)) {
+      //   exporter.ExportFromTexture(ref jp2);
+      // }
+
+      return true;
+    } catch (System.Exception e) {
+      if (loaderSettings.logException) Debug.LogException(e);
+
+      return false;
+    }
+  }
+  
+  
   /// <summary> Load image asynchronously. This variant uses the default <c>LoaderSettings</c>.</summary>
   /// <returns>True if the data can be loaded, false otherwise.</returns>
   public static Task<bool> LoadImageAsync(Texture2D texture, byte[] data) {
@@ -137,4 +176,5 @@ public static partial class AsyncImageLoader {
       logException = true,
     };
   }
+
 }

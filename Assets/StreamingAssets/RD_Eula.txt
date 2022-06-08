@@ -1,0 +1,15 @@
+Product: Raindrop Viewer 
+version: <see botton right corner>
+This product is offered 'as-is' and no support or warranty is offered.
+
+Contact info:
+Discord: 
+Email raindropviewer@gmail.com for important issues.
+
+Privacy policy:
+- This application does not collect your information. 
+- However, it utilises various 3rd party libraries and frameworks, which may collect your information: 
+> Unity game engine
+> LibreMetaverse library
+
+If you disagree with any of above information, please quit now and refrain from using this software.

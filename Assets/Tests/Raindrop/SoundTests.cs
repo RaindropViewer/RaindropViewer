@@ -1,27 +1,89 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.IO;
 using NUnit.Framework;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop;
+using Raindrop.Media;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Tests.Raindrop
+namespace Raindrop.Tests.Sounds
 {
     [TestFixture()]
     public class SoundTests
     {
-        // Prerequisite: you have copied a ogg file into the
-        // cache at /cache/0/0/00000000-0000-0000-0000-000000000000
-        
-        // you will hear audio play. no exceptions thrown. green tick.
-        [UnityTest]
-        public IEnumerator Play_CachedSound_IsSuccessful()
+
+        [SetUp]
+        public void Setup()
         {
-            RaindropInstance instance = new RaindropInstance(new GridClient());
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
+        }
+
+        // copy sample audio to cache.
+        // play sound is called.
+        //
+        // Expected: no exceptions thrown. you will hear audio play.
+        [UnityTest]
+        public IEnumerator OfflineCachedSound_IsPlayable_NoError()
+        {
+            yield return new WaitForSeconds(5);
+
+            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var internalDir = instance.UserDir;
+
+            //copy the sound file to cache path in a haphazard manner:
+            string relativePath_SoundFile = Path.Combine("test", "sound", "00000000-0000-0000-0000-000000000000");
+            var fromPath = Path.Combine(internalDir, relativePath_SoundFile);
+            var toPath = Path.Combine(instance.Client.Settings.ASSET_CACHE_DIR, "0", "0", "00000000-0000-0000-0000-000000000000");
+            DeleteTestFile(toPath);
+            CopyTestFile(fromPath, toPath);
 
             instance.MediaManager.PlayUISound(UUID.Zero);
 
-            instance.CleanUp();
+            Debug.Log("play sound");
+            yield return new WaitForSeconds(20);
+
+            DeleteTestFile(toPath);
+            yield break;
+
+            static void DeleteTestFile(string toPath)
+            {
+                if (File.Exists(toPath))
+                {
+                    File.Delete(toPath);
+                }
+            }
+
+            static void CopyTestFile(string fromPath, string toPath)
+            {
+                try
+                {
+                    File.Copy(fromPath, toPath);
+                }
+                catch
+                {
+                    Debug.Log("failed to copy sample sound file for the test.");
+                }
+            }
+        }
+
+        // Prerequisite: you have copied a ogg file into the
+        // cache at /cache/0/0/00000000-0000-0000-0000-000000000000
+
+        // you will hear audio play. no exceptions thrown. green tick.
+        [UnityTest]
+        public IEnumerator OfflineUncachedSound_Playable_ButNoSound()
+        {
+            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+
+            instance.MediaManager.PlayUISound(UUID.Zero); 
+
+            Debug.Log("play sound");
+            yield return new WaitForSeconds(20);
+
             yield break;
         }
     

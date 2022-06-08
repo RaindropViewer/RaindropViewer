@@ -1,14 +1,12 @@
 ﻿using System.IO;
-using System.Reflection;
 using System.Threading;
 using Disk;
-using log4net;
-using log4net.Appender;
-using log4net.Config;
-using log4net.Layout;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityScripts.Disk;
 using Logger = OpenMetaverse.Logger;
 
 namespace Raindrop.Services.Bootstrap
@@ -19,19 +17,27 @@ namespace Raindrop.Services.Bootstrap
     //Just attach this script as a component of the game manager. You don't need anything else, unless you want the UI.
     public class RaindropBootstrapper : MonoBehaviour
     {
-        //private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-        //private RaindropNetcom netcom => instance.Netcom;
         private void Awake()
         {
             Start_Raindrop_CoreDependencies();
+
+            StartUIScene();
         }
 
-        //create the gameobject that helps to create the filesystem
-        private static void Init_StaticFileSystem()
+        private void StartUIScene()
         {
-            // start the startupCopier
-            var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
+            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
+        }
+
+        //perform check-copy operation.
+        private static void CheckAndUpdate_StaticFileSystem()
+        {
+            var copier = StaticFilesCopier.GetInstance();
+            var copy_result = copier.Work();
+            if (copy_result == -1)
+            {
+                Logger.Log("static files copier failed", Helpers.LogLevel.Error);
+            }
         }
 
         private static void SendStartupMessageToLogger()
@@ -44,11 +50,11 @@ namespace Raindrop.Services.Bootstrap
             //0. start rolling log file
             // ConfigureRollingLogFile();
 
-            startupPrintLogger();
+            StartupPrintLogger();
             
-            Assign_MainThreadReference();
+            Init_Globals();
             
-            Init_StaticFileSystem();
+            CheckAndUpdate_StaticFileSystem();
             
             //0. start servicelocator pattern.
             StartServiceLocator();
@@ -57,41 +63,47 @@ namespace Raindrop.Services.Bootstrap
             CreateAndRegister_RaindropInstance();
         }
 
-        private static void Assign_MainThreadReference()
+        private static void Init_Globals()
         {
-            Globals.GMainThread = System.Threading.Thread.CurrentThread;
+            Globals.Init();
         }
 
        
-        public static void startupPrintLogger()
+        public static void StartupPrintLogger()
         {
             Logger.Log("Logger is ready", Helpers.LogLevel.Debug);
             Logger.Log("Logger is logging to : "+  Path.Combine(
-                    DirectoryHelpers.GetInternalCacheDir(),
+                    DirectoryHelpers.GetInternalStorageDir(),
                     "log.txt")
                 , Helpers.LogLevel.Debug);
         }
 
         public static void CreateAndRegister_RaindropInstance()
         {
-            if (ServiceLocator.ServiceLocator.Instance.IsRegistered<RaindropInstance>()) 
+            if (ServiceLocator.Instance.IsRegistered<RaindropInstance>()) 
                 return;
             
             var rdi = new RaindropInstance(new GridClient());
-            ServiceLocator.ServiceLocator.Instance.Register<RaindropInstance>(rdi);
+            ServiceLocator.Instance.Register<RaindropInstance>(rdi);
             SendStartupMessageToLogger();
         }
 
         public static void StartServiceLocator()
         {
-            if (ServiceLocator.ServiceLocator.Instance == null)
+            if (ServiceLocator.Instance == null)
             {
-                ServiceLocator.ServiceLocator.Initiailze();
+                ServiceLocator.Initiailze();
             }
         }
         
         
-        void OnApplicationQuit()
+        public void OnApplicationQuit()
+        {
+            Quit_Application();
+        }
+
+        // globally- accessible quit method.
+        public void Quit_Application()
         {
             void SaveInventoryToDiskAndLogout(RaindropInstance raindropInstance, RaindropNetcom raindropNetcom)
             {
@@ -111,7 +123,7 @@ namespace Raindrop.Services.Bootstrap
             RaindropInstance instance;
             try
             {
-                instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+                instance = ServiceLocator.Instance.Get<RaindropInstance>();
             }
             catch
             {
@@ -119,9 +131,9 @@ namespace Raindrop.Services.Bootstrap
             }
 
             RaindropNetcom netcom = instance.Netcom;
-            
+
             OpenMetaverse.Logger.Log("Application ending after " + Time.time + " seconds"
-                , Helpers.LogLevel.Debug); 
+                , Helpers.LogLevel.Debug);
 
             // if (statusTimer != null)
             // {
@@ -154,10 +166,10 @@ namespace Raindrop.Services.Bootstrap
             //     instance.UnregisterClientEvents(client);
             // }
 
-            //if (instance?.Names != null)
-            //{
-            //    instance.Names.NameUpdated -= new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
-            //}
+            // if (instance?.Names != null)
+            // {
+            //     instance.Names.NameUpdated -= new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
+            // }
 
             instance.CleanUp();
         }

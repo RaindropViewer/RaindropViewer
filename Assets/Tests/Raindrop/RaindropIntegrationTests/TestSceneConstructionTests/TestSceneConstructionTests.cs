@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using NUnit.Framework;
-using Tests.Raindrop.RaindropIntegrationTests.Helpers;
+using Raindrop.Tests.RaindropIntegrationTests.Helpers;
 using UnityEngine.TestTools;
 
-namespace Tests.Raindrop.RaindropIntegrationTests.TestSceneConstructionTests
+namespace Raindrop.Tests.RaindropIntegrationTests.TestSceneConstructionTests
 {
     //test that it is possible to construct the test scene.
     //the test scene contains no UI, but has a bootstrapped raindropinstance
@@ -15,7 +15,6 @@ namespace Tests.Raindrop.RaindropIntegrationTests.TestSceneConstructionTests
         public IEnumerator SceneLoading_Bootstrapper_IsSuccessful()
         {
             yield return SceneLoader.LoadHeadlessScene();
-
             yield break;
         }
 
