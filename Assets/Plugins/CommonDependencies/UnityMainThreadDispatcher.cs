@@ -28,18 +28,25 @@ using System.Threading.Tasks;
 /// </summary>
 public class UnityMainThreadDispatcher : MonoBehaviour
 {
-	
+	public static int MaxTasksPerUpdateCall = 3;
 	
 
 	private static readonly Queue<Action> _executionQueue = new Queue<Action>();
 
 	public void Update()
 	{
+		int count = 0;
 		lock (_executionQueue)
 		{
 			while (_executionQueue.Count > 0)
 			{
 				_executionQueue.Dequeue().Invoke();
+				
+				count++;
+				if (count >= MaxTasksPerUpdateCall)
+				{
+					break;
+				}
 			}
 		}
 	}
