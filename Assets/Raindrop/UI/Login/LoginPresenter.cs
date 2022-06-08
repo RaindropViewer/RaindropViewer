@@ -1,4 +1,5 @@
 using System.Collections;
+using Plugins.CommonDependencies;
 using Raindrop.Presenters;
 using Raindrop.Services;
 using TMPro;
@@ -12,10 +13,10 @@ namespace Raindrop.UI.Login
 {
     public class LoginPresenter : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
 
         private UIService Uimanager =>
-            ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            ServiceLocator.Instance.Get<UIService>();
 
         #region UI elements - the 'view' in MVP
         //main
@@ -34,14 +35,7 @@ namespace Raindrop.UI.Login
 
         public string Password { get; set; }
 
-        public bool isSaveCredentials
-        {
-            get => RememberCheckbox.isOn;
-            set
-            {
-                RememberCheckbox.isOn = value;
-            }
-        } 
+        // public bool isSaveCredentials => true;
 
         public bool agreeTOS { get; set; } = true;
 
@@ -105,13 +99,13 @@ namespace Raindrop.UI.Login
             //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
 
             //DropdownMenuWithEntry = UserDropdownMenu.GetComponent<DropdownMenuWithEntry>();
-            RememberCheckbox.onValueChanged.AddListener(OnRememberCredsToggle);
+            // RememberCheckbox.onValueChanged.AddListener(OnRememberCredsToggle);
         }
 
-        private void OnRememberCredsToggle(bool isOn)
-        {
-            instance.GlobalSettings["remember_login"] = isOn;
-        }
+        // private void OnRememberCredsToggle(bool isOn)
+        // {
+        //     instance.GlobalSettings["remember_login"] = isOn;
+        // }
 
         private void OnEnable()
         {

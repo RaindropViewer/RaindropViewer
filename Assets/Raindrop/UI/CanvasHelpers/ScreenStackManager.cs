@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenMetaverse;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,8 +12,8 @@ using UnityEngine.Serialization;
 //on start, it searches children for all canvases.
 public class ScreenStackManager : MonoBehaviour
 { 
-    [Tooltip("The canvases that are available to use.")]
-    public List<CanvasIdentifier> availableCanvases = new List<CanvasIdentifier>();
+    [FormerlySerializedAs("availableCanvases")] [Tooltip("The canvases that are available to use.")]
+    public List<CanvasIdentifier> linkedCanvases = new List<CanvasIdentifier>();
     [Tooltip("The canvases that are created and in memory stack.")]
     public Stack<CanvasIdentifier> activeCanvasStack = new Stack<CanvasIdentifier>();
 
@@ -43,13 +43,13 @@ public class ScreenStackManager : MonoBehaviour
             var _ = transform.GetChild(i).GetComponent<CanvasIdentifier>();
             if (_ != null)
             {
-                availableCanvases.Add(_);
+                linkedCanvases.Add(_);
             }
         }
 
         try
         {
-            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
+            linkedCanvases.ForEach(x => x.gameObject.SetActive(false));
         }
         catch (Exception e)
         {
@@ -62,12 +62,12 @@ public class ScreenStackManager : MonoBehaviour
     {
         if (! IsEulaAccepted())
         {
-            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
+            linkedCanvases.ForEach(x => x.gameObject.SetActive(false));
             Push(CanvasType.Eula);
         }
         else
         {
-            availableCanvases.ForEach(x => x.gameObject.SetActive(false));
+            linkedCanvases.ForEach(x => x.gameObject.SetActive(false));
             Push(initialPage);
         }
     }
@@ -105,7 +105,7 @@ public class ScreenStackManager : MonoBehaviour
     }
     public void Push(CanvasType type)
     {
-        CanvasIdentifier desiredCanvas = availableCanvases.Find(x => x.canvasType == type);
+        CanvasIdentifier desiredCanvas = linkedCanvases.Find(x => x.canvasType == type);
      
         //check if the canvas is not supported:
         if (desiredCanvas == null)
@@ -123,10 +123,10 @@ public class ScreenStackManager : MonoBehaviour
         if (activeCanvasStack.Count() != 0)
         {
             var lastActiveCanvas = activeCanvasStack.Peek();
-            lastActiveCanvas.gameObject.SetActive(false);
+            lastActiveCanvas.gameObject.SetActive(false); //todo
         }
         //push it
-        desiredCanvas.gameObject.SetActive(true);
+        desiredCanvas.gameObject.SetActive(true); //todo.
         activeCanvasStack.Push(desiredCanvas);
     }
 

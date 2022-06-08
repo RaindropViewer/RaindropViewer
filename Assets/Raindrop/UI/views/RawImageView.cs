@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using Plugins.ObjectPool;
 using Raindrop;
 using Raindrop.Services.Bootstrap;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ public class RawImageView  : MonoBehaviour
         var image = (Texture2D)this.GetComponent<RawImage>().texture;
         if (image != null)
         {
-            TexturePool.ReturnToPool(image);
+            TexturePoolSelfImpl.GetInstance().ReturnToPool(image);
             // Object.Destroy(this.GetComponent<RawImage>().texture);
         }
         this.GetComponent<RawImage>().texture = defaultImg;

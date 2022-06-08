@@ -1,17 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Raindrop;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
-using Raindrop.ServiceLocator;
 using Raindrop.Services;
-using Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines;
+using Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests
+namespace Raindrop.Tests.RaindropFullIntegrationTests
 {
     /*
      * UI intensive, full integration tests for the login functionality. 
@@ -23,19 +22,22 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         private List<string> _gridFriendlyNames = new List<string>()
         {
             "Second Life (agni)",
-            "Metropolis Metaversum"
+            "Metropolis Metaversum",
+            "Local Host"
             // "https://login.agni.lindenlab.com/cgi-bin/login.cgi",
             // "login.metro.land"
         };
         List<string> GridUsers = new List<string>()
         {
             "***REMOVED*** Resident",
-            "Raindrop Raindrop"
+            "Raindrop Raindrop",
+            "Test User"
         };
         List<string> GridPass = new List<string>()
         {
             "***REMOVED***",
-            "***REMOVED***"
+            "***REMOVED***",
+            "password"
         };
 
         
@@ -47,7 +49,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         public void OneTimeSetUp()
         {
             //load the main scene.
-            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene"); 
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
         }
         
         [OneTimeTearDown]
@@ -109,23 +111,27 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         [Timeout(100000000)]
         public IEnumerator LoginAndDoNothing()
         {
+            int userIdx = 2;
+            
+            Debug.Log("Logging to " + _gridFriendlyNames[userIdx]);
+            
             GetTo_LoginScreen();
 
-            SetClient_SettingsMinimal();
+            // SetClient_SettingsMinimal();
             
             var uiSrv = ServiceLocator.Instance.Get<UIService>();
 
             //finally, do login.
             //1b. we are on the welcome screen.
             Assert.True(
-                uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Welcome,
+                uiSrv.GetPresentCanvasType() == CanvasType.Welcome,
                 "expect current view to be welcome canvas");
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(5);
                 
             // 1c. do "select grid by ui"
             //get knwon grids
             var grids = instance.GridManger.Grids;
-            string friendlyName_grid = _gridFriendlyNames[0];
+            string friendlyName_grid = _gridFriendlyNames[userIdx];
             yield return LoginTests.Utils.UIHelpers.Click_Dropdown_Then_Select_ByString(
                 "GridDropdown",
                 friendlyName_grid
@@ -136,10 +142,8 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             yield return LoginTests.Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
                 
             //1b. we are on the login screen. do login. assert logged in.
-            Assert.IsTrue(uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Login);
-            Login.PresenterType_IsAvailable( uiSrv.ScreenStackManager);
-
-            yield return Login.StartLogin(GridUsers[0], GridPass[0]);
+            Assert.IsTrue(uiSrv.GetPresentCanvasType() == CanvasType.Login);
+            yield return Login.StartLogin(GridUsers[userIdx], GridPass[userIdx]);
             // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
             yield return new WaitForSeconds(12);
 
@@ -183,6 +187,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
         public static IEnumerator GetTo_LoginScreen()
         {
             //0. is the scene ready?
+            yield return new WaitForSeconds(2);
             var viewsManager = Get_ViewsManager();
 
             //1. get UI service.
@@ -196,10 +201,9 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
             {
                 Assert.Fail("UIService unavailable.");
             }
-            // uiSrv.resetUI();
             
             //1a. accept the eula if it appears.
-            if (uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Eula)
+            if (uiSrv.GetPresentCanvasType() == CanvasType.Eula)
             {
                 // well, we need to agree to eula first.
                 yield return Login.accepttheeula();
@@ -221,7 +225,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
                 public static IEnumerator Click_Button_Welcome2LoginScreen()
                 {
                     Assert.IsTrue(
-                        InputSubroutines.UIHelpers.Click_ButtonByUnityName("LetsGo!")
+                        global::Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines.UIHelpers.Click_ButtonByUnityName("LetsGo!")
                         );
                     yield return new WaitForSeconds(2); // if you remvoe this one you will fail the test.
                 }
@@ -243,9 +247,10 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests
                     Assert.NotNull(TMP_dd);
 
                     Assert.IsTrue(
-                        InputSubroutines.UIHelpers.Click_DropdownEntry_ByName(
+                        global::Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines.UIHelpers.Click_DropdownEntry_ByName(
                             TMP_dd,
-                            targetDropdownEntry)
+                            targetDropdownEntry),
+                        "The entry " + targetDropdownEntry.ToString() + " does not exist"
                     );
                     yield return new WaitForSeconds(1);
                 }

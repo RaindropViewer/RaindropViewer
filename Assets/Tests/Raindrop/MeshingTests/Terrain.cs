@@ -6,7 +6,7 @@ using Raindrop.Render;
 using UnityEngine;
 using Mesh = UnityEngine.Mesh;
 
-namespace Tests.Raindrop.MeshingTests
+namespace Raindrop.Tests.MeshingTests
 {
     public class Terrain
     {
@@ -58,7 +58,7 @@ namespace Tests.Raindrop.MeshingTests
 
             //unity part terrain mesh.
             var mesh = new Mesh();
-            UniMesher.Mesh_Face(face, ref mesh);
+            UniMesher.MeshFromFace(face, mesh);
             Assert.True(mesh.vertexCount == face.Vertices.Count);
             
             Face OMVSingleQuad_TerrainMesh()

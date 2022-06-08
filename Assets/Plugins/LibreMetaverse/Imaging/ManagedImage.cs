@@ -25,6 +25,7 @@
  */
 
 using System;
+using Plugins.CommonDependencies;
 using Unity.Collections;
 //using System.Drawing;
 //using System.Drawing.Imaging;
@@ -122,12 +123,37 @@ namespace OpenMetaverse.Imaging
         }
 
 #if !NO_UNSAFE
+
+        public ManagedImage(Color32[] bitmap, int height, int width)
+        {
+            Width = width;
+            Height = height;
+            int pixelCount = Width * Height;
+
+            //todo: by default, we assume A,r,g,b,channels are all present
+            Channels = ImageChannels.Alpha | ImageChannels.Color;
+            Red = new byte[pixelCount];
+            Green = new byte[pixelCount];
+            Blue = new byte[pixelCount];
+            Alpha = new byte[pixelCount];
+
+            for (int i = 0; i < pixelCount; i++)
+            {
+                Color32 bit = bitmap[i]; // tex.GetPixel(i%Width , i / Width);
+                Blue[i] = bit.b;
+                Green[i] = bit.g;
+                Red[i] = bit.r;
+                Alpha[i] = bit.a;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="bitmap"></param>
         /// 
         //apparently this method only loads the image (.tga) as a bitmap, then returns it as a managed image. the bitmap is not used. perhaps we can skip this intermediary?
+        // warn: Must be run in main thread.
         public ManagedImage(Texture2D tex)
         {
             Width = tex.width;
@@ -135,7 +161,7 @@ namespace OpenMetaverse.Imaging
 
             int pixelCount = Width * Height;
 
-            if (tex.format == TextureFormat.ARGB32)   //PixelFormat.Format32bppArgb  --- 32 bits per pixel; 8 bits each are used for the alpha, red, green, and blue 
+            if (tex.format == TextureFormat.RGBA32)   //PixelFormat.Format32bppArgb  --- 32 bits per pixel; 8 bits each are used for the alpha, red, green, and blue 
             {
                 Channels = ImageChannels.Alpha | ImageChannels.Color;
                 Red = new byte[pixelCount];
@@ -424,9 +450,16 @@ namespace OpenMetaverse.Imaging
         /// origin, suitable for feeding directly into OpenGL
         /// </summary>
         /// <returns>A byte array containing raw texture data</returns>
-        public Texture2D ExportTex2D()
+        public void ExportTex2D(Texture2D reference)
         {
-            byte[] raw = new byte[Width * Height * 4];
+            //check for bad thread.
+            if (!UnityMainThreadDispatcher.isOnMainThread())
+            {
+                throw new WrongThreadException();
+            }
+            
+            int byteCount = Width * Height * 4;
+            byte[] raw = new byte[byteCount];
 
             if ((Channels & ImageChannels.Alpha) != 0)
             {
@@ -465,15 +498,24 @@ namespace OpenMetaverse.Imaging
                 }
             }
 
-            Texture2D b = new Texture2D(Width, Height,TextureFormat.ARGB32,false);
+            // take the texture that the caller passed in...
+            Texture2D b = reference;
             b.hideFlags = HideFlags.HideAndDontSave; //this helps us delete this texture later?
 
+            //do a resize if required.
+            if (b.height != Height || b.width != Width)
+            {
+                //do resize
+                b.Resize(Width, Height);
+            }
+            
+            //do a quick sanity check that the sizes are exact same.
             var mip0Data = b.GetPixelData<Color32>(0);
-
-            if (mip0Data.Length != Width * Height)
+            var mip0ByteCount = b.format == TextureFormat.RGBA32 ?  mip0Data.Length * 4 : mip0Data.Length * 3; //4 bytes per texel.
+            if (mip0ByteCount != byteCount) //LHS is mip texel count. //RHS is byte array texel count 
             {
                 Debug.LogError("mip0 data size (of texture) not match the data size of array! "
-                               + (mip0Data.Length).ToString() + " vs "+ (Width * Height).ToString()
+                               + mip0ByteCount.ToString() + " vs "+ (byteCount).ToString()
                                );
             } 
 
@@ -484,12 +526,12 @@ namespace OpenMetaverse.Imaging
                 var green = raw[i * 4 + 1];
                 var red = raw[i * 4 + 2];
                 var alpha = raw[i * 4 + 3];
-                mip0Data[i] = new Color32(alpha, red, green, blue);
+                mip0Data[i] = new Color32(red, green, blue, alpha);
             }
 
             b.LoadRawTextureData(mip0Data);
             b.Apply(false);
-            return b;
+            // return b;
         }
 
         public byte[] ExportTGA()

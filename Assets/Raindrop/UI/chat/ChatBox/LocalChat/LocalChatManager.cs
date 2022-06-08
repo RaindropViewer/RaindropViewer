@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using Object = System.Object;
 using System.Text.RegularExpressions;
+using Plugins.CommonDependencies;
 using Raindrop.Core;
 using Raindrop.Services;
 using Raindrop.Services.Bootstrap;
@@ -76,7 +77,7 @@ namespace Raindrop
 
         private void InitializeConfig()
         {
-            var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            var ui = ServiceLocator.Instance.Get<UIService>();
 
             Settings s = instance.GlobalSettings;
             

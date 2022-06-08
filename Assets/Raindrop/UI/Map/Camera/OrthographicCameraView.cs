@@ -61,17 +61,17 @@ namespace Raindrop.UI.Views
         {
             var dest = new UE.Vector3
                 (vec.x, vec.y, transform.position.z);
-            lerpCamTo(this.gameObject.transform, dest, 1);
+            lerpCamTo(dest, 1);
         }
 
 
-        public void lerpCamTo(Transform transform, Vector2 targetPosition, float duration)
+        public void lerpCamTo(Vector2 targetPosition, float duration)
         {
-            var coroutine = lerpTo(transform, targetPosition, duration);
+            var coroutine = lerpTo(targetPosition, duration);
             StartCoroutine(coroutine);
         }
 
-        IEnumerator lerpTo(Transform transform, Vector2 targetPosition, float duration)
+        IEnumerator lerpTo(Vector2 targetPosition, float duration)
         {
             float time = 0;
             Vector2 startPosition = transform.position;

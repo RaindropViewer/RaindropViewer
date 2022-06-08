@@ -1,9 +1,9 @@
 using OpenMetaverse;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using Raindrop.Services;
 using System.Collections;
 using System.Collections.Generic;
+using Plugins.CommonDependencies;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]

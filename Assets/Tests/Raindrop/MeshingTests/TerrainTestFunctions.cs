@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Tests.Raindrop.MeshingTests
+namespace Raindrop.Tests.MeshingTests
 {
     public class TerrainTestFunctions
     {

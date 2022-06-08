@@ -1,34 +1,29 @@
 ﻿using System;
 using System.Threading;
 using OpenMetaverse.Rendering;
+using Plugins.ObjectPool;
 using UnityEngine;
 
 namespace Raindrop.Services.Bootstrap
 {
     public class Globals : MonoBehaviour
     {
-        public static Thread GMainThread;
-        public Texture2D DefaultTexture;
+        public static TexturePoolSelfImpl texturepool;
         public static MeshmerizerR renderer { get; set; }
         public static string FullAppName { get; set; }
         public static string SimpleAppName { get; set; }
 
 
-        public static bool isOnMainThread()
-        {
-            return Globals.GMainThread.Equals(System.Threading.Thread.CurrentThread);
-        }
-
         public static void Init()
         {
-            GMainThread = System.Threading.Thread.CurrentThread;
-            
+            texturepool = TexturePoolSelfImpl.GetInstance();
+
             InitDefaultTextures();
 
             void InitDefaultTextures()
             {
                 //init void map's  # hex 1D475F
-                Textures.DefaultMapVoidTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                Textures.DefaultMapVoidTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
                 Color color;
                 ColorUtility.TryParseHtmlString("#1D475F", out color);
                 Textures.DefaultMapVoidTexture.SetPixel(0, 0, color);

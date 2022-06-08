@@ -1,9 +1,9 @@
 using Raindrop;
 using Raindrop.Rendering;
-using Raindrop.ServiceLocator;
 using Raindrop.UI.Views;
 using System.Collections;
 using System.Collections.Generic;
+using Plugins.CommonDependencies;
 using Raindrop.Utilities;
 using UnityEngine;
 
@@ -28,7 +28,6 @@ public class ResetMinimapCamera : MonoBehaviour
         if (Active && ready)
         {
             OpenMetaverse.Vector3d globalPos_meters = instance.Client.Self.GlobalPosition;
-            // Vector3 UnityScene_GlobalPos_meters = RHelp.TKVector3d(globalPos_meters);
             Vector3 MapPos = MapSpaceConverters.GlobalSpaceToMapSpace(globalPos_meters);
             cam.SetToGridPos(MapPos);
         } else

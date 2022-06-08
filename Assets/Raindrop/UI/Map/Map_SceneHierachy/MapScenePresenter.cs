@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
+using Plugins.ObjectPool;
 using Raindrop.UI.Views;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Serialization;
 using UE = UnityEngine;
 
 namespace Raindrop.UI.map.Map_SceneHierachy
 {
     /// <summary>
-    /// hello, i spawn map tiles inside of the 3d space. 
+    /// hello, i update and spawn entities in the map-space. 
     /// </summary>
 
     public class MapScenePresenter : MonoBehaviour
     {
+        RaindropInstance Instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        GridClient Client => Instance.Client;
+        
         [SerializeField]
         private const float RenderUpdatePeriod = 2f;
+
+        //a pause button to stop the updating.
         [SerializeField]
         public bool fetchOn = false;
-
-        public int poolSize = 10;
 
         [SerializeField]
         public uint mapTileZBuffer;
@@ -31,30 +37,73 @@ namespace Raindrop.UI.map.Map_SceneHierachy
         public GameObject mapTilePrefab;
 
         //camera. contains the viewable range.
-        [SerializeField]
-        public OrthographicCameraView cameraView;
-        public OrthographicCameraView cameraView2;
-        private Dictionary<ulong, GameObject> map_collection = new Dictionary<ulong, GameObject>(); //tiles that are in the scene.
+        [FormerlySerializedAs("cameraView")] [SerializeField]
+        public OrthographicCameraView mapCameraView;
+        [FormerlySerializedAs("cameraView2")] public OrthographicCameraView minimapCameraView;
+        
+        // track what we are fetching, have fetched, and is present in the scene.
+        // the region handle and it's associated tile.
+        private Dictionary<ulong, GameObject> regionTiles = new Dictionary<ulong, GameObject>(); //tiles that are in the scene.
+        // the ongoing tile requests
+        List<ulong> tileRequests = new List<ulong>();
+        // the last-draw time of the tiles.
         private Dictionary<ulong, float> map_collection_lastSeenTime = new Dictionary<ulong, float>(); //tiles and their lastseentime.
-        private bool stillDrawing = false;
+        // private bool stillDrawing = false;
 
+        //the internal data cache
+        private MapSceneData MapSceneData;
+        
+        // flags for logic.
+        private bool needRedraw;
+
+        //the tiles.
+        public int poolSize = 10;
         public MapTileRecycler TileRecycler;
-        [FormerlySerializedAs("tileTimeToLive")] [SerializeField] private float tileTimeToDestroy = 10f;
+        [SerializeField] private float tileTimeToDestroy = 10f;
+        
 
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-
+        
         private void Awake()
         {
             TileRecycler = new MapTileRecycler(poolSize);
             TileRecycler.objectToPool = mapTilePrefab;
+
+            MapSceneData = new MapSceneData();
         }
 
         private void Start()
         {
-            instance.Netcom.ClientConnected += NetcomOnClientConnected;
-            instance.Netcom.ClientDisconnected += NetcomOnClientDisconnected;
+            Init();
         }
 
+        public void Init()
+        {
+            RegisterClientEvents();
+        }
+
+
+
+        void RegisterClientEvents()
+        {
+            Client.Grid.GridItems += new EventHandler<GridItemsEventArgs>(Grid_GridItems);
+            Client.Grid.GridRegion += new EventHandler<GridRegionEventArgs>(Grid_GridRegion);
+            Client.Grid.GridLayer += new EventHandler<GridLayerEventArgs>(Grid_GridLayer);
+            
+            Instance.Netcom.ClientConnected += NetcomOnClientConnected;
+            Instance.Netcom.ClientDisconnected += NetcomOnClientDisconnected;
+        }
+
+        void UnregisterClientEvents(GridClient Client)
+        {
+            if (Client == null) return;
+            Client.Grid.GridItems -= new EventHandler<GridItemsEventArgs>(Grid_GridItems);
+            Client.Grid.GridRegion -= new EventHandler<GridRegionEventArgs>(Grid_GridRegion);
+            Client.Grid.GridLayer -= new EventHandler<GridLayerEventArgs>(Grid_GridLayer);
+            
+            Instance.Netcom.ClientConnected -= NetcomOnClientConnected;
+            Instance.Netcom.ClientDisconnected -= NetcomOnClientDisconnected;
+        }
+        
         private void NetcomOnClientDisconnected(object sender, DisconnectedEventArgs e)
         {
             CancelInvoke();
@@ -66,6 +115,121 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             InvokeRepeating("RedrawMap", RenderUpdatePeriod, RenderUpdatePeriod);
         }
 
+        //avatar goes in here
+        void Grid_GridItems(object sender, GridItemsEventArgs e)
+        {
+            foreach (MapItem item in e.Items)
+            {
+                if (item is MapAgentLocation)
+                {
+                    MapAgentLocation loc = (MapAgentLocation)item;
+                    lock (MapSceneData.regionMapItems)
+                    {
+                        if (!MapSceneData.regionMapItems.ContainsKey(item.RegionHandle))
+                        {
+                            MapSceneData.regionMapItems[loc.RegionHandle] = new List<MapItem>();
+                        }
+                        MapSceneData.regionMapItems[loc.RegionHandle].Add(loc);
+                    }
+                    
+                    needRedraw = true;
+                }
+            }
+        }
+        
+        //region-is-present comes in here
+        //is ignored if we are on SL grid.
+        void Grid_GridRegion(object sender, GridRegionEventArgs e)
+        {
+            if (Instance.Netcom.IsTeleporting) // ????
+            
+            needRedraw = true;
+            MapSceneData.regions[e.Region.RegionHandle] = e.Region;
+            if (e.Region.Access != SimAccess.NonExistent
+                && e.Region.MapImageID != UUID.Zero
+                && !tileRequests.Contains(e.Region.RegionHandle)
+                && !regionTiles.ContainsKey(e.Region.RegionHandle))
+            {
+
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    DownloadRegionTile(e.Region.RegionHandle, e.Region.MapImageID);
+                });
+            }
+        }
+
+
+        void Grid_GridLayer(object sender, GridLayerEventArgs e)
+        {
+        }        
+        
+        // retrieve a tile from the asset server, and in the callback, decode to maptile.
+        void DownloadRegionTile(ulong handle, UUID imageID)
+        {
+            Assert.IsTrue(UnityMainThreadDispatcher.isOnMainThread());
+            
+            if (regionTiles.ContainsKey(handle)) return;
+
+            lock (tileRequests)
+                if (!tileRequests.Contains(handle))
+                    tileRequests.Add(handle);
+
+
+            Uri url = Client.Network.CurrentSim.Caps.GetTextureCapURI();
+            if (url != null)
+            {
+                Client.Assets.RequestImage(imageID, ImageType.Normal, (state, asset) =>
+                {
+                    if (state != TextureRequestState.Finished)
+                        return;
+                    if (asset?.AssetData == null)
+                    {
+                        //give up and stop trying for texture.
+                        return;
+                    }
+                    
+                    UnityMainThreadDispatcher.Instance().Enqueue(
+                        () =>
+                        {
+                            try
+                            {
+                                asset.Decode(); //warn: main thread only.
+                                var t2d = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.ARGB32);
+                                asset.Image.ExportTex2D(t2d); //decode: assetData -> texture
+                                
+                                //spawn in the tile.
+                                var mapPlanePos = GetMapPlanePosition(handle);
+                                Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " +
+                                          mapPlanePos.y);
+                                var tileGO = SpawnOnMapPlane(mapPlanePos);
+                                
+                                //apply texture.
+                                var textureComponent = tileGO.GetComponent<TexturableMesh>();
+                                textureComponent.ApplyTexture(t2d);
+
+                                regionTiles.Add(handle, tileGO);
+                                
+                                needRedraw = true;
+                            }
+                            catch (Exception e)
+                            {
+                                throw new DecodeException("maptile (jp2) decode failed at " + e.Message);
+                            }
+                            finally
+                            {
+                                lock (tileRequests)
+                                {
+                                    if (tileRequests.Contains(handle))
+                                    {
+                                        tileRequests.Remove(handle);
+                                    }
+                                }
+                            }
+                        });
+                });
+            }
+        }
+        
 
         private void RedrawMap()
         {
@@ -82,30 +246,37 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             }
 
             //prevent drawing if prevous pass is not done.
-            if (stillDrawing)
+            // if (stillDrawing)
+            // {
+            //     return;
+            // }
+            // stillDrawing = true;
+            
+            // AddAndRemoveTiles();
+            bool cameraIsMoved = true; 
+            if (cameraIsMoved)
             {
-                return;
+                SendRequestForMapBlocks();
             }
-            stillDrawing = true;
 
-            DrawTiles();
+            
+            
+            // stillDrawing = false;
 
-            stillDrawing = false;
-
-            void DrawTiles()
+            void AddAndRemoveTiles()
             {
                 //1. get the zoom level based on height of camera.
-                int zoom = (int)cameraView.Zoom;
+                int zoom = (int)mapCameraView.Zoom;
 
                 //2. obtain the range that the camera can see, in grid coordinates.
                 var handles =
                     MapCameraLogic.getVisibleRegionHandles(
-                        cameraView.Min,
-                        cameraView.Max,
+                        mapCameraView.Min,
+                        mapCameraView.Max,
                         zoom); // add 1 int to the result, as each sim is 1-large.
                 var minimapHandles = MapCameraLogic.getVisibleRegionHandles(
-                        cameraView2.Min,
-                        cameraView2.Max,
+                        minimapCameraView.Min,
+                        minimapCameraView.Max,
                         1);
                 handles.UnionWith(minimapHandles);
 
@@ -113,7 +284,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                 //3. spawn the tiles that are in this space.
                 foreach (var handle in handles)
                 {
-                    if (!map_collection.ContainsKey(handle))
+                    if (!regionTiles.ContainsKey(handle))
                     {
                         //rate-limiter...
                         if (maxFetchPerLoop-- == 0)
@@ -125,9 +296,9 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                         var mapPlanePos = GetMapPlanePosition(handle);
                         Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " + mapPlanePos.y);
                         var tileGO = SpawnOnMapPlane(mapPlanePos);
-                        map_collection.Add(handle, tileGO);
+                        regionTiles.Add(handle, tileGO);
                     }
-                    //update the tile's timer.
+                    //reset the tile's timer.
                     ResetTileDestructionTimer(map_collection_lastSeenTime, handle);
                 }
                 
@@ -142,9 +313,9 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                         if (lastseentime + tileTimeToDestroy < Time.realtimeSinceStartup)
                         {
                             //destroy the tile
-                            GameObject tileGO = map_collection[handle];
+                            GameObject tileGO = regionTiles[handle];
                             TileRecycler.ReturnToPool(tileGO);
-                            map_collection.Remove(handle);
+                            regionTiles.Remove(handle);
                             // map_collection_lastSeenTime.Remove(handle); //!!!
                             lastSeenTime_ToRemove.Add(handle);
                         }
@@ -156,6 +327,23 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                     }
                 }
             }
+        }
+
+        private void SendRequestForMapBlocks()
+        {
+            Instance.Client.Grid.RequestMapBlocks(GridLayerType.Objects, 
+                (ushort)mapCameraView.Min.x, 
+                (ushort)mapCameraView.Min.y, 
+                (ushort)mapCameraView.Max.x, 
+                (ushort)mapCameraView.Max.y,
+                true);
+
+            Instance.Client.Grid.RequestMapBlocks(GridLayerType.Objects, 
+                (ushort)minimapCameraView.Min.x, 
+                (ushort)minimapCameraView.Min.y, 
+                (ushort)minimapCameraView.Max.x, 
+                (ushort)minimapCameraView.Max.y,
+                true);
         }
 
         private void ResetTileDestructionTimer(Dictionary<ulong, float> mapCollectionLastSeenTime, ulong handle)
@@ -170,6 +358,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             }
         }
 
+        //get the handle/sim's position in the unity space.
         private UE.Vector3 GetMapPlanePosition(ulong handle)
         {
             UnityEngine.Vector3 posInScene = 
@@ -192,41 +381,23 @@ namespace Raindrop.UI.map.Map_SceneHierachy
 
     }
 
-    public class MapTileRecycler
+    internal class DecodeException : Exception
     {
-        public int DefaultSize = 10;
-        public List<GameObject> pooledObjects = new List<GameObject>();
-        public GameObject objectToPool;
-        [SerializeField] public bool shouldExpand = true;
+        public DecodeException(string cannotReadJ2kHeader)
+        {
+            throw new NotImplementedException(); //change to another ecception.
+        }
+    }
 
+    internal class MapSceneData
+    {
+        //items appearing in the block requests
+        public Dictionary<ulong, List<MapItem>> regionMapItems =
+            new Dictionary<ulong, List<MapItem>>();
+
+        //list of regions that are present on grid.
+        public Dictionary<ulong, GridRegion> regions =
+            new Dictionary<ulong, GridRegion>();
         
-        public MapTileRecycler(int defaultSize)
-        {
-            DefaultSize = defaultSize;
-        }
-
-        public GameObject GetPooledObject() {
-            for (int i = 0; i < pooledObjects.Count; i++) {
-                if (!pooledObjects[i].activeInHierarchy) {
-                    return pooledObjects[i];
-                }
-            }
-            
-            // "lazy instantiation" is over here :)
-            if (shouldExpand) {
-                GameObject obj = (GameObject)MonoBehaviour.Instantiate(objectToPool);
-                obj.SetActive(false);
-                pooledObjects.Add(obj);
-                return obj;
-            } else {
-                return null;
-            }
-        }
-
-        public void ReturnToPool(GameObject gameObject)
-        {
-            gameObject.SetActive(false);
-        }
-
     }
 }

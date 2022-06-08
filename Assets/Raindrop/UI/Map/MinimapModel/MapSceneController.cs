@@ -9,11 +9,12 @@ using Raindrop.Map;
 using Raindrop.UI.Views;
 using Raindrop.Netcom;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Map.Model;
 using Vector2 = UnityEngine.Vector2;
 using Raindrop.UI.Model;
 
-namespace Raindrop.UI.Presenters
+namespace Raindrop.UI.map.Map_SceneHierachy
 {
     //some key ideas:
     /* if my finger is clicking the map, I have intention to navigate and pan the map.
@@ -25,8 +26,9 @@ namespace Raindrop.UI.Presenters
      * 
      */
 
-    public class MapSceneController
+    public class MapSceneController : MonoBehaviour
     {
+        
         public event EventHandler<string> MapClicked;
         public virtual void OnMapClick(ulong regionCoords) //protected virtual method
         {
@@ -39,6 +41,11 @@ namespace Raindrop.UI.Presenters
             //mapSceneView.gameObject.SetActive(true);
         }
 
+        
+        
+        
+        #region EventSetup
 
+        #endregion
     }
 }

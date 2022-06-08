@@ -17,9 +17,12 @@ namespace Raindrop.Unity3D
     //sets the mesh of the gameobject to match the sim's shape. 
     public class TerrainMeshView : MonoBehaviour, IMeshView
     {
-        private TerrainMeshController controller;
-        MeshRenderer meshRenderer;
-        MeshFilter meshFilter;
+        public TerrainMeshController controller;
+        public MeshRenderer meshRenderer;
+        public MeshFilter meshFilter;
+        public Origin_SimHandle simHandle;
+         
+        
         UnityEngine.Mesh terrainMesh;
         
         [SerializeField]
@@ -27,21 +30,20 @@ namespace Raindrop.Unity3D
         
         private void Awake()
         {
-            controller = new TerrainMeshController(this);
-            
             //1 mesh renderer component
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = new UnityEngine.Material(Shader.Find("Standard")); //hopefully this not use reflection.
+            // meshRenderer.sharedMaterial = new UnityEngine.Material(Shader.Find("Standard")); //hopefully this not use reflection.
 
             //2 mesh filter component (owns the mesh)
-            meshFilter = gameObject.AddComponent<MeshFilter>();
+            // meshFilter = gameObject.AddComponent<MeshFilter>();
             
             //2.1 make terrain mesh of 256*256 at zero height and pass to meshfilter
-            terrainMesh = new UnityEngine.Mesh(); //make the mesh.
+            terrainMesh = new Mesh(); //make the mesh.
             GetComponent<MeshFilter>().mesh = terrainMesh;         //assign this mesh to the meshfiltercomponent
             
-            //3. set position to the correct place.
             
+            //mvc
+            controller = new TerrainMeshController(this, terrainMesh);
+
         }
 
         public void SetTexture(Texture2D texture)
@@ -54,6 +56,5 @@ namespace Raindrop.Unity3D
             GetComponent<MeshFilter>().mesh = terrainMesh;         //assign this mesh to the meshfiltercomponent
         }
 
-        
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
+namespace Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines
 {
     //static methods to help you click buttons!
     static internal class UIHelpers

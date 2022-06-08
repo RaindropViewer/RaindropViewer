@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Raindrop.Presenters;
 using Raindrop.UI.LoadingScreen;
+using Raindrop.UI.Views;
 using UnityEngine;
 
 namespace Raindrop.Services.Bootstrap
@@ -14,6 +15,7 @@ namespace Raindrop.Services.Bootstrap
         [SerializeField] public LoadingView ll;
         
         [SerializeField] public ChatPresenter chatPresenter;
+        [SerializeField] public MapUIView mapUI;
         
     }
 }

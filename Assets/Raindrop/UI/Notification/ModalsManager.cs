@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using Raindrop.Services;
 using Raindrop.Services.Bootstrap;
 using UnityEngine;
@@ -47,7 +47,7 @@ public class ModalsManager : MonoBehaviour
     // shows a generic modal, where the only button is "ok" - does nothing.
     public void showModal_NotificationGeneric(string title, string content /*, ModalType type*/)
     {
-        if (! Globals.isOnMainThread())
+        if (! UnityMainThreadDispatcher.isOnMainThread())
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() => {
                     //Debug.Log(" dispatching of showing modal");

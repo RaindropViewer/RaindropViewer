@@ -1,6 +1,8 @@
 using UE = UnityEngine;
 using OpenMetaverse;
 using System;
+using Raindrop.Rendering;
+using Unity.Mathematics;
 using UnityEngine.Assertions;
 
 namespace Raindrop.Utilities
@@ -23,6 +25,22 @@ namespace Raindrop.Utilities
         {
             var handle = Utils.UIntsToLong((uint)v3.x * 256, (uint)v3.y * 256);
             return handle;
+        }
+        
+        // convert the rotation in SL to rotation in unitymap space
+        public static UE.Quaternion GlobalRot2MapRot(Quaternion globalQuaternion)
+        {
+            //1. get euler around the vertical axis.
+            UE.Quaternion unity_space_rot = RHelp.TKQuaternion4(globalQuaternion);
+            var degrees_verticalAxis_rotation = unity_space_rot.eulerAngles.y;
+            
+            //2. create identity rotation in the mapspace.
+            UE.Quaternion mapSpace_identity = UE.Quaternion.identity; //quaternion.Euler(90,0,0);
+            
+            //3. apply the euler to the identitiy rotation found in (2)
+            var mapSpace_rot = mapSpace_identity * UE.Quaternion.AngleAxis(degrees_verticalAxis_rotation, UE.Vector3.back);
+            return mapSpace_rot;
+
         }
 
 

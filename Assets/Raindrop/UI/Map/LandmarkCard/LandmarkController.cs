@@ -1,9 +1,9 @@
 ﻿using System;
 using OpenMetaverse;
 using OpenMetaverse.Assets;
+using Plugins.CommonDependencies;
 using Raindrop;
 using Raindrop.Netcom;
-using Raindrop.ServiceLocator;
 using Raindrop.Services.Bootstrap;
 
 public class LandmarkController : IDisposable
@@ -130,7 +130,7 @@ public class LandmarkController : IDisposable
     {
         if (e.Parcel.ID != parcelID) return;
 
-        if (! Globals.isOnMainThread())
+        if (! UnityMainThreadDispatcher.isOnMainThread())
         {
             UnityMainThreadDispatcher.Instance().Enqueue(
                 () => Parcels_ParcelInfoReply(sender,e)

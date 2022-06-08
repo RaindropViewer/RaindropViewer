@@ -8,59 +8,6 @@ namespace Raindrop.Rendering
 {
 
     /// <summary>
-    /// Contains per primitive face data
-    /// </summary>
-    public class FaceData : IDisposable
-    {
-        public float[] Vertices;
-        public ushort[] Indices;
-        public float[] TexCoords;
-        public float[] Normals;
-        public int PickingID = -1;
-        public int VertexVBO = -1;
-        public int IndexVBO = -1;
-        public TextureInfo TextureInfo = new TextureInfo();
-        public BoundingVolume BoundingVolume = new BoundingVolume();
-        public static int VertexSize = 32; // sizeof (vertex), 2  x vector3 + 1 x vector2 = 8 floats x 4 bytes = 32 bytes 
-        public TextureAnimationInfo AnimInfo;
-        public int QueryID = 0;
-        public bool VBOFailed = false;
-
-        /// <summary>
-        /// Dispose VBOs if we have them in graphics card memory
-        /// </summary>
-        public void Dispose()
-        {
-        }
-
-    }
-
-    /// <summary>
-    /// Class handling texture animations
-    /// </summary>
-    public class TextureAnimationInfo
-    {
-        public Primitive.TextureAnimation PrimAnimInfo;
-        public float CurrentFrame;
-        public float CurrentTime;
-        public bool PingPong;
-        float LastTime = 0f;
-        float TotalTime = 0f;
-
-        /// <summary>
-        /// Perform texture manipulation to implement texture animations
-        /// </summary>
-        /// <param name="lastFrameTime">Time passed since the last run (in seconds)</param>
-        public void Step(float lastFrameTime)
-        {
-            //todo: animation of textures.
-            
-            
-        }
-
-    }
-
-    /// <summary>
     /// Class that handle rendering of objects: simple primitives, sculpties, and meshes
     /// </summary>
     public class RenderPrimitive : SceneObject
@@ -85,10 +32,8 @@ namespace Raindrop.Rendering
         int prevShapeHash;
         #endregion Private fields
 
-        /// <summary>
         /// Default constructor
-        /// </summary>
-        public RenderPrimitive()
+        private void Awake()
         {
             Type = SceneObjectType.Primitive;
         }
@@ -130,7 +75,7 @@ namespace Raindrop.Rendering
                     if (Prim.Type == PrimType.Sculpt || Prim.Type == PrimType.Mesh)
                     {
                         var sculptHash = Prim.Sculpt.GetHashCode();
-                        if (Prim.Sculpt.GetHashCode() != prevSculptHash || TEHash != prevTEHash)
+                        if (sculptHash != prevSculptHash || TEHash != prevTEHash)
                         {
                             Meshed = false;
                         }
@@ -167,15 +112,12 @@ namespace Raindrop.Rendering
         /// update the state in this view.
         public void Render()
         {
-            throw new NotImplementedException();
+            //filter out attached objects if not rendering people
+            if (!RenderSettings.AvatarRenderingEnabled && Attached) return;
             
-            // //filter out attached objects if not rendering people
-            // if (!RenderSettings.AvatarRenderingEnabled && Attached) return;
-            //
-            // // Prim rotation and position and scale
-            // GameObject_SetPosition(Prim.Scale, RenderPosition);
-            // GameObject_SetPosition(Prim.Scale, RenderRotation);
-            //
+            // Prim rotation and position and scale
+            RenderPrimitive_SetPosition(Prim.Scale, RenderPosition);
+            
             // // Do we have animated texture on this face
             // bool animatedTexture = false;
             //
@@ -353,7 +295,12 @@ namespace Raindrop.Rendering
             //     return animatedTexture;
             // }
         }
-        
+
+        //set my position.
+        private void RenderPrimitive_SetPosition(Vector3 primScale, Vector3 renderPosition)
+        {
+            throw new NotImplementedException();
+        }
 
 
         /// <summary>
@@ -367,4 +314,59 @@ namespace Raindrop.Rendering
             return $"LocalID: {id}, distance {distance:0.00}";
         }
     }
+    
+
+    /// <summary>
+    /// Contains per primitive face data
+    /// </summary>
+    public class FaceData : IDisposable
+    {
+        public float[] Vertices;
+        public ushort[] Indices;
+        public float[] TexCoords;
+        public float[] Normals;
+        public int PickingID = -1;
+        public int VertexVBO = -1;
+        public int IndexVBO = -1;
+        public TextureInfo TextureInfo = new TextureInfo();
+        public BoundingVolume BoundingVolume = new BoundingVolume();
+        public static int VertexSize = 32; // sizeof (vertex), 2  x vector3 + 1 x vector2 = 8 floats x 4 bytes = 32 bytes 
+        public TextureAnimationInfo AnimInfo;
+        public int QueryID = 0;
+        public bool VBOFailed = false;
+
+        /// <summary>
+        /// Dispose VBOs if we have them in graphics card memory
+        /// </summary>
+        public void Dispose()
+        {
+        }
+
+    }
+
+    /// <summary>
+    /// Class handling texture animations
+    /// </summary>
+    public class TextureAnimationInfo
+    {
+        public Primitive.TextureAnimation PrimAnimInfo;
+        public float CurrentFrame;
+        public float CurrentTime;
+        public bool PingPong;
+        float LastTime = 0f;
+        float TotalTime = 0f;
+
+        /// <summary>
+        /// Perform texture manipulation to implement texture animations
+        /// </summary>
+        /// <param name="lastFrameTime">Time passed since the last run (in seconds)</param>
+        public void Step(float lastFrameTime)
+        {
+            //todo: animation of textures.
+            
+            
+        }
+
+    }
+    
 }

@@ -25,8 +25,8 @@ public class LookAtTextUpdater : MonoBehaviour
 
     private void Start()
     {
-        var prez = _mapUIView.getPresenter();
-        prez.MapClicked += bl_UserMapClick; // register with an event
+        // var prez = _mapUIView.getPresenter();
+        // prez.MapClicked += bl_UserMapClick; // register with an event
     }
 
 

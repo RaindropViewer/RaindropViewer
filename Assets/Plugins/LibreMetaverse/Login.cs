@@ -1446,12 +1446,14 @@ namespace OpenMetaverse
                         {
                             UpdateLoginStatus(LoginStatus.Failed,
                                 $"Error opening the login server connection: {e.Message}");
+                            Logger.Log($"Login failed dump: {e.StackTrace}", Helpers.LogLevel.Warning);
                         }
                     });
                 }
                 catch (Exception e)
                 {
-                    UpdateLoginStatus(LoginStatus.Failed, $"Error opening the login server connection: {e}");
+                    UpdateLoginStatus(LoginStatus.Failed, $"Error opening the login server connection: {e.Message}");
+                    Logger.Log($"Login failed dump: {e.StackTrace}", Helpers.LogLevel.Warning);
                 }
 
                 #endregion

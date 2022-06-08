@@ -3,14 +3,14 @@ using System.Collections;
 using System.IO;
 using NUnit.Framework;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop;
 using Raindrop.Media;
-using Raindrop.ServiceLocator;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Tests.Raindrop
+namespace Raindrop.Tests.Sounds
 {
     [TestFixture()]
     public class SoundTests
@@ -19,7 +19,7 @@ namespace Tests.Raindrop
         [SetUp]
         public void Setup()
         {
-            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
         }
 
         // copy sample audio to cache.

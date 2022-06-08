@@ -298,10 +298,8 @@ namespace OpenMetaverse.Http
 
             if (responseData != null)
             {
-                Logger.DebugLog("RequestCompletedHandler" + ":" +" responseData is not null.");
                 try { result = OSDParser.Deserialize(responseData); }
                 catch (Exception ex) {
-                    Logger.Log("RequestCompletedHandler" + ":" + " responseData is not null but ran an exception!.",Helpers.LogLevel.Error); 
                     error = ex; }
             }
 
@@ -350,7 +348,8 @@ namespace OpenMetaverse.Http
                     Logger.Log(ex.Message, Helpers.LogLevel.Error, ex);
                 }
             }
-            Logger.DebugLog("CapsClient, FireCompleteCallback : "+ error.ToString()); 
+            if (error != null)
+                Logger.DebugLog("CapsClient, FireCompleteCallback : "+ error.ToString()); //why is error null here
 
             _Response = result;
             _ResponseEvent.Set();

@@ -5,14 +5,14 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityScripts.Disk;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests
+namespace Raindrop.Tests.RaindropFullIntegrationTests
 {
     public class DiskCheckTests
     {
         [UnityTest]
         public IEnumerator StaticCacheCopier_Test()
         {            
-            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene"); 
+            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
 
             yield return new WaitForSeconds(3);
 

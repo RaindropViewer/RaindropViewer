@@ -2,8 +2,10 @@ using System;
 using System.Runtime.InteropServices;
 
 public static partial class AsyncImageLoader {
-  public class FreeImage {
-    public enum Format {
+  public class FreeImage
+  {
+    public enum Format
+    {
       FIF_UNKNOWN = -1,
       FIF_BMP = 0,
       FIF_ICO = 1,
@@ -45,7 +47,8 @@ public static partial class AsyncImageLoader {
       FIF_JXR = 36
     }
 
-    internal enum Type {
+    internal enum Type
+    {
       FIT_UNKNOWN = 0,
       FIT_BITMAP = 1,
       FIT_UINT16 = 2,
@@ -61,7 +64,8 @@ public static partial class AsyncImageLoader {
       FIT_RGBAF = 12
     }
 
-    internal enum ColorType {
+    internal enum ColorType
+    {
       FIC_MINISWHITE = 0,
       FIC_MINISBLACK = 1,
       FIC_RGB = 2,
@@ -84,11 +88,19 @@ public static partial class AsyncImageLoader {
     [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_LoadFromMemory")]
     internal static extern IntPtr LoadFromMemory(Format format, IntPtr stream, int flags);
 
+    [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_SaveToMemory")]
+    internal static extern bool SaveToMemory(Format format, IntPtr fi_bitmap, IntPtr stream, int flags);
+
     [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_Unload")]
     internal static extern void Unload(IntPtr dib);
 
     [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_ConvertToRawBits")]
-    internal static extern void ConvertToRawBits(IntPtr bits, IntPtr dib, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
+    internal static extern void ConvertToRawBits(IntPtr bits, IntPtr dib, int pitch, uint bpp, uint red_mask,
+      uint green_mask, uint blue_mask, bool topdown);
+
+    [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_ConvertFromRawBits")]
+    internal static extern IntPtr ConvertFromRawBits(IntPtr bits, int width, int height, int pitch, uint bpp,
+      uint red_mask, uint green_mask, uint blue_mask, bool topdown);
 
     [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_GetWidth")]
     internal static extern uint GetWidth(IntPtr handle);
@@ -101,5 +113,8 @@ public static partial class AsyncImageLoader {
 
     [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_GetBPP")]
     internal static extern int GetBPP(IntPtr dib);
+
+    [DllImport(FreeImageLibrary, EntryPoint = "FreeImage_AcquireMemory")]
+    internal static extern void AcquireMemory(IntPtr mem, ref IntPtr data, ref int size);
   }
 }

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using OpenMetaverse;
 using OpenMetaverse.ImportExport.Collada14;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using Raindrop.UI.chat;
 using Raindrop.UI.chat.UI_tabs;
@@ -33,7 +34,7 @@ namespace Raindrop.Presenters
 
         private UUID imageUUID;
         private Image _image;
-        private ChatPresenter chatPrez => ServiceLocator.ServiceLocator.Instance.Get<UIService>().chatFacade;
+        private ChatPresenter chatPrez => ServiceLocator.Instance.Get<UIService>().chatFacade;
 
         //private IMPresenter Presenter;
         public bool Highlighted { get; set; }

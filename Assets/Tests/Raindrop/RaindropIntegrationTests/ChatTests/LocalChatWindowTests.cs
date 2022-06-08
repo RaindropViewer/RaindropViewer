@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Tests.Raindrop.RaindropIntegrationTests.ChatTests
+namespace Raindrop.Tests.RaindropIntegrationTests.ChatTests
 {
     [TestFixture()]
     public class LocalChatWindowTests : MonoBehaviour
@@ -14,6 +14,8 @@ namespace Tests.Raindrop.RaindropIntegrationTests.ChatTests
         //test the local chat UI, send and receive functions.
         public IEnumerator AbleOpenLocalChatUI()
         {
+            
+            
             Debug.Log("test is not implemented.");
             // SceneManager.LoadScene("LocalChatWindowScene");
             //

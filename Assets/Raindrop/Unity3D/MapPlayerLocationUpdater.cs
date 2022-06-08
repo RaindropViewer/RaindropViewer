@@ -1,16 +1,11 @@
 ﻿using Raindrop.Netcom;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Raindrop.Rendering;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Utilities;
-using UnityEngine.Assertions;
 using Quaternion = UnityEngine.Quaternion;
-using Vector3 = OpenMetaverse.Vector3;
 
 namespace Raindrop.Unity3D
 {
@@ -18,7 +13,7 @@ namespace Raindrop.Unity3D
     // see @ MapCoordinatesConversionTests
     class MapPlayerLocationUpdater : MonoBehaviour
     {
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
@@ -36,16 +31,15 @@ namespace Raindrop.Unity3D
                 return;
             }
 
-            var mapSpace = 
+            var position = 
                 MapSpaceConverters.GlobalSpaceToMapSpace(instance.Client.Self.GlobalPosition);
             
-            UnityEngine.Quaternion rotation_InScene = RHelp.TKQuaternion4(instance.Client.Self.SimRotation);
-            var heading_UE = rotation_InScene.eulerAngles.y;
-            UnityEngine.Vector3 orientationInMapSpace =
-                Quaternion.Euler(0, 0, heading_UE) * UnityEngine.Vector3.up;
+            // UnityEngine.Quaternion orientation_in3D = RHelp.TKQuaternion4(instance.Client.Self.SimRotation);
+            UnityEngine.Quaternion orientation_mapspace = MapSpaceConverters.GlobalRot2MapRot(instance.Client.Self.SimRotation);
+            // var headingDeg = - orientation.eulerAngles.y; //invert rotation as y is upward axis.
 
-            MapSpaceSetters.SetMapItemPosition(agent.transform, mapSpace);
-            MapSpaceSetters.SetMapItemRotation(agent.transform, orientationInMapSpace);
+            MapSpaceSetters.SetMapItemPosition(agent.transform, position);
+            MapSpaceSetters.SetMapItemOrientation(agent.transform, orientation_mapspace);
             
         }
 

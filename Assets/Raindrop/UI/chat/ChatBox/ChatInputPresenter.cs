@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Presenters;
 using TMPro;
 using UniRx;
@@ -16,7 +17,7 @@ namespace Raindrop.UI.chat
         // | hello there.. |SEND|
         // _____________________
 
-        public RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        public RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
 
         public IMPresenter DestChatInputAcceptor; // the monobehavior that accepts our input.
 

@@ -1,4 +1,5 @@
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -29,7 +30,7 @@ namespace Raindrop.Presenters
         //right pane: the contents of the selected chat in the left pane.+
         //             input bar of the text to send to said chat.
 
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
 
         #region UI elements - left tabs 
         [FormerlySerializedAs("chatList")] [Tooltip("The container of the list of chat tabs.")]
@@ -67,7 +68,7 @@ namespace Raindrop.Presenters
         private void OnRequestNewChat()
         {
             // string nameModal = "NewChatChooser";
-            ServiceLocator.ServiceLocator.Instance.Get<UIService>()
+            ServiceLocator.Instance.Get<UIService>()
                 .ModalsManager.Show(ChatChooserModal);
         }
 

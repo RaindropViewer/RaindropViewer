@@ -1,4 +1,5 @@
 ﻿using System;
+using Plugins.CommonDependencies;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -20,7 +21,7 @@ namespace Raindrop.Services.Bootstrap
         // "would you like to login to the last active connection?"
         private void AskUser_LoginUsingPreviousCredentials()
         {
-            var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            var ui = ServiceLocator.Instance.Get<UIService>();
             Assert.IsNotNull(ui, "ui is not found.");
             // var instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
             // ui.modalManager.showModal_NtfGeneric("Quick Re-log",

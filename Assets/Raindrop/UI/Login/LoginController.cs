@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.Services.Bootstrap;
 
@@ -8,7 +9,7 @@ namespace Raindrop.UI.Login
 {
     public class LoginController
     {
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
         public RaindropNetcom netcom => instance.Netcom;
         private LoginPresenter view;
         public bool isDoingLogin;
@@ -100,12 +101,12 @@ namespace Raindrop.UI.Login
 
             void Init_RememberLogin_Checkbox()
             {
-                if (!instance.GlobalSettings.ContainsKey("remember_login"))
-                {
-                    instance.GlobalSettings["remember_login"] = true;
-                }
+                // if (!instance.GlobalSettings.ContainsKey("remember_login"))
+                // {
+                //     instance.GlobalSettings["remember_login"] = true;
+                // }
 
-                view.isSaveCredentials = instance.GlobalSettings["remember_login"];
+                // view.isSaveCredentials = instance.GlobalSettings["remember_login"];
             }
 
             void Init_UserAndPassword_Fields()
@@ -200,7 +201,7 @@ namespace Raindrop.UI.Login
             var temp = netcom.LoginOptions;
 
             netcom.Login();
-            SaveConfig(netcom.LoginOptions, instance.GlobalSettings, view.isSaveCredentials);
+            SaveConfig(netcom.LoginOptions, instance.GlobalSettings);
         }
         
         
@@ -249,7 +250,7 @@ namespace Raindrop.UI.Login
 
         // this function appends (and saves) content of loginoptions to globalsettings file.
         // it is called when the user clicks the login button.
-        public void SaveConfig(LoginOptions loginoptions, Raindrop.Settings globalSettings, bool isSaveCredentials)
+        public void SaveConfig(LoginOptions loginoptions, Raindrop.Settings globalSettings)
         {
             Raindrop.Settings s = globalSettings;
             LoginUtils.SavedLogin sl = new LoginUtils.SavedLogin();
@@ -281,7 +282,7 @@ namespace Raindrop.UI.Login
                 s["saved_logins"] = new OSDMap();
             }
 
-            if (isSaveCredentials)
+            if (true /*isSaveCredentials*/)
             {
                 OpenMetaverse.Logger.Log("saving user credientials to disk: ", Helpers.LogLevel.Info);
                 sl.Username = s["username"] = username;
@@ -320,7 +321,7 @@ namespace Raindrop.UI.Login
 
             //s["login_grid"] = OSD.FromInteger(gridmgr.);  //note: this was removed as this was literally a magic number (int) that corresponds to the position of the dropbox selection.
             s["login_uri"] = OSD.FromString(loginoptions.GridLoginUri);
-            s["remember_login"] = isSaveCredentials; //OSD.FromBoolean (loginoptions.IsSaveCredentials);
+            // s["remember_login"] = isSaveCredentials; //OSD.FromBoolean (loginoptions.IsSaveCredentials);
         }
         #endregion
         

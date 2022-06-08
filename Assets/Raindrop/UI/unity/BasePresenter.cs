@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Raindrop.Presenters
 
         public void registerWithUIService()
         {
-            ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            ServiceLocator.Instance.Get<UIService>();
         }
 
     }

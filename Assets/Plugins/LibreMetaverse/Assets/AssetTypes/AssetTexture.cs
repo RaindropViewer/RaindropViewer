@@ -27,6 +27,7 @@
 
 using System;
 using OpenMetaverse.Imaging;
+using Plugins.ObjectPool;
 using UnityEngine;
 
 namespace OpenMetaverse.Assets
@@ -79,7 +80,15 @@ namespace OpenMetaverse.Assets
         /// </summary>
         public override void Encode()
         {
-            throw new NotImplementedException();
+            // image bitmap -> jp2 byte array
+            Texture2D t2d_bitmap = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.ARGB32);
+            Image.ExportTex2D(t2d_bitmap);
+            byte[] jp2 = Array.Empty<byte>();
+            T2D_JP2.Convert_TextureBitmap_To_JP2Bytes_NoMipMap(t2d_bitmap, ref jp2);
+
+            AssetData = jp2;
+
+            TexturePoolSelfImpl.GetInstance().ReturnToPool(t2d_bitmap);
 
             // using (var writer = new OpenJpegDotNet.IO.Writer(Image.ExportTex2D()))
             // {
@@ -92,24 +101,21 @@ namespace OpenMetaverse.Assets
         /// <seealso cref="ManagedImage"/> object <seealso cref="Image"/>
         /// </summary>
         /// <returns>True if the decoding was successful, otherwise false</returns>
+        /// Warn: only run on main thread, due to call to T2D.LoadT2DWithoutMipMaps(AssetData, texture);
         public override bool Decode()
         {
             if (AssetData == null || AssetData.Length <= 0) { return false; }
 
-            this.Components = 0;
+            
+            Components = 0;
 
-            Texture2D texture = new Texture2D(1,1);
-            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
-            T2D.LoadT2DWithoutMipMaps(AssetData, texture); //blocking.
+            // 1. get a texture and give it to the decoder 
+            Texture2D texture = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGBA32);
+
+            T2D_JP2.LoadT2DWithoutMipMaps(AssetData, texture); //blocking.
+            
+            // 2. when decoder is done writing to texture, we can give it the ManagedImage constructor. (oh wtf)
             Image = new ManagedImage(texture); //blocking.
-            // using (var reader = new OpenJpegDotNet.IO.Reader(AssetData))
-            // {
-            //     // *hack: decode from ManagedImage directly or better yet, get rid of ManagedImage entirely!
-            //     if (!reader.ReadHeader()) { return false; }
-            //
-            //     throw new NotImplementedException();
-            //     // Image = new ManagedImage(reader.DecodeToBitmap());
-            // }
 
             if ((Image.Channels & ManagedImage.ImageChannels.Color) != 0)
                 Components += 3;

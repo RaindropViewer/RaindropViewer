@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using Lean.Gui;
+using Plugins.CommonDependencies;
 using Raindrop;
 using Raindrop.Rendering;
-using Raindrop.ServiceLocator;
 using UnityEngine;
 using Camera = UnityEngine.Camera;
 
@@ -13,7 +13,6 @@ using Camera = UnityEngine.Camera;
 public class UpdateCameraBackend : MonoBehaviour
 {
     private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
-    //private RaindropNetcom netcom { get { return instance.Netcom; } }
     bool Active => instance.Client.Network.Connected && (instance.Client.Network.CurrentSim != null);
 
     public Camera cam;

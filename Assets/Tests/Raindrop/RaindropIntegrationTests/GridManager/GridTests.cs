@@ -4,14 +4,14 @@ using System.IO;
 using Disk;
 using NUnit.Framework;
 using OpenMetaverse;
-using Raindrop;
 
-namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests.GridManager
+namespace Raindrop.Tests.RaindropIntegrationTests.GridManager
 {
     public class GridTests
     {
         /// <summary>
         ///  serialise list of grids into the LLSD xml file.
+        /// todo: currently, no check on end result.
         /// </summary>
         [Test]
         public void Serialisation_CustomGrids()
@@ -25,22 +25,37 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests.GridManager
         
         /// <summary>
         ///  Create 2 grids, save them to file.
+        /// todo: currently, no check on end result.
         /// </summary>
         [Test]
-        public void Serialisation_CustomGrids_Two()
+        public void Serialisation_CustomGrids_AddGrid_PersistentAfterRestart()
         {
+            //1. add my custom grid, serialise it to disk.
             var instance = new RaindropInstance(new GridClient());
             
             instance.GridManger.RegisterCustomGrid(
-                new Grid("lollll"
-                    , "Second Life (agni)"
-                    , "https://login.agni.lindenlab.com/cgi-bin/login.cgi")
+                new Grid("new item"
+                    , "custom grid two test"
+                    , "https://meow.com")
                 );
-
             
             instance.GridManger.SaveCustomGrids( DirectoryHelpers.GetInternalStorageDir());
-            
             instance.CleanUp();
+            instance = null;
+
+            //2. restart raindrop, expect that list of grids, my new grid is present
+            instance = new RaindropInstance(new GridClient());
+            var foundGridIdx = -1;
+            foundGridIdx = instance.GridManger.CustomGrids.FindIndex(grid => grid.Name == "custom grid two test");
+            Assert.True(foundGridIdx != -1, "cant find the newly added grid ");
+            
+            //3. cleanup: delete grid from custom list.
+            instance.GridManger.UnregisterGrid(foundGridIdx);
+            bool foundGrid = instance.GridManger.CustomGrids.Exists(grid => grid.Name == "custom grid two test");
+            Assert.True(foundGrid == false, " newly added grid successfuly purged from disk ");
+
+            instance.CleanUp();
+            instance = null;
         }
         
         

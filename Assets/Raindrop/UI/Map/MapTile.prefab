@@ -40,11 +40,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4388118593235937986}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1ab480bcc4ebf194d86a3c02fa6c0c81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useExternalMap: 0
   unityTile: {fileID: 8320433054047828310}
 --- !u!114 &8320433054047828310
 MonoBehaviour:
@@ -59,8 +60,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   renderer: {fileID: 7526832835800448097}
-  isReady: 0
   isMapTile: 1
+  isReady: 0
+  updateRequired: 1
+  State: 0
 --- !u!1 &5304488199770352771
 GameObject:
   m_ObjectHideFlags: 0

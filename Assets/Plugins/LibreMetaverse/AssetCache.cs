@@ -147,12 +147,12 @@ namespace OpenMetaverse
 
                 if (File.Exists(FileName(assetID)))
                 {
-                    DebugLog("Reading " + FileName(assetID) + " from asset cache.");
+                    // DebugLog("Reading " + FileName(assetID) + " from asset cache.");
                     data = File.ReadAllBytes(FileName(assetID));
                 }
                 else
                 {
-                    DebugLog("Reading " + StaticFileName(assetID) + " from static asset cache.");
+                    // DebugLog("Reading " + StaticFileName(assetID) + " from static asset cache.");
                     data = File.ReadAllBytes(StaticFileName(assetID));
 
                 }
@@ -160,7 +160,7 @@ namespace OpenMetaverse
             }
             catch (Exception ex)
             {
-                DebugLog("Failed reading asset from cache (" + ex.Message + ")");
+                // DebugLog("Failed reading asset from cache (" + ex.Message + ")");
                 return null;
             }
         }

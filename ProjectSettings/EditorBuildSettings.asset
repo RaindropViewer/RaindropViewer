@@ -6,10 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Raindrop/Bootstrap/BootstrapScene.unity
+    guid: 94e79acf948f40946af2edd8ae7b8970
+  - enabled: 1
     path: Assets/Raindrop/Bootstrap/MainScene.unity
     guid: bb761ad61c4e4c74aaa552fad3c8b089
   - enabled: 1
     path: Assets/Tests/HeadlessBootstrapScene.unity
     guid: a9f35cb3e179fef4389cf769af057e55
+  - enabled: 1
+    path: Assets/Scenes/empty.unity
+    guid: a1f2d2eb96fe734428cc7b1051f11f40
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 3362b748d547f3b4a9d98d2d3821aff8, type: 2}

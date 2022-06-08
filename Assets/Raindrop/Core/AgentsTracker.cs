@@ -73,7 +73,7 @@ namespace Raindrop
             }
 
             //guard: if we are on non-main thread, we should give this function call to the main thread. 
-            if (!Globals.isOnMainThread())
+            if (!UnityMainThreadDispatcher.isOnMainThread())
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(() => {
                     UpdateRadar(e);
@@ -226,7 +226,7 @@ namespace Raindrop
             //when the sim is disconnected, avatars in that sim are no longer tracked.
             try
             {
-                if (!Globals.isOnMainThread())
+                if (!UnityMainThreadDispatcher.isOnMainThread())
                 {
                     UnityMainThreadDispatcher.Instance().Enqueue(() => {
                         Network_SimDisconnected(sender, e);

@@ -353,28 +353,33 @@ namespace OpenMetaverse.Imaging
         {
             try
             {
-                Texture2D bitmap = null;
+                Color32[] color32Array = null;
+                int height = -1;
+                int width = -1;
+
                 lock (ResourceSync)
                 {
                     using (Stream stream = Helpers.GetResourceStream(fileName, Settings.RESOURCE_DIR))
                     {
                         if (stream != null)
                         {
-
-                            bitmap = LoadTGAClass.LoadTGA(stream);
+                            color32Array = LoadTGAClass.LoadTGAColors(stream, out height, out width);
                             //bitmap = new Texture2D(tex);
                         }
                     }
                 }
-                if (bitmap == null)
+                if (color32Array == null)
                 {
                     Logger.Log(String.Format("Failed loading resource file: {0}", fileName), Helpers.LogLevel.Error);
                     return null;
                 }
-                else
+                if (height == -1 || width == -1)
                 {
-                    return new ManagedImage(bitmap);
+                    Logger.Log(String.Format("Failed loading resource file: {0}", fileName), Helpers.LogLevel.Error);
+                    return null;
                 }
+                
+                return new ManagedImage(color32Array, height, width);
             }
             catch (Exception e)
             {

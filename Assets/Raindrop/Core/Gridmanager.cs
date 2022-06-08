@@ -116,19 +116,21 @@ namespace Raindrop
      */
     public class GridManager : IDisposable
     {
-        public List<Grid> Grids;
-        public List<Grid> CustomGrids;
+        public List<Grid> Grids; //list to hold all grids, default or custom.
+        public List<Grid> CustomGrids; //special list to hold only those that are custom. required to perform save-to-disk operation later.
         private string gridsFileCustom = "grids_custom.xml";
         private string gridsFileDefault = "grids.xml";
+        private readonly string dataDir;
 
         // _appDataDir: the folder of the 2 grid xml files.
         public GridManager(string _appDataDir)
         {
+            dataDir = _appDataDir;
             Grids = new List<Grid>();
             CustomGrids = new List<Grid>();
             
-            LoadDefaultGrids(_appDataDir);
-            LoadCustomGrids(_appDataDir);
+            LoadDefaultGrids(dataDir);
+            LoadCustomGrids(dataDir);
         }
 
         public void Dispose()
@@ -163,7 +165,7 @@ namespace Raindrop
             try
             {
                 OSDArray customGrids = new OSDArray();
-                foreach (var grid in Grids)
+                foreach (var grid in CustomGrids)
                 {
                     var item = Grid.ToOSD(grid);
                     customGrids.Add(item);
@@ -184,6 +186,7 @@ namespace Raindrop
             }
         }
 
+        //add grid to list of grids, while overwriting if same-ID is already present.
         public void RegisterGrid(Grid grid)
         {
             int ix = Grids.FindIndex((Grid g) => { return g.ID == grid.ID; });
@@ -197,8 +200,12 @@ namespace Raindrop
             }
         }
         
+        //add custom-grid to list of grids, while overwriting if same-ID is already present.
+        //add custom-grid to custom grid-list, while overwriting if same-ID is already present.
+        // update disk's custom grid.xml with new grid.
         public void RegisterCustomGrid(Grid grid)
         {
+            //1. replace if any duplicates in custom list
             int ix = CustomGrids.FindIndex((Grid g) => { return g.ID == grid.ID; });
             if (ix < 0)
             {
@@ -208,6 +215,21 @@ namespace Raindrop
             {
                 CustomGrids[ix] = grid;
             }
+            
+            //2. replace if any duplicates in main list.
+            
+            ix = Grids.FindIndex((Grid g) => { return g.ID == grid.ID; });
+            if (ix < 0)
+            {
+                Grids.Add(grid);
+            }
+            else
+            {
+                Grids[ix] = grid;
+            }
+            
+            //3. perform write to disk
+            SaveCustomGrids(dataDir);
         }
 
         public Grid this[int ix]
@@ -241,11 +263,12 @@ namespace Raindrop
             get { return Grids.Count; }
         }
 
+        //load custom grids, and overwrite any dupes in $List<Grids> 
         public void LoadCustomGrids(string datadir)
         {
             CustomGrids.Clear();
             
-            //create blank LLSD file if not exists.
+            //create blank custom_grids.xml file if not exists.
             string sysGridsFile = Path.Combine(datadir, gridsFileCustom);
             if (!File.Exists(sysGridsFile))
             {
@@ -265,6 +288,13 @@ namespace Raindrop
             {
                 Logger.Log(string.Format("Error loading custom grid information: {0}", ex.Message), Helpers.LogLevel.Warning);
             }
+        }
+
+        //remove from custom grid xml. update disk.
+        public void UnregisterGrid(int foundGridIdx)
+        {
+            CustomGrids.RemoveAt(foundGridIdx);
+            SaveCustomGrids(dataDir);
         }
     }
 }

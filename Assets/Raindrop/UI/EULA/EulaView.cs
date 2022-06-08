@@ -1,10 +1,6 @@
 using Raindrop;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
-using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -52,7 +48,8 @@ public class EulaView : MonoBehaviour
         if (instance.GlobalSettings["EulaAccepted"] == false)
             return;
         
-        ServiceLocator.Instance.Get<UIService>().ScreenStackManager.ResetToInitialScreen();
+        var ui = ServiceLocator.Instance.Get<UIService>();
+        ui.ResetToInitialScreen();
     }
 
     private void onToggleChanged(bool isEulaAccepted)

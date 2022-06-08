@@ -44,7 +44,7 @@ public class LandmarkView : MonoBehaviour
     // access the modified bool in presenter, if it is true, we need to update ourselves.
     public void RenderView(Vector3 pos)
     {
-        if (! Globals.isOnMainThread())
+        if (! UnityMainThreadDispatcher.isOnMainThread())
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {

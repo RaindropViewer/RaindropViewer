@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using OpenMetaverse;
 using OpenMetaverse.Rendering;
+using Plugins.CommonDependencies;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
 using Quaternion = OpenMetaverse.Quaternion;
@@ -165,7 +166,7 @@ namespace Raindrop.Rendering
             if (BasePrim.Velocity != Vector3.Zero)
             {
                 BasePrim.Position = InterpolatedPosition = BasePrim.Position + BasePrim.Velocity * time
-                    * 0.98f * ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>()
+                    * 0.98f * ServiceLocator.Instance.Get<RaindropInstance>()
                         .Client.Network.CurrentSim.Stats.Dilation;
                 BasePrim.Velocity += BasePrim.Acceleration * time;
             }
@@ -313,16 +314,6 @@ namespace Raindrop.Rendering
 
 
 
-        //public static Color WinColor(OpenTK.Graphics.Color4 color)
-        //{
-        //    return Color.FromArgb((int)(color.A * 255), (int)(color.R * 255), (int)(color.G * 255), (int)(color.B * 255));
-        //}
-
-        //public static Color WinColor(Color4 color)
-        //{
-        //    return Color.FromArgb((int)(color.A * 255), (int)(color.R * 255), (int)(color.G * 255), (int)(color.B * 255));
-        //}
-
         public static int NextPow2(int start)
         {
             int pow = 1;
@@ -341,8 +332,8 @@ namespace Raindrop.Rendering
             try
             {
                 string fname = 
-                    ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>()
-                        .ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>()
+                    ServiceLocator.Instance.Get<RaindropInstance>()
+                        .ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>()
                             .Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -391,7 +382,7 @@ namespace Raindrop.Rendering
         {
             try
             {
-                string fname = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Create, FileAccess.Write, FileShare.None))
                 {

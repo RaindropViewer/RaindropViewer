@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using UnityEngine;
 
 namespace Raindrop.Map.Model
@@ -9,6 +11,8 @@ namespace Raindrop.Map.Model
     // for you to get map tiles from the network.
     public class MapTilesNetwork 
     {
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+
         List<ulong> tileRequests = new List<ulong>(); // a list of pending fetch requests. the ulongs are the x and y world coordinates (gridX * 256), packed.
         private DownloadManager downloader;
         UnityMainThreadDispatcher mainThreadInstance;
@@ -126,7 +130,31 @@ namespace Raindrop.Map.Model
 
             yield return null;
         }
-        
+
+        //retrieve and decode a single tile map from the server.
+        public MapTile GetRegionTilesInternal(ulong handle)
+        {
+            // sync with/ add to the existing requests.
+            lock (tileRequests)
+            {
+                if (tileRequests.Contains(handle)) return null;
+                tileRequests.Add(handle);
+            }
+            
+            // instance.Client.Grid.RequestMapBlocks(
+            //     GridLayerType.Objects,
+            //     (ushort)regLeft,
+            //     (ushort)regBottom,
+            //     (ushort)regXMax,
+            //     (ushort)regYMax,
+            //     true);
+
+
+            MapTile res = null;
+            return res; // the tile is created. but inside the tile, it is not ready and the texture is the empty texture static
+
+            
+        }
     }
 
 }

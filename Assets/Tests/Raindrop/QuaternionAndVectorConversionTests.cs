@@ -7,14 +7,13 @@ using OpenMetaverse.ImportExport.Collada14;
 using Raindrop;
 using Raindrop.Media;
 using Raindrop.Rendering;
-using Raindrop.ServiceLocator;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
-namespace Tests.Raindrop
+namespace Raindrop.Tests
 {
     [TestFixture()]
     public class QuaternionAndVectorConversionTests

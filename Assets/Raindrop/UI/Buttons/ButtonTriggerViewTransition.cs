@@ -1,18 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Lean.Gui;
-using Raindrop;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Logger = OpenMetaverse.Logger;
 
 // This component allows you to bring up the scene that the button is supposed to lead to.
 public class ButtonTriggerViewTransition : MonoBehaviour
 {
+    [Header("Use POP to pop the current view")]
     public CanvasType canvasTypeToPush;
     [Tooltip("If pop and push is true, it means the UI stack will be popped first, then pushed. Ala, the current UI you seeing will be gone.")]
     public bool popAndPush;
@@ -39,16 +36,16 @@ public class ButtonTriggerViewTransition : MonoBehaviour
     {
         if (canvasTypeToPush == CanvasType.POP)
         {
-            ServiceLocator.Instance.Get<UIService>().ScreenStackManager.PopCanvas();
+            ServiceLocator.Instance.Get<UIService>().PopCanvas();
             return;
         }
         
         if (popAndPush)
         {
-            ServiceLocator.Instance.Get<UIService>().ScreenStackManager.PopAndPush(canvasTypeToPush);
+            ServiceLocator.Instance.Get<UIService>().PopAndPush(canvasTypeToPush);
         } else
         {
-            ServiceLocator.Instance.Get<UIService>().ScreenStackManager.Push(canvasTypeToPush);
+            ServiceLocator.Instance.Get<UIService>().Push(canvasTypeToPush);
         }
     }
 }

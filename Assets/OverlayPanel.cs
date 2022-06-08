@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 //the map overlay panel, that is laid on top of the map UI when a place is selected.
 public class OverlayPanel : MonoBehaviour
 {
-    [FormerlySerializedAs("me")] public GameObject panel;
+    public GameObject panel;
     private void Awake()
     {
         //register my root.

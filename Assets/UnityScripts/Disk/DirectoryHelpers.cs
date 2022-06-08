@@ -84,7 +84,7 @@ namespace Disk
             {
                 OpenMetaverse.Logger.Log("error writing bytes to filepath : "+ filePath + " " + e.ToString(), Helpers.LogLevel.Error);
             }
-            // Debug.Log($"write: {filePath} ");
+            Debug.Log($"write: {filePath} ");
         }
         
         //easily write to a file

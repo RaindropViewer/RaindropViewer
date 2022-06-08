@@ -1,8 +1,8 @@
 using LibreMetaverse.PrimMesher;
 using OpenMetaverse;
 using OpenMetaverse.Rendering;
+using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using ObjectManager = Raindrop.Presenters.ObjectManager;

@@ -6,8 +6,10 @@ using NUnit.Framework;
 using OpenMetaverse;
 using Vector3 = UnityEngine.Vector3;
 using Raindrop.Utilities;
+using UnityEngine;
+using Quaternion = OpenMetaverse.Quaternion;
 
-namespace Tests.Raindrop
+namespace Raindrop.Tests.Map3D
 {
     // the location of the mapEntities in the scene hierachy is defined as 
     // "global" coordinates / 256 - that is, an entity existing in the sim Daboom (1000, 1000)
@@ -86,6 +88,29 @@ namespace Tests.Raindrop
             var handle = MapSpaceConverters.MapSpace2Handle(mapSpaceEntityPosition);
 
             Assert.True(handle == Utils.UIntsToLong((1000 * 256), (1000 * 256)));
+
+        }
+        
+        [Test]
+        public void OMVRot2MapRot_Test()
+        {
+            //lets say the entity is looking north-wards in the map.
+            var OMV_north = Quaternion.Identity; 
+            var MapspaceRot_north = MapSpaceConverters.GlobalRot2MapRot(OMV_north);
+            Debug.Log(MapspaceRot_north.eulerAngles.ToString());
+            Assert.True(MapspaceRot_north.eulerAngles.x == 0);
+            Assert.True(MapspaceRot_north.eulerAngles.z == 0);
+            Assert.True(MapspaceRot_north.eulerAngles.y == 0);
+
+            
+            //lets say the entity is looking to the right-wards in the map.
+            var OMV_east = Quaternion.CreateFromEulers(0, 0, -1.57f); //right handed screwdriver. 
+            var MapspaceRot = MapSpaceConverters.GlobalRot2MapRot(OMV_east);
+
+            Debug.Log(MapspaceRot.eulerAngles.ToString());
+            Assert.True(MapspaceRot.eulerAngles.x == 0);
+            Assert.True(MapspaceRot.eulerAngles.y == 0);
+            Assert.True(Math.Abs(MapspaceRot.eulerAngles.z - 270) < 0.1f); //left handed screwdriver );
 
         }
 

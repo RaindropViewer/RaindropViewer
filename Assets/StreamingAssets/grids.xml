@@ -62,7 +62,7 @@
       <key>platform</key>
       <string>OpenSim</string>
       <key>loginuri</key>
-      <string>http://login.metro.land/</string>
+      <string>http://hypergrid.org:8002/</string>
       <key>loginpage</key>
       <string>http://metropolis.hypergrid.org</string>
       <key>helperuri</key>
@@ -448,7 +448,7 @@
       <string>1</string>
     </map>
 
-    <!-- Local Host -->
+    <!-- Local Host (grid proxy) -->
 
     <map>
       <key>gridnick</key>

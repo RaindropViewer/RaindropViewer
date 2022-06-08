@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.UI.chat;
 using Raindrop.UI.chat.printer_component;
@@ -9,7 +10,7 @@ namespace Raindrop.Presenters
 {
     public class IMPresenter : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom => instance.Netcom;
         public TMPTextFieldPrinter printer; //the component in the textbox
         public IMManager manager;

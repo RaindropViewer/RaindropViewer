@@ -105,7 +105,7 @@ public class AddTouchGesturesHandler : MonoBehaviour
 			{
 				Vector3 worldPoint = orthoCam.Cam.ScreenToWorldPoint((Vector2)recognizer.touchLocation());
 				ulong regionCoords = MapSpaceConverters.MapSpace2Handle(worldPoint);
-				mapUIView.getPresenter().OnMapClick(regionCoords);
+				// mapUIView.getPresenter().OnMapClick(regionCoords);
 				//Debug.Log("tap recognizer fired: " + r);
 			};
 			TouchKit.addGestureRecognizer(recognizer);

@@ -17,18 +17,20 @@ public class TexturableMesh : MonoBehaviour
     public bool isMapTile = false;
 
     [Header("this sets to true when mesh is ready and we can apply the texture.")]
-    public bool isReady = false;
+    // public bool isReady = false;
     [Header("if this flag is set true, and present state is 'isTextured', we need to update the texture.")]
-    public bool updateRequired = true;
+    // public bool updateRequired = true;
 
-    public TexturedState State = TexturedState.initialising;
+    public TexturedState State = TexturedState.Initialising;
+
+    public Texture2D texture;
 
     public enum TexturedState
     {
-        initialising,   // rendering components are still waking up.
-        acceptingTextures, //componets are ready.
-        defaultTexture, // rendering components have a default texture assigned.
-        isTextured      // the mesh is indeed textured. 
+        Initialising,   // rendering components are still waking up.
+        AcceptingTextures, //componets are ready.
+        // defaultTexture, // rendering components have a default texture assigned.
+        // isTextured      // the mesh is indeed textured. 
     }
     
     void Awake()
@@ -40,22 +42,29 @@ public class TexturableMesh : MonoBehaviour
         else
         {
             mat = renderer.material;
-            State = TexturedState.acceptingTextures;
+            State = TexturedState.AcceptingTextures;
         }
     }
     void Start()
     {
-        ApplyLoadingTexture();
+        if (texture == null)
+        {
+            ApplyLoadingTexture();
+        }
+        else
+        {
+            ApplyTexture(texture);
+        }
     }
 
     //apply a generic, loading texture to the mesh
-    public void ApplyLoadingTexture()
+    private void ApplyLoadingTexture()
     {
-        if (State != TexturedState.acceptingTextures)
-        {
-            OpenMetaverse.Logger.Log("texturable mesh is not initialised",Helpers.LogLevel.Error);
-            return;
-        }
+        // if (State != TexturedState.acceptingTextures)
+        // {
+        //     OpenMetaverse.Logger.Log("texturable mesh is not initialised",Helpers.LogLevel.Error);
+        //     return;
+        // }
         
         if (isMapTile)
         {
@@ -71,10 +80,12 @@ public class TexturableMesh : MonoBehaviour
     // apply a texture2d to this texturable mesh.
     public void ApplyTexture(Texture2D tex)
     {
-        // not ready to apply the texture to us! - bug.
-        if (State == TexturedState.initialising)
+        // assign texture reference.
+        texture = tex;
+
+        //not ready, but when start is called, the application will be done.
+        if (State == TexturedState.Initialising)
         {
-            Debug.LogError("renderer is not ready when ApplyTexture(t2d) was called.");
             return;
         }
         
@@ -90,15 +101,16 @@ public class TexturableMesh : MonoBehaviour
         mat.SetTexture("_BaseMap", tex);
         // Obsolete: variant for standard render pipeline
         // mat.SetTexture("_MainTex", tex);
-        if (State == TexturedState.acceptingTextures)
-        {
-            State = TexturedState.defaultTexture;
-        }
 
-        if (State == TexturedState.defaultTexture)
-        {
-            State = TexturedState.isTextured;
-        }
+        // if (State == TexturedState.acceptingTextures)
+        // {
+        //     State = TexturedState.defaultTexture;
+        // }
+        //
+        // if (State == TexturedState.defaultTexture)
+        // {
+        //     State = TexturedState.isTextured;
+        // }
     }
 }
 

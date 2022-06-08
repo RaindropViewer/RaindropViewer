@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
 using Raindrop.Services;
@@ -19,7 +20,7 @@ namespace Raindrop
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client => instance.Client;
 
-        private UIService ui => ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+        private UIService ui => ServiceLocator.Instance.Get<UIService>();
 
         //public ChatTabs Tabs = new ChatTabs();
         //public ChatTabPresenter MainTab;
@@ -29,7 +30,7 @@ namespace Raindrop
         public ChatListView chatListView => presenter.chatListView;
 
 
-        RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+        RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
         public ChatManager(ChatPresenter view)
         {
             this.presenter = view;
@@ -239,7 +240,7 @@ namespace Raindrop
         /// <param name="highlightChatTab">Highligt (and flash in taskbar) chat tab if not selected</param>
         public void DisplayNotificationInChat(string msg, ChatBufferTextStyle style, bool highlightChatTab)
         {
-            if (! Globals.isOnMainThread())
+            if (! UnityMainThreadDispatcher.isOnMainThread())
             {
                 UnityMainThreadDispatcher.Instance().Enqueue(
                         () => DisplayNotificationInChat(msg, style, highlightChatTab)

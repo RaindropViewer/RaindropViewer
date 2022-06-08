@@ -9,7 +9,7 @@ using Raindrop.Netcom;
 using Raindrop.Media;
 using Raindrop.UI.Notification;
 using OpenMetaverse;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using UnityEditor;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
@@ -240,6 +240,9 @@ namespace Raindrop
                 Logger.Log("Mono runtime is detected. This should not happen except in the editor.", Helpers.LogLevel.Warning);
             }
 
+            //init client file paths, client settings, and client events.
+            InitializeClient(_client);
+
             _netcom = new RaindropNetcom(this);
             _state = new StateManager(this);
             MediaManager = new MediaManager(this);
@@ -249,7 +252,6 @@ namespace Raindrop
             //RegisterContextActions();
             _movement = new RaindropMovement(this);
 
-            InitializeClient(_client);
 
             //rlv = new RLVManager(this);
             _gridManager = new GridManager(UserDir);
@@ -330,14 +332,19 @@ namespace Raindrop
             client.Settings.SEND_AGENT_THROTTLE = true;
 
             client.Settings.USE_ASSET_CACHE = true;
-            client.Settings.ASSET_CACHE_DIR = Path.Combine(UserDir, "cache");
+            //1. init res dir: internalStrgeRoot/openmetavese_data.
+            OpenMetaverse.Settings.RESOURCE_DIR = Path.Combine(UserDir, "openmetaverse_data");
+            Logger.Log("resource root: " + OpenMetaverse.Settings.RESOURCE_DIR, Helpers.LogLevel.Info);
+            //2. init asset cache dir: internalStrgeRoot/openmetavese_data/cache.
+            client.Settings.ASSET_CACHE_DIR = Path.Combine(OpenMetaverse.Settings.RESOURCE_DIR, "cache");
+            Logger.Log("Asset cache: " + client.Settings.ASSET_CACHE_DIR, Helpers.LogLevel.Info);
             client.Assets.Cache.AutoPruneEnabled = false;
             client.Assets.Cache.ComputeAssetCacheFilename = ComputeCacheName;
 
             client.Throttle.Total = 5000000f; //0.625 megabytes.
             client.Settings.THROTTLE_OUTGOING_PACKETS = true; //please throttle to be good boy.
-            client.Settings.LOGIN_TIMEOUT = 120 * 1000;
-            client.Settings.SIMULATOR_TIMEOUT = 180 * 1000;
+            client.Settings.LOGIN_TIMEOUT = 47 * 1000; //120
+            client.Settings.SIMULATOR_TIMEOUT = 180 * 1000; //180
             client.Settings.MAX_CONCURRENT_TEXTURE_DOWNLOADS = 20;
 
             client.Self.Movement.AutoResetControls = false;

@@ -1869,13 +1869,27 @@ namespace OpenMetaverse
                             {
                                 if (state == TextureRequestState.Finished)
                                 {
-                                    assetTexture.Decode();
+                                    //queue decode to main thread
+                                    Task decodeTask = UnityMainThreadDispatcher.Instance().EnqueueAsync(() =>
+                                    {
+                                        lock (assetTexture)
+                                        {
+                                            assetTexture.Decode();
 
+                                            return;
+                                        }
+
+
+                                    });
+                                    // decodeTask.Start(); // no need to call start, the task is already started itself.
+                                    //wait for decode to done, then run the next part.
+                                    decodeTask.Wait();
                                     for (int i = 0; i < Textures.Length; i++)
                                     {
                                         if (Textures[i].TextureID == textureId)
                                             Textures[i].Texture = assetTexture;
                                     }
+
                                 }
                                 else
                                 {

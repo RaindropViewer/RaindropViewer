@@ -1,19 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
-using Better.StreamingAssets;
-using System;
-using Raindrop;
-using UnityEngine.UI;
-using Raindrop.Presenters;
+using System.Threading;
 using OpenMetaverse;
-using Raindrop.Map;
-using Raindrop.Services.Bootstrap;
-using Raindrop.UI;
+using Plugins.CommonDependencies;
+using UnityEngine;
+
 using Raindrop.UI.map.Map_SceneHierachy;
-using Raindrop.UI.Presenters;
+using UnityEditor.PackageManager;
 using UnityEngine.Serialization;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Raindrop.UI.Views
 {
@@ -25,13 +21,26 @@ namespace Raindrop.UI.Views
         [FormerlySerializedAs("mapSceneGraph_Root")] [SerializeField]
         // public MapScenePresenter mapScenePresenter;
 
-        private MapSceneController msp;
+        public ParcelInfoPopup parcelUI;
 
         public MapScenePresenter MapScenePresenter;
 
+        private GridClient Client => ServiceLocator.Instance.Get<RaindropInstance>().Client;
+       
+        //global handle: handle + the offset within the simulator.
+        public void OnFocusMapPosition(ulong global_handle, RaycastHit raycastHit)
+        {
+            //1. lerp to map postion
+            MapScenePresenter.mapCameraView.lerpCamTo(raycastHit.point, 1);
+            
+            //2. get parcel data and show the info as a popup window
+            parcelUI.Open(global_handle);
+        }
+        
+
         private void Awake()
         {
-            msp = new MapSceneController(this);
+            // msp = new MapSceneController(this);
         }
 
         private void OnEnable()
@@ -46,9 +55,5 @@ namespace Raindrop.UI.Views
             //mapSceneGraph_Root.gameObject.SetActive(false);
         }
 
-        public MapSceneController getPresenter()
-        {
-            return this.msp;
-        }
     }
 }

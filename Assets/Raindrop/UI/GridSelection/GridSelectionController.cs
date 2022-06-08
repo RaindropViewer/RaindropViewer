@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using UnityEngine;
 
 namespace Raindrop.GridSelection
@@ -13,7 +14,7 @@ namespace Raindrop.GridSelection
 
         //reference to model
         private RaindropInstance instance => 
-            ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+            ServiceLocator.Instance.Get<RaindropInstance>();
         private bool Ready => !(instance is null);
         private bool Connected => instance.Client.Network.Connected;
 

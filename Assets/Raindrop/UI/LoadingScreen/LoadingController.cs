@@ -1,7 +1,7 @@
 ﻿using System;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
-using Raindrop.Presenters;
 using Raindrop.Services;
 
 namespace Raindrop.UI.LoadingScreen
@@ -9,7 +9,7 @@ namespace Raindrop.UI.LoadingScreen
     public class LoadingController : IDisposable
     {
         private LoadingView view;
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
         public bool isInteractable => view.canvas.interactable;
@@ -65,7 +65,7 @@ namespace Raindrop.UI.LoadingScreen
                 case LoginStatus.Success:
                     view.loginMsg.Value += "Logged in as " + netcom.LoginOptions.FullName + Environment.NewLine;
                     
-                    ServiceLocator.ServiceLocator.Instance.Get<UIService>().ScreenStackManager.PopAndPush(CanvasType.Game);
+                    ServiceLocator.Instance.Get<UIService>().PopAndPush(CanvasType.Game);
                     
                     view.FadeOut();
                     break;

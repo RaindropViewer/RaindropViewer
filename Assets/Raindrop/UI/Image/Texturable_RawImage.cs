@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using OpenMetaverse;
 using OpenMetaverse.Assets;
 using OpenMetaverse.Imaging;
+using Plugins.CommonDependencies;
+using Plugins.ObjectPool;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
@@ -62,8 +63,8 @@ public class Texturable_RawImage : MonoBehaviour
         }
         
         //2. decipher data from jp2 to plain (bitmap style) texture2d
-        var img = TexturePool.Get(TextureFormat.RGB24);
-        T2D.LoadT2DWithoutMipMaps(assetTexture.AssetData, img); //blocking.
+        var img = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGB24);
+        T2D_JP2.LoadT2DWithoutMipMaps(assetTexture.AssetData, img); //blocking.
 
         //3. push the texture2d to the rawimage.
         ProfileTexture.setRawImage(img);

@@ -1,11 +1,9 @@
 using OpenMetaverse;
 using Raindrop.Rendering;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Plugins.CommonDependencies;
 using Raindrop.Services.Bootstrap;
-using UniRx.Triggers;
 using UE = UnityEngine ;
 using UnityEngine ;
 
@@ -27,13 +25,12 @@ namespace Raindrop.Presenters
             = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject in minimap
         public GameObject agentReference; //reference to the agent, if rezzed - it should.
 
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
         //private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 
         void Start()
         {
-            mainThread = System.Threading.Thread.CurrentThread;
             //this seems to happen on new avatars.
             instance.Client.Objects.AvatarUpdate +=  Objects_AvatarUpdate;
             //this seems to happen on avatar movements.
@@ -46,7 +43,7 @@ namespace Raindrop.Presenters
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
-            if (Globals.isOnMainThread())
+            if (UnityMainThreadDispatcher.isOnMainThread())
             {
                 updateAvatarPosition(e);
             } else
@@ -70,17 +67,12 @@ namespace Raindrop.Presenters
                 }
             }
         }
-
-
-
-        public Thread mainThread;
-
         private void Objects_AvatarUpdate(object sender, AvatarUpdateEventArgs e)
         {
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
-            if (Globals.isOnMainThread())
+            if (UnityMainThreadDispatcher.isOnMainThread())
             {
                 updateAvatar(e);
             } else

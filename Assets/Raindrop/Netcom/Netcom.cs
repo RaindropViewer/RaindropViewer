@@ -163,7 +163,7 @@ namespace Raindrop.Netcom
             {
                 loggedIn = true;
                 client.Self.RequestBalance();
-
+                
                 UnityMainThreadDispatcher.Instance().Enqueue(() => {
                     Logger.DebugLog("netcom callback: Network_LoginProgress.Success");
                     OnClientConnected(EventArgs.Empty);
@@ -449,6 +449,11 @@ namespace Raindrop.Netcom
         public bool IsTeleporting
         {
             get { return teleporting; }
+        }
+        
+        public bool IsSecondlife
+        {
+            get { return (instance.Netcom.LoginOptions.Grid.Platform == "SecondLife"); }
         }
 
         public LoginOptions LoginOptions

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4263168154616483493}
   - component: {fileID: 1271366560738967570}
   - component: {fileID: 6769652233357756075}
+  - component: {fileID: 4815567157698140068}
   m_Layer: 7
   m_Name: ObjectPrototype
   m_TagString: Untagged
@@ -110,6 +111,50 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tm: {fileID: 1215507854730738474}
+--- !u!114 &4815567157698140068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3767279658298423867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dcd2942ba7a85946a37e9269f5df10c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  InterpolatedPosition:
+    X: 0
+    Y: 0
+    Z: 0
+  InterpolatedRotation:
+    X: 0
+    Y: 0
+    Z: 0
+    W: 0
+  RenderPosition:
+    X: 0
+    Y: 0
+    Z: 0
+  RenderRotation:
+    X: 0
+    Y: 0
+    Z: 0
+    W: 0
+  DistanceSquared: 0
+  PositionCalculated: 0
+  Type: 1
+  Initialized: 0
+  IsDisposed: 0
+  AlphaQueryID: -1
+  SimpleQueryID: -1
+  HasAlphaFaces: 0
+  HasSimpleFaces: 0
+  HasInvisibleFaces: 0
+  Attached: 0
+  AttachedStateKnown: 0
+  Meshed: 0
+  Meshing: 0
 --- !u!1 &8737598692518959133
 GameObject:
   m_ObjectHideFlags: 0

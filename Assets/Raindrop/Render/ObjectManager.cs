@@ -7,6 +7,8 @@ using System.IO;
 using System.Threading;
 using OpenMetaverse.Imaging;
 using OpenMetaverse.Rendering;
+using Plugins.CommonDependencies;
+using Plugins.ObjectPool;
 using Raindrop.Render;
 using Raindrop.Services.Bootstrap;
 using UniRx.Toolkit;
@@ -18,7 +20,7 @@ using RenderSettings = Raindrop.Rendering.RenderSettings;
 
 namespace Raindrop.Presenters
 {
-    // subscribes to object-data events and delegates them to the various other rendering managers.
+    // on every update, do a scan 
     // - creates objects
     // - gives these objects positions
     // - gives these objects textures.
@@ -31,7 +33,6 @@ namespace Raindrop.Presenters
         private object objectsLock = new object();
         private Dictionary<uint, RenderPrimitive> Prims 
             = new Dictionary<uint, RenderPrimitive>(); //user UUID -> user gameobject 
-        List<SceneObject> SortedObjects;
         
          MeshmerizerR renderer => Globals.renderer;
 
@@ -39,20 +40,32 @@ namespace Raindrop.Presenters
         readonly ConcurrentQueue<GenericTask> PendingTasks = new ConcurrentQueue<GenericTask>();
         private readonly SemaphoreSlim PendingTasksAvailable = new SemaphoreSlim(0);
 
-        private ObjectPool<RenderPrimitive> PrimPool;
+        // private ObjectPool<RenderPrimitive> PrimPool;
         // simple counter to prevent lag from too many meshings in a single frame.
         private int meshingsRequestedThisFrame;
         // a cache for decoded scuplties
         Dictionary<UUID, Texture2D> sculptCache = new Dictionary<UUID, Texture2D>();
 
-        private RaindropInstance instance { get { return ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
         private GridClient Client { get { return instance?.Client; } }
         bool Active => instance.Client.Network.Connected;
         
         void Start()
         {
-            instance.Client.Objects.ObjectUpdate += ObjectsOnObjectUpdate; //prims, foilage, attachments (for those that are static and we-just-saw-it)
-            instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate; //prims, avatars (for those that move often and hap-hazardly)
+            // instance.Client.Objects.ObjectUpdate += ObjectsOnObjectUpdate; //prims, foilage, attachments (for those that are static and we-just-saw-it)
+            // instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate; //prims, avatars (for those that move often and hap-hazardly)
+            
+            instance.Client.Network.SimConnected += NetworkOnSimConnected;
+
+            // PrimPool = ObjectPool<RenderPrimitive>
+        }
+
+        private void NetworkOnSimConnected(object sender, SimConnectedEventArgs e)
+        {
+            if (e.Simulator == instance.Client.Network.CurrentSim)
+            {
+                RenderingEnabled = true;
+            }
         }
 
         private void Update()
@@ -266,7 +279,7 @@ namespace Raindrop.Presenters
         {
             if (!RenderingEnabled) return;
 
-            if (Globals.isOnMainThread())
+            if (UnityMainThreadDispatcher.isOnMainThread())
             {
                 //work.
                 UpdatePrim(prim);
@@ -281,6 +294,8 @@ namespace Raindrop.Presenters
             
             void UpdatePrim(Primitive primitive)
             {
+                RenderPrimitive rPrim;
+                
                 //create and insert prim's data into the hashtable.
                 switch (primitive.PrimData.PCode)
                 {
@@ -291,19 +306,26 @@ namespace Raindrop.Presenters
                     case PCode.Prim:
                         if (primitive.Textures == null) return;
 
-                        RenderPrimitive rPrim;
+                        //check if the prim is already in the scene dictionary
                         if (Prims.TryGetValue(primitive.LocalID, out rPrim))
                         {
+                            SetPrimTransforms_RequiresOnMainThread(primitive, rPrim.gameObject);
                             rPrim.AttachedStateKnown = false;
                         }
                         else
                         {
-                            rPrim = PrimPool.Rent();
+                            //looks like the prim is new to us.
+                            
                             //give the prim its default, uninitialised properties
                             rPrim.Meshed = false;
                             rPrim.BoundingVolume = new BoundingVolume();
 
+                            //mesh it
                             rPrim.BoundingVolume.FromScale(primitive.Scale);
+                            RezNewObject_RequiresOnMainThread(primitive, out rPrim);
+                            Prims[primitive.LocalID] = rPrim;
+                            SetPrimTransforms_RequiresOnMainThread(primitive, rPrim.gameObject);
+                            
                         }
 
                         rPrim.BasePrim = primitive;
@@ -317,23 +339,6 @@ namespace Raindrop.Presenters
                         break;
                 }
 
-                //render the prims data on the main thread.
-                // note: looks like there is no need to run this on main thread, as we can just lock it (exclusive section).
-                lock (objectsLock)
-                {
-                    RenderPrimitive obj;
-                    Prims.TryGetValue(primitive.LocalID, out obj);
-                    if (obj != null)
-                    {
-                        SetPrimTransforms_RequiresOnMainThread(primitive, obj.gameObject);
-                    }
-                    else
-                    {
-                        RezNewObject_RequiresOnMainThread(primitive, out obj);
-                        Prims[primitive.LocalID] = obj;
-                        SetPrimTransforms_RequiresOnMainThread(primitive, obj.gameObject);
-                    }
-                }
             }
         }
 
@@ -341,7 +346,7 @@ namespace Raindrop.Presenters
         // warn: MUST be run by main thread.
         private void RezNewObject_RequiresOnMainThread(Primitive e, out RenderPrimitive newObj)
         {
-            if (Thread.CurrentThread != Globals.GMainThread)
+            if (! UnityMainThreadDispatcher.isOnMainThread())
             {
                 Debug.LogError("thou must run RezNewObject_RequiresOnMainThread on main thread..");
                 newObj = null;
@@ -355,37 +360,11 @@ namespace Raindrop.Presenters
             
             RezNewObject(e, out newObj);;
             
-            // Debug.LogError("fixme");
-            // Transform parent = this.gameObject.transform;
-            // newObj = Instantiate(PrimPrefab, UE.Vector3.zero, UE.Quaternion.identity, parent);
-            
-            // GameObject go = new GameObject();
-            // if (Globals.isOnMainThread())
-            // {
-            //      RezNewObject(e, out newObj);
-            //      
-            // } else
-            // {
-            //     UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            //     {
-            //         RezNewObject_RequiresOnMainThread(e, newObj);
-            //     });
-            // }
-            // return;
         }
 
         //make sure to run this only on Main thread.
         private void RezNewObject(Primitive e, out RenderPrimitive rp)
         {
-            if (e.Text != "" || e.Text != null)
-            {
-                // Debug.Log("prim has no props. " + e.Prim.ID); //this is for most prims.
-            }
-            else if (e.Properties.Name == null)
-            {
-                Debug.Log("prim has property, but no name . " + e.ID); //i have never seen this before.
-            }
-
             var go = CreatePrimGameObject(e);
             
             //get the controller class on this obj:
@@ -394,10 +373,6 @@ namespace Raindrop.Presenters
             {
                 Debug.LogError("wtf why prim prefab has no RenderPrimitive script?");
             }
-                
-            //objects[e.ID] = primGO;
-            //return primGO;
-            return;
         }
 
 
@@ -413,7 +388,7 @@ namespace Raindrop.Presenters
                 return; //object is already removed from scene.
             }
             
-            if (Thread.CurrentThread != Globals.GMainThread)
+            if (! UnityMainThreadDispatcher.isOnMainThread())
             {
                 Debug.LogError("thou shalt not run SetPrimTransforms_RequiresOnMainThread on main thread..");
                 return;
@@ -430,12 +405,7 @@ namespace Raindrop.Presenters
         
     
         
-        //make the agent:
-        // mesh it
-        // nametag - todo: remove me.
-        // scaling
-        // position
-        // rotation
+        //make the Gameobject that represents the primitive:
         private GameObject CreatePrimGameObject(Primitive ePrim)
         {
             string objname;
@@ -448,7 +418,11 @@ namespace Raindrop.Presenters
                 objname = ePrim.Properties.Name;
             }
             
-            UUID uuid = ePrim.ID;
+            // UUID uuid = ePrim.ID;
+            string name = ePrim.Properties.Name;
+            string desc = ePrim.Properties.Description;
+            string sitString = ePrim.Properties.SitName;
+            string touchString = ePrim.Properties.TouchName;
             
             GameObject go = Instantiate(PrimPrefab, this.transform);
 
@@ -460,8 +434,8 @@ namespace Raindrop.Presenters
 
             UE.Quaternion objRot = RHelp.TKQuaternion4(ePrim.Rotation);
             go.transform.rotation = objRot;
-            
-            go.name = uuid.ToString();
+
+            go.name = name;
             
             return go;
         }
@@ -493,8 +467,8 @@ namespace Raindrop.Presenters
                             {
                                 lock (img)
                                 {
-                                    img = TexturePool.Get(TextureFormat.RGB24);
-                                    T2D.LoadT2DWithoutMipMaps(assetTexture.AssetData, img); //blocking.
+                                    img = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.RGB24);
+                                    T2D_JP2.LoadT2DWithoutMipMaps(assetTexture.AssetData, img); //blocking.
                             
                                     try
                                     {

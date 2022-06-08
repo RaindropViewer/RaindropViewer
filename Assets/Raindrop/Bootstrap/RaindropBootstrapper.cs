@@ -2,8 +2,10 @@
 using System.Threading;
 using Disk;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityScripts.Disk;
 using Logger = OpenMetaverse.Logger;
 
@@ -18,6 +20,13 @@ namespace Raindrop.Services.Bootstrap
         private void Awake()
         {
             Start_Raindrop_CoreDependencies();
+
+            StartUIScene();
+        }
+
+        private void StartUIScene()
+        {
+            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
         }
 
         //perform check-copy operation.
@@ -41,7 +50,7 @@ namespace Raindrop.Services.Bootstrap
             //0. start rolling log file
             // ConfigureRollingLogFile();
 
-            startupPrintLogger();
+            StartupPrintLogger();
             
             Init_Globals();
             
@@ -60,7 +69,7 @@ namespace Raindrop.Services.Bootstrap
         }
 
        
-        public static void startupPrintLogger()
+        public static void StartupPrintLogger()
         {
             Logger.Log("Logger is ready", Helpers.LogLevel.Debug);
             Logger.Log("Logger is logging to : "+  Path.Combine(
@@ -71,19 +80,19 @@ namespace Raindrop.Services.Bootstrap
 
         public static void CreateAndRegister_RaindropInstance()
         {
-            if (ServiceLocator.ServiceLocator.Instance.IsRegistered<RaindropInstance>()) 
+            if (ServiceLocator.Instance.IsRegistered<RaindropInstance>()) 
                 return;
             
             var rdi = new RaindropInstance(new GridClient());
-            ServiceLocator.ServiceLocator.Instance.Register<RaindropInstance>(rdi);
+            ServiceLocator.Instance.Register<RaindropInstance>(rdi);
             SendStartupMessageToLogger();
         }
 
         public static void StartServiceLocator()
         {
-            if (ServiceLocator.ServiceLocator.Instance == null)
+            if (ServiceLocator.Instance == null)
             {
-                ServiceLocator.ServiceLocator.Initiailze();
+                ServiceLocator.Initiailze();
             }
         }
         
@@ -114,7 +123,7 @@ namespace Raindrop.Services.Bootstrap
             RaindropInstance instance;
             try
             {
-                instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+                instance = ServiceLocator.Instance.Get<RaindropInstance>();
             }
             catch
             {

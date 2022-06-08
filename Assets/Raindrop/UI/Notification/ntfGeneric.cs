@@ -1,4 +1,5 @@
 ﻿using System;
+using Plugins.CommonDependencies;
 using Raindrop.Services;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Raindrop
     public class ntfGeneric : MonoBehaviour
     {
         private RaindropInstance instance =>
-            ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+            ServiceLocator.Instance.Get<RaindropInstance>();
 
         public TMPro.TMP_Text txtMessage;
         public void Init(string msg)
@@ -25,7 +26,7 @@ namespace Raindrop
         private void btnOk_Click(object sender, EventArgs e)
         {
 
-            var ui = ServiceLocator.ServiceLocator.Instance.Get<UIService>();
+            var ui = ServiceLocator.Instance.Get<UIService>();
             ui.ModalsManager.UnShow(this.gameObject);
             // instance.Notification.RemoveNotification(this);
         }

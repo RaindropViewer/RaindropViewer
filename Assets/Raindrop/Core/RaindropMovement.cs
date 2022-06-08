@@ -84,7 +84,7 @@ namespace Raindrop
             this.instance = instance;
             timer = new System.Timers.Timer(100); //seems like turn left and right will have 100 timer.
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
-            timer.Enabled = true;
+            timer.Enabled = false;
         }
 
         public void Dispose()

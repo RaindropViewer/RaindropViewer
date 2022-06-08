@@ -2,8 +2,8 @@
 using Raindrop;
 using Raindrop.Netcom;
 using Raindrop.Rendering;
-using Raindrop.ServiceLocator;
 using System;
+using Plugins.CommonDependencies;
 using UnityEngine;
 using Vector3 = OpenMetaverse.Vector3;
 using OMV = OpenMetaverse;

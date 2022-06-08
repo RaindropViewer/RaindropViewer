@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Raindrop;
-using Raindrop.Presenters;
+﻿using System.Collections;
 using Raindrop.Services;
-using Raindrop.UI.Login;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.UI;
 using Assert = NUnit.Framework.Assert;
 
-namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
+namespace Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines
 {
     /*
      * UI intensive, full integration subroutines for the pressing buttons to login.
@@ -69,8 +62,9 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
             {
                 //1b. we are on the welcome screen.
                 Assert.True(
-                    uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Welcome,
-                    "expect current view to be welcome canvas");
+                    uiSrv.GetPresentCanvasType() == CanvasType.Welcome,
+                    "expect current view to be welcome canvas. instead, it is : " +
+                    uiSrv.GetPresentCanvasType());
                 yield return new WaitForSeconds(2);
                 
                 // 1c. do "select grid by ui"
@@ -87,8 +81,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
                 yield return LoginTests.Utils.UIHelpers.Click_Button_Welcome2LoginScreen();
                 
                 //1b. we are on the login screen. do login. assert logged in.
-                Assert.IsTrue(uiSrv.ScreenStackManager.TopCanvas.canvasType == CanvasType.Login);
-                PresenterType_IsAvailable( uiSrv.ScreenStackManager);
+                Assert.IsTrue(uiSrv.GetPresentCanvasType() == CanvasType.Login);
 
                 yield return Login.StartLogin(username, password);
                 // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
@@ -109,18 +102,7 @@ namespace Tests.Raindrop.RaindropFullIntegrationTests.InputSubroutines
                 Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
                 
                 yield return new WaitForSeconds(4);
-                
             }
-
         }
-
-        public static void PresenterType_IsAvailable(ScreenStackManager vm)
-        {
-            var loginPresenter
-                = vm.GetForegroundCanvas().GetComponent<LoginPresenter>();
-            Assert.True(loginPresenter != null);
-        }
-
-
     }
 }

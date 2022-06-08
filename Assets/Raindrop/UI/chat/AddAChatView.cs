@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using OpenMetaverse;
+using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.ServiceLocator;
 using Raindrop.Services;
 using UnityEngine;
 using UnityEngine.Serialization;

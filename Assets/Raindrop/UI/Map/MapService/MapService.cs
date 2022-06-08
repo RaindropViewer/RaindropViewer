@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Raindrop.ServiceLocator;
+using Plugins.CommonDependencies;
 using UnityEngine;
 
 namespace Raindrop.Map.Model
@@ -36,26 +36,29 @@ namespace Raindrop.Map.Model
         // fixme: unused
         ConcurrentQueue<MapData> receivedDataQueue = new ConcurrentQueue<MapData>();
 
-        // fixme: unused
-        UnityMainThreadDispatcher mainThreadInstance;
-        private object mapDataQueue_lock = new object();
-        
         private MapTilesRAM _mapTilesRam;
         private MapTilesNetwork mapTilesNetwork;
         
-        private RaindropInstance instance => ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
-        private bool Secondlife => instance.Netcom.LoginOptions.Grid.Platform == "SecondLife";
+        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        // private bool Secondlife; //=> instance.Netcom.LoginOptions.Grid.Platform == "SecondLife";
+        public bool isReady = false;
 
         public MapService()
         {
-            mainThreadInstance = UnityMainThreadDispatcher.Instance();
-
             //the cache.
             _mapTilesRam = new MapTilesRAM(10, receivedDataQueue);
             // the disk.
             // mapTilesDisk = new MapTilesDisk();
             // the network.
             mapTilesNetwork = new MapTilesNetwork(2);
+            
+            instance.Netcom.ClientConnected += NetcomOnClientConnected;
+        }
+
+        // set my SL flag as true.
+        private void NetcomOnClientConnected(object sender, EventArgs e)
+        {
+            // Secondlife = (instance.Netcom.LoginOptions.Grid.Platform == "SecondLife");
         }
 
         /// <summary>
@@ -78,10 +81,12 @@ namespace Raindrop.Map.Model
                 return res;
             }
             //this call to network, returns a maptile that is empty inside for now.
-            if (Secondlife)
+            if (instance.Netcom.IsSecondlife)
             {
                 res = mapTilesNetwork.GetRegionTileExternal_SL(handle, 1);
             }
+            //todo: handle non-SL case.
+            
             return res;
         }
         

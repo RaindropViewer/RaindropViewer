@@ -117,7 +117,7 @@ namespace Raindrop.Render
         
         
         //give OMV.rendering.face, return unity mesh.
-        public static void Mesh_Face(Face face, ref Mesh mesh)
+        public static void MeshFromFace(Face face, Mesh mesh)
         {
             if (mesh == null)
             {
