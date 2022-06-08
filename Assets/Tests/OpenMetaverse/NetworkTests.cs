@@ -30,6 +30,7 @@ using System.Net;
 using OpenMetaverse;
 using OpenMetaverse.Packets;
 using NUnit.Framework;
+using Tests;
 using UnityEngine;
 
 namespace OpenMetaverse.Tests
@@ -59,8 +60,8 @@ namespace OpenMetaverse.Tests
         [OneTimeSetUp]
         public void Init()
         {
-            var fullusername = "***REMOVED*** resident";//Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "***REMOVED***";// Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+            var fullusername = Secrets.GridUsers[0];
+            var password = Secrets.GridPass[0];
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername), "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password), "LMVTestAgentPassword is empty. Live NetworkTests cannot be performed.");
             var username = fullusername.Split(' ');

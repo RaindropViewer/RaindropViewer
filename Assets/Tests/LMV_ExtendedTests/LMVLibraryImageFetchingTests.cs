@@ -2,19 +2,15 @@
 using System.Collections;
 using System.IO;
 using System.Net;
-using System.Text;
 using NUnit.Framework;
 using OpenMetaverse;
 using OpenMetaverse.Assets;
-using OpenMetaverse.Packets;
-using Raindrop.Netcom;
-using Raindrop.Services.Bootstrap;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Disk;
 using OpenMetaverse.Http;
 using Plugins.ObjectPool;
+using Tests;
 
 namespace Raindrop.Tests
 {
@@ -46,9 +42,9 @@ namespace Raindrop.Tests
             // required to prevent throwing exception later on:
             // some message like:   Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV Resident>: Setting server side baking failed'. Use UnityEngine.TestTools.LogAssert.Expect
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
-            
-            var fullusername = "***REMOVED*** resident"; //Environment.GetEnvironmentVariable("LMVTestAgentUsername");
-            var password = "***REMOVED***"; // Environment.GetEnvironmentVariable("LMVTestAgentPassword");
+
+            var fullusername = Secrets.GridUsers[0];
+            var password = Secrets.GridPass[0];
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername),
                 "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password),

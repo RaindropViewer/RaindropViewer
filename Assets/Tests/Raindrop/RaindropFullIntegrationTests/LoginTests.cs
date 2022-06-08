@@ -5,6 +5,7 @@ using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.Services;
 using Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines;
+using Tests;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,30 +19,6 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
     [TestFixture()]
     public class LoginTests
     {
-        //0. list of grids and the login credentials.
-        private List<string> _gridFriendlyNames = new List<string>()
-        {
-            "Second Life (agni)",
-            "Metropolis Metaversum",
-            "Local Host"
-            // "https://login.agni.lindenlab.com/cgi-bin/login.cgi",
-            // "login.metro.land"
-        };
-        List<string> GridUsers = new List<string>()
-        {
-            "***REMOVED*** Resident",
-            "Raindrop Raindrop",
-            "Test User"
-        };
-        List<string> GridPass = new List<string>()
-        {
-            "***REMOVED***",
-            "***REMOVED***",
-            "password"
-        };
-
-        
-        
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
@@ -93,13 +70,13 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
 
             
             //Finally, perform 2x login-logout for each test-user!
-            for (int loginCredIdx = 0; loginCredIdx < GridUsers.Count; loginCredIdx++)
+            for (int loginCredIdx = 0; loginCredIdx < Secrets.GridUsers.Count; loginCredIdx++)
             {
                 int times = 2;
                 yield return Login.DoExhaustiveLogins(
-                    GridUsers[loginCredIdx], 
-                    GridPass[loginCredIdx],
-                    _gridFriendlyNames[loginCredIdx],
+                    Secrets.GridUsers[loginCredIdx], 
+                    Secrets.GridPass[loginCredIdx],
+                    Secrets._gridFriendlyNames[loginCredIdx],
                     times,
                     instance, uiSrv);
             }
@@ -113,7 +90,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         {
             int userIdx = 2;
             
-            Debug.Log("Logging to " + _gridFriendlyNames[userIdx]);
+            Debug.Log("Logging to " + Secrets._gridFriendlyNames[userIdx]);
             
             GetTo_LoginScreen();
 
@@ -131,7 +108,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             // 1c. do "select grid by ui"
             //get knwon grids
             var grids = instance.GridManger.Grids;
-            string friendlyName_grid = _gridFriendlyNames[userIdx];
+            string friendlyName_grid = Secrets._gridFriendlyNames[userIdx];
             yield return LoginTests.Utils.UIHelpers.Click_Dropdown_Then_Select_ByString(
                 "GridDropdown",
                 friendlyName_grid
@@ -143,7 +120,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
                 
             //1b. we are on the login screen. do login. assert logged in.
             Assert.IsTrue(uiSrv.GetPresentCanvasType() == CanvasType.Login);
-            yield return Login.StartLogin(GridUsers[userIdx], GridPass[userIdx]);
+            yield return Login.StartLogin(Secrets.GridUsers[userIdx], Secrets.GridPass[userIdx]);
             // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
             yield return new WaitForSeconds(12);
 
