@@ -4,7 +4,6 @@ using OpenMetaverse;
 using Plugins.CommonDependencies;
 using Raindrop.Services.Bootstrap;
 using TMPro;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Raindrop.UI.Views
