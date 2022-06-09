@@ -3,6 +3,8 @@ An android client to connect to Secondlife and [OpenSimulator](http://opensimula
 
 This is experimental software.
 
+## How to build/contribute?
+Please see [Raindrop Viewer Documentation](docs/Readme.md)
 
 ## Development Screenshots
 
@@ -13,7 +15,4 @@ This is experimental software.
 ![Login Screen](docs/image/login.jpg "Login")
 
 ![Map Screen](docs/image/map.jpg "Map")
-
-## How to build/contribute?
-Please see [Raindrop Viewer Documentation](docs/Readme.md)
 
