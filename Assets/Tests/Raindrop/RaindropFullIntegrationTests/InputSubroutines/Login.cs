@@ -91,7 +91,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines
                 //UIHelpers.Click_ButtonByUnityName("CloseLoadingScreenButton");
                 yield return new WaitForSeconds(8);
                 Assert.False(uiSrv._loadingController.isInteractable,
-                    $"login has failed for {gridFriendlyName}. the message is {instance.Client.Network.LoginMessage}");
+                    $"login has failed for {gridFriendlyName}. the message is {instance.Client.Network.LoginMessage}, status code {instance.Client.Network.LoginStatusCode}");
             
                 //assert the backend API; that we are logged in.
                 Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
