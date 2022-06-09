@@ -142,8 +142,12 @@ namespace Raindrop.UI.map.Map_SceneHierachy
         void Grid_GridRegion(object sender, GridRegionEventArgs e)
         {
             if (Instance.Netcom.IsTeleporting) // ????
-            
+                return;
             needRedraw = true;
+            if (e is null)
+            {
+                Debug.LogWarning("e is null");
+            }
             MapSceneData.regions[e.Region.RegionHandle] = e.Region;
             if (e.Region.Access != SimAccess.NonExistent
                 && e.Region.MapImageID != UUID.Zero
@@ -199,8 +203,8 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                                 
                                 //spawn in the tile.
                                 var mapPlanePos = GetMapPlanePosition(handle);
-                                Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " +
-                                          mapPlanePos.y);
+                                // Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " +
+                                //           mapPlanePos.y);
                                 var tileGO = SpawnOnMapPlane(mapPlanePos);
                                 
                                 //apply texture.
@@ -294,7 +298,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
 
                         //not avail in scene, so instantiate the tile.
                         var mapPlanePos = GetMapPlanePosition(handle);
-                        Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " + mapPlanePos.y);
+                        // Debug.Log("renderer wants to render map tile at " + mapPlanePos.x + " " + mapPlanePos.y);
                         var tileGO = SpawnOnMapPlane(mapPlanePos);
                         regionTiles.Add(handle, tileGO);
                     }
