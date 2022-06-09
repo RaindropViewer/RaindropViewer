@@ -1,5 +1,5 @@
 # Raindrop Viewer
-An android client to connect to Secondlife and [OpenSimulator](http://opensimulator.org/wiki/Main_Page) grids, running on the Unity game engine.
+An android client to connect to Secondlife and [OpenSimulator](http://opensimulator.org/wiki/Main_Page) grids, built on the Unity game engine.
 
 This is experimental software.
 
