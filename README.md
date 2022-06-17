@@ -3,6 +3,14 @@ An android client to connect to Secondlife and [OpenSimulator](http://opensimula
 
 This is experimental software.
 
+## What works?
+- Login to server/grid works.
+- Grid selection from limited list of grids (you can connect to opensim server on localhost no problem. Metaversium grid works too.)
+- Decoding of jp2 assets works but in a terrible, hacky way. (Involving modification of texture2D directly, nonetheless!)
+- Map view is able to pan, zoom.
+- Movement is synchronised with server, but there is no visual-smoothing at all. Janky.
+- Object sounds work to a limited extent.
+
 ## How to build/contribute?
 Please see [Raindrop Viewer Documentation](docs/Readme.md)
 
