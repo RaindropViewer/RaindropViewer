@@ -28,7 +28,6 @@ namespace Raindrop.Tests.LMV_ExtendedTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {    
-            //make the main thread dispatcher
             GameObject mainThreadDispatcher = 
                 new GameObject("mainThreadDispatcher");
             mainThreadDispatcher.AddComponent<UnityMainThreadDispatcher>();
@@ -188,16 +187,18 @@ namespace Raindrop.Tests.LMV_ExtendedTests
         }
         
         // able to login and grab a user's profile pic and save to disk
-        [Test]
-        public IEnumerator LoginAndDownloadJ2P()
+        [UnityTest]
+        public IEnumerator LoginAndDownloadJp2()
         {
             Helpers.LoginHeadless(instance, 0, "Hooper");
 
             yield return new WaitForSeconds(15);
             
             //request that image (using DownloadManager)
-            instance.Client.Assets.RequestImage(UUID.Parse(
-                    "ed891aaa-b031-cd08-77d7-4d0a15a2b8c5"), //nuki face. SL.
+            instance.Client.Assets.RequestImage(
+                UUID.Parse(
+                    "ed891aaa-b031-cd08-77d7-4d0a15a2b8c5"
+                ), //a user's profile picture. SecondLife.
                 ImageType.Normal,
                 Callback_DecodeAndSaveFileAsPNG,
                 false);
@@ -205,8 +206,6 @@ namespace Raindrop.Tests.LMV_ExtendedTests
             yield return new WaitForSeconds(10);
             instance.Client.Network.Logout();
             yield return new WaitForSeconds(10);
-
-            yield break;
         }
 
         // Callback for DownloadManager.
@@ -250,9 +249,7 @@ namespace Raindrop.Tests.LMV_ExtendedTests
                 DirectoryHelpers.WriteToFile(
                     bytes,  
                     Path.Combine(basepath, relativepath2));
-                
             });
-
         }
     }
     
