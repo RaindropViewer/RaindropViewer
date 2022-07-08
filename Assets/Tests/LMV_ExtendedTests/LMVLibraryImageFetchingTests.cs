@@ -82,7 +82,6 @@ namespace Raindrop.Tests
                 "Client is not connected to the grid");
         }
 
-        
         /* DownloadManager variant of 'wtf' WebRequest.
          * (Used to) Fail in unity editor, android target, net standard 2.0
          * (Used to) unity completely hang at call to
@@ -145,19 +144,22 @@ namespace Raindrop.Tests
             }
         }
 
-        // Implementation with the DownloadManager class.
+        // Download a Maptile, via SL's External API.
+        // Implementation: using DownloadManager class.
         [UnityTest]
         public IEnumerator Test_DownloadMaptile_DownloadManager()
         {
-            //ctor DLmanager
             DownloadManager dlm = new DownloadManager();
             
-            
             // var request = (HttpWebRequest)HttpWebRequest.Create(
-            //     new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000))
+            //     new Uri(string.Format(
+            // "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg",
+            // 1, 1000, 1000))
             // );
             DownloadRequest req = new DownloadRequest(
-                new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000)),
+                new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 
+                    1, 1000, 1000)),
                 20 * 1000,
                 null,
                 null,
@@ -165,34 +167,33 @@ namespace Raindrop.Tests
                 {
                     if (error == null && responseData != null) // success
                     {
-                        Debug.Log("nice, dl is complete!");
-                        
-                        Debug.Log("storeing file as : " );
-                        
-                        
+                        Debug.Log("Download Success.");
+                        Assert.Pass();
                     }
                     else // download failed
                     {
-                        Debug.Log("nice, dl had errors, but the callback was raised anyways");
+                        Debug.Log("Download failed.");
+                        Assert.Fail();
                     }
                 }
             );
             
-            
             dlm.QueueDownload(req);
             
             yield return new WaitForSeconds(10);
-            yield break;
         }
 
         
-        // a simple implementation without using DownloadManager class
+        // Download a Maptile, via SL's External API.
+        // Implementation: BeginGetResponse, HttpWebRequest
         [UnityTest]
         public IEnumerator Test_DownloadMapTile_SimpleImplementation()
         {
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(
-                new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000))
+                new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 
+                    1, 1000, 1000))
             );
             
             RequestState state = new RequestState(request,
@@ -205,91 +206,110 @@ namespace Raindrop.Tests
             // Start the request for the remote server response
             IAsyncResult result = request.BeginGetResponse(GetResponse, state);
             
-            
-            
             yield return new WaitForSeconds(10);
             yield break;
             // hack function - implementation is in CapsBase
             void GetResponse(IAsyncResult ar)
-        {
-            var state = (RequestState)ar.AsyncState;
-            HttpWebResponse response = null;
-            byte[] responseData = null;
-            Exception error = null;
-
-            try
             {
-                using (response = (HttpWebResponse)state.Request.EndGetResponse(ar))
+                var state = (RequestState)ar.AsyncState;
+                HttpWebResponse response = null;
+                byte[] responseData = null;
+                Exception error = null;
+
+                try
                 {
-                    // Get the stream for downloading the response
-                    using (var responseStream = response.GetResponseStream())
+                    using (response = 
+                               (HttpWebResponse)state.Request.EndGetResponse(ar))
                     {
-                        #region Read the response
-
-                        // If Content-Length is set we create a buffer of the exact size, otherwise
-                        // a MemoryStream is used to receive the response
-                        bool nolength = (response.ContentLength <= 0) || (Type.GetType("Mono.Runtime") != null);
-                        int size = (nolength) ? 8192 : (int)response.ContentLength;
-                        MemoryStream ms = (nolength) ? new MemoryStream() : null;
-                        byte[] buffer = new byte[size];
-
-                        int bytesRead = 0;
-                        int offset = 0;
-                        int totalBytesRead = 0;
-                        int totalSize = nolength ? 0 : size;
-
-                        while (responseStream != null && (bytesRead = responseStream.Read(buffer, offset, size)) != 0)
+                        // Get the stream for downloading the response
+                        using (var responseStream = response.GetResponseStream())
                         {
-                            totalBytesRead += bytesRead;
+                            #region Read the response
+
+                            // If Content-Length is set,
+                            // we create a buffer of the exact size,
+                            // otherwise,
+                            // a MemoryStream is used to receive the response
+                            bool nolength = (response.ContentLength <= 0) || 
+                                            (Type.GetType("Mono.Runtime") != null);
+                            int size = (nolength) 
+                                ? 8192 
+                                : (int)response.ContentLength;
+                            MemoryStream ms = (nolength)
+                                ? new MemoryStream()
+                                : null;
+                            byte[] buffer = new byte[size];
+
+                            int bytesRead = 0;
+                            int offset = 0;
+                            int totalBytesRead = 0;
+                            int totalSize = nolength ? 0 : size;
+
+                            while (responseStream != null && 
+                                   (bytesRead = responseStream.Read(buffer, offset, size)) != 0)
+                            {
+                                totalBytesRead += bytesRead;
+
+                                if (nolength)
+                                {
+                                    totalSize += (size - bytesRead);
+                                    ms.Write(buffer, 0, bytesRead);
+                                }
+                                else
+                                {
+                                    offset += bytesRead;
+                                    size -= bytesRead;
+                                }
+
+                                // Fire the download progress callback for
+                                // each chunk of received data
+                                if (state.DownloadProgressCallback != null)
+                                    state.DownloadProgressCallback(
+                                        state.Request,
+                                        response,
+                                        totalBytesRead,
+                                        totalSize);
+                            }
 
                             if (nolength)
                             {
-                                totalSize += (size - bytesRead);
-                                ms.Write(buffer, 0, bytesRead);
+                                responseData = ms.ToArray();
+                                ms.Close();
+                                ms.Dispose();
                             }
                             else
                             {
-                                offset += bytesRead;
-                                size -= bytesRead;
+                                responseData = buffer;
                             }
 
-                            // Fire the download progress callback for each chunk of received data
-                            if (state.DownloadProgressCallback != null)
-                                state.DownloadProgressCallback(state.Request, response, totalBytesRead, totalSize);
+                            #endregion Read the response
                         }
-
-                        if (nolength)
-                        {
-                            responseData = ms.ToArray();
-                            ms.Close();
-                            ms.Dispose();
-                        }
-                        else
-                        {
-                            responseData = buffer;
-                        }
-
-                        #endregion Read the response
                     }
                 }
+                catch (Exception ex)
+                {
+                    // Logger.DebugLog("CapsBase.GetResponse(): " + ex.Message);
+                    error = ex;
+                }
+                state.CompletedCallback?.Invoke(state.Request, response, responseData, error);
             }
-            catch (Exception ex)
-            {
-                // Logger.DebugLog("CapsBase.GetResponse(): " + ex.Message);
-                error = ex;
-            }
-
-            state.CompletedCallback?.Invoke(state.Request, response, responseData, error);
-        }
         }
         
 
-
-        // After much confusion, it seems that the line request.ServicePoint.MaxIdleTime = 0; is causing the issue.
-        // to run this test, make the SetupRequest public.
+        /* After much confusion, it seems that the line
+         * request.ServicePoint.MaxIdleTime = 0;
+         * is causing the issue.
+         *
+         * For full information:
+         * https://github.com/cinderblocks/libremetaverse/issues/62
+         * 
+         */
         /*
+        //to run this test, make the SetupRequest public.
+        // WARN: important to use SetupRequest to reproduce deadlock; 
+        // if i construct the HttpWebRequest directly, its all ok.
         [UnityTest]
-        public IEnumerator Test_TheSetupRequestMethod_IsCausingTheIssue()
+        public IEnumerator SetupRequestMethod_IsCausingMainThreadToLockup()
         {
             var dlm = new DownloadManager();
             HttpWebRequest req;
@@ -297,13 +317,18 @@ namespace Raindrop.Tests
             if (passTheTest_YesPlease == true)
             {
                 req = (HttpWebRequest) HttpWebRequest.Create( 
-                    new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000))
+                    new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 
+                    1, 1000, 1000))
                 );
                 req.Accept = null;
 
             }else{
-                req = dlm.SetupRequest( // <-- important to use SetupRequest; if i construct the HttpWebRequest directly, its all ok.
-                    new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000))
+                req = dlm.SetupRequest( // <-- setuprequest is required to
+                                        // replicate deadlock
+                    new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg",
+                     1, 1000, 1000))
                     , null);
             }
 
@@ -325,7 +350,7 @@ namespace Raindrop.Tests
         */
 
         // able to login and grab a user's profile pic and save to disk
-        [UnityTest]
+        [Test]
         public IEnumerator LoginAndDownloadJ2P()
         {
             LoginHeadless();
