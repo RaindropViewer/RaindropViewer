@@ -23,6 +23,7 @@ namespace UnityScripts.Disk
         {
             if (_instance == null)
             {
+                BetterStreamingAssets.Initialize(); //fuck, this is easy to forget.
                 _instance = new StaticFilesCopier();
             }
             return _instance;
@@ -33,7 +34,6 @@ namespace UnityScripts.Disk
         // do copy (scan the files in device, copy if not same as staticassets.).
         public int Work()
         {
-            BetterStreamingAssets.Initialize(); //fuck, this is easy to forget.
             int res = CheckOmvDataFolderAndUpdateItIfNecessary();
             if (res != -1) 
                 CopyIsDoneAndNoErrors = true;
