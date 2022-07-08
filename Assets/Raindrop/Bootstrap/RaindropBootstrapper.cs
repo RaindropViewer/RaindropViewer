@@ -29,7 +29,7 @@ namespace Raindrop.Services.Bootstrap
             SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
         }
 
-        //perform check-copy operation.
+        // prep user file system for LMV's usage, by copying static files.
         private static void CheckAndUpdate_StaticFileSystem()
         {
             var copier = StaticFilesCopier.GetInstance();

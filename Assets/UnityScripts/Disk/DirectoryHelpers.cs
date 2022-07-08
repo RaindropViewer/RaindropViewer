@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using OpenMetaverse;
 using UnityEngine;
 
@@ -84,6 +85,32 @@ namespace Disk
             {
                 OpenMetaverse.Logger.Log("error writing bytes to filepath : "+ filePath + " " + e.ToString(), Helpers.LogLevel.Error);
             }
+            Debug.Log($"write: {filePath} ");
+        }
+        
+        //easily write to a file
+        //filePath = fully-specified file path
+        public static async Task WriteToFileAsync(byte[] outbytes, string filePath)
+        {
+            //create parent subfolders
+            var parentDir = Path.GetDirectoryName(filePath);
+            System.IO.Directory.CreateDirectory(parentDir);
+
+            await Task.Run(() =>
+            {
+                //write file
+                try
+                {
+                    System.IO.File.WriteAllBytes(filePath, outbytes);
+                }
+                catch (IOException e)
+                {
+                    OpenMetaverse.Logger.Log(
+                        "error writing bytes to filepath : " + filePath + " " +
+                        e.ToString(), Helpers.LogLevel.Error);
+                }
+            });
+
             Debug.Log($"write: {filePath} ");
         }
         
