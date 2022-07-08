@@ -19,62 +19,86 @@ namespace Raindrop.Tests
     {
         private static RaindropInstance instance;
 
-
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
             instance.CleanUp();
         }
         
-        
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {    
             //make the main thread dispatcher
-            GameObject mainThreadDispatcher_Test = new GameObject("mainThreadDispatcher_Test");
-            mainThreadDispatcher_Test.AddComponent<UnityMainThreadDispatcher>();
+            GameObject mainThreadDispatcher = 
+                new GameObject("mainThreadDispatcher");
+            mainThreadDispatcher.AddComponent<UnityMainThreadDispatcher>();
             
             instance = new RaindropInstance(new GridClient());
         }
         
-        void LoginHeadless()
+        // Do login using the LMV library only.
+        void LoginHeadless(int userIdx = 0, string startLocation = "Hooper")
         {
-            // required to prevent throwing exception later on:
-            // some message like:   Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV Resident>: Setting server side baking failed'. Use UnityEngine.TestTools.LogAssert.Expect
+            /* hack: I added this,
+             * to prevent the library from throwing the runtime exception :
+             *
+             * Unhandled log message: '[Error] 22:34:22 [ERROR] - <TanukiDEV
+             * Resident>: Setting server side baking failed'. Use
+             * UnityEngine.TestTools.LogAssert.Expect   */
+             
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
 
-            var fullusername = Secrets.GridUsers[0];
-            var password = Secrets.GridPass[0];
-            Assert.IsFalse(string.IsNullOrWhiteSpace(fullusername),
-                "LMVTestAgentUsername is empty. Live NetworkTests cannot be performed.");
+            var fullUsername = Secrets.GridUsers[userIdx];
+            var password = Secrets.GridPass[userIdx];
+            Assert.IsFalse(string.IsNullOrWhiteSpace(fullUsername),
+                "LMVTestAgentUsername is empty. " +
+                "Live NetworkTests cannot be performed.");
             Assert.IsFalse(string.IsNullOrWhiteSpace(password),
-                "LMVTestAgentPassword is empty. Live NetworkTests cannot be performed.");
-            var username = fullusername.Split(' ');
+                "LMVTestAgentPassword is empty. " +
+                "Live NetworkTests cannot be performed.");
+            var username = fullUsername.Split(' ');
 
-            Debug.Log($"Logging in {fullusername}...");
             // Connect to the grid
-            string startLoc = NetworkManager.StartLocation("Hooper", 179, 18, 32);
-            //changed:
-            Debug.Log("startLoc : " + startLoc);
-            Assert.IsTrue(instance.Client.Network.Login(username[0], username[1], password, "Unit Test Framework", startLoc,
-                "contact@openmetaverse.co"), "Client failed to login, reason: " + instance.Client.Network.LoginMessage);
-            //changed:
-            Debug.Log("login message: " + instance.Client.Network.LoginMessage);
-            Debug.Log("Done");
+            string startLoc = 
+                NetworkManager.StartLocation(startLocation, 179, 18, 32);
+            Debug.Log($"Logging in " +
+                      $"User: {fullUsername}, " +
+                      $"Loc: {startLoc}");
+            bool loginSuccessful = instance.Client.Network.Login(
+                username[0],
+                username[1],
+                password,
+                "Unit Test Framework",
+                startLoc,
+                "raindropcafeofficial@gmail.com");
+            Assert.IsTrue(loginSuccessful, 
+                $"Client failed to login, reason: " +
+                $"{instance.Client.Network.LoginMessage}");
+            Debug.Log("Grid returned the login message: " 
+                      + instance.Client.Network.LoginMessage);
 
-            Assert.IsTrue(instance.Client.Network.Connected, "Client is not connected to the grid");
+            Assert.IsTrue(
+                instance.Client.Network.Connected, 
+                "Client is not connected to the grid");
         }
 
         
-        // DownloadManager variant of 'wtf' WebRequest.
-        // (Used to) Fail in unity editor, android target, net standard 2.0
-        // (Used to) unity completely hang at call to HttpWebRequest.BeginGetResponse()  
+        /* DownloadManager variant of 'wtf' WebRequest.
+         * (Used to) Fail in unity editor, android target, net standard 2.0
+         * (Used to) unity completely hang at call to
+         * HttpWebRequest.BeginGetResponse() 
+         * 
+         * For full information:
+         * https://github.com/cinderblocks/libremetaverse/issues/62
+         */
         [UnityTest]
         public IEnumerator wtf1_WebRequest_BeginGetResponse_PASS()
         {
             DownloadManager dl = new DownloadManager();
             dl.QueueDownload(new DownloadRequest(
-                new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000)),
+                new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 
+                    1, 1000, 1000)),
                 5000,
                 null,
                 null,
@@ -88,18 +112,27 @@ namespace Raindrop.Tests
         }
         
         
-        // simple variant of 'wtf' WebRequest.
-        // Passes in unity editor, android target, net standard 2.0
-        // this call to HttpWebRequest.BeginGetResponse() is ok, does not hang 
-        // note that some sort of exception was raised somewhere and the debugger break for it... but not relevant. this passes.
+        /* simple variant of 'wtf' WebRequest.
+        * Passes in unity editor, android target, net standard 2.0
+        * this call to HttpWebRequest.BeginGetResponse() is ok, does not hang 
+        * note that some sort of exception was raised somewhere and the
+        * debugger break for it... but not relevant. this passes.
+        *
+        * For full information:
+        * https://github.com/cinderblocks/libremetaverse/issues/62
+        */
         [UnityTest]
         public IEnumerator wtf2_WebRequest_BeginGetResponse_PASS()
         {
             var request = HttpWebRequest.Create(
-                new Uri(string.Format("http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg", 1, 1000, 1000))
+                new Uri(string.Format(
+                    "http://map.secondlife.com/map-{0}-{1}-{2}-objects.jpg",
+                    1, 1000, 1000))
             );
 
-            request.BeginGetResponse(new AsyncCallback(FinishWebRequest), request);
+            request.BeginGetResponse(
+                new AsyncCallback(FinishWebRequest), 
+                request);
 
             yield return new WaitForSeconds(10);
             yield break;
@@ -291,7 +324,7 @@ namespace Raindrop.Tests
         }
         */
 
-        //able to login and grab a user's profile pic and save to disk
+        // able to login and grab a user's profile pic and save to disk
         [UnityTest]
         public IEnumerator LoginAndDownloadJ2P()
         {
