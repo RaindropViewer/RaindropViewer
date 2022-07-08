@@ -2,6 +2,7 @@
 using OpenMetaverse;
 using Tests;
 using UnityEngine;
+using UnityScripts.Disk;
 
 namespace Raindrop.Tests.LMV_ExtendedTests
 {
@@ -58,6 +59,15 @@ namespace Raindrop.Tests.LMV_ExtendedTests
             Assert.IsTrue(
                 instance.Client.Network.Connected, 
                 "Client is not connected to the grid");
+        }
+
+        // Copies the OMV assets
+        // from the StreamingAssets folder, into the runtime folder
+        public static void DoStartupCopy()
+        {
+            var copier = StaticFilesCopier.GetInstance();
+            copier.Work();
+            Assert.True(copier.CopyIsDoneAndNoErrors);
         }
     }
 }

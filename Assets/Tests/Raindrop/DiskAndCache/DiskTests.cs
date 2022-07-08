@@ -82,14 +82,8 @@ namespace Raindrop.Tests.DiskAndCache
             File.WriteAllBytes(GridsXmlFile, new byte[]{0x01});
 
             //2. do the startup copy.
-            var copier = StaticFilesCopier.GetInstance();
-            copier.Work();
-            // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
+            LMV_ExtendedTests.Helpers.DoStartupCopy();
 
-            //wait for files to be copied...
-            yield return new WaitForSeconds(3);
-            Assert.True(copier.CopyIsDoneAndNoErrors);
             
             //3. grids.xml is expected to be copied
             Assert.True(File.Exists(GridsXmlFile),
