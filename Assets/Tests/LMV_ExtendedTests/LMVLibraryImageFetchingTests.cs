@@ -346,34 +346,47 @@ namespace Raindrop.Tests
             yield break;
         }
 
-        // Callback for DownloadManager, this will Fetching and saving the desired image. 
-        // this callback is known to run on non-main thread.
-        private void Callback_DecodeAndSaveFileAsPNG(TextureRequestState state, AssetTexture assettexture)
+        // Callback for DownloadManager.
+        // It will fetch and save the desired image as .png. 
+        private void Callback_DecodeAndSaveFileAsPNG(
+            TextureRequestState state, 
+            AssetTexture assettexture)
         {
             //assert download is finished
             Debug.Log("downloaded bytes: " + assettexture.AssetData.Length);
-            if (state != TextureRequestState.Finished)
-            {
-                Assert.Fail();
-            }
-
-            //save that image, jp2
+            Assert.True(state == TextureRequestState.Finished);
+            
+            //save image as jp2
             var basepath = instance.ClientDir + "/test_cache/";
             var relativepath1 = assettexture.AssetID.ToString() +  ".jp2";
-            DirectoryHelpers.WriteToFile(assettexture.AssetData,  Path.Combine(basepath, relativepath1));
+            DirectoryHelpers.WriteToFile(
+                assettexture.AssetData, 
+                Path.Combine(basepath, relativepath1));
             
-            //j2p -> t2d -> png 
-            //needs to be on main thread...
+            // image encoding conversion:
+            // j2p -> t2d -> png 
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                assettexture.Decode(); //needs to be on main thread...
-                var t2d = TexturePoolSelfImpl.GetInstance().GetFromPool(TextureFormat.ARGB32);
-                assettexture.Image.ExportTex2D(t2d); //decode: assetData -> texture
+                // j2p -> t2d -> MI (RGB bitmap) 
+                assettexture.Decode(); 
+                
+                var t2d = 
+                    TexturePoolSelfImpl.GetInstance().
+                        GetFromPool(TextureFormat.ARGB32);
+                
+                // MI (RGB bitmap) -> Texture2D
+                assettexture.Image.ExportTex2D(t2d);
+                
                 var bytes = t2d.EncodeToPNG(); 
             
-                //save that image, png
-                var relativepath2 = assettexture.AssetID.ToString() +  ".png";//this is a image with wrong channels.
-                DirectoryHelpers.WriteToFile(bytes,  Path.Combine(basepath, relativepath2));
+                // save that image as png
+                // WARN: this is a image with BGR channels.
+                var relativepath2 = 
+                    assettexture.AssetID.ToString() +  ".png";
+                    
+                DirectoryHelpers.WriteToFile(
+                    bytes,  
+                    Path.Combine(basepath, relativepath2));
                 
             });
 
