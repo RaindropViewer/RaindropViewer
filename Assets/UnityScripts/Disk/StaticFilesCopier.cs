@@ -5,13 +5,11 @@ using Disk;
 using OpenMetaverse;
 using SearchOption = System.IO.SearchOption;
 
-// on every boot, as soon as possible,
-// copy any missing/changed items in streaming assets to the data path in user-accessible-space
-
-
-// CopyStreamingAssetsToPersistentDataPath
 namespace UnityScripts.Disk
 {
+    // Copy StreamingAsset folder's contents into appRootPath,
+    // a user-accessible space.
+    // because LMV library cannot access StreamingAssets using normal file IO.
     public class StaticFilesCopier
     {
         private StaticFilesCopier()
@@ -87,13 +85,19 @@ namespace UnityScripts.Disk
             string slash = Path.DirectorySeparatorChar.ToString();
             if (!BetterStreamingAssets.DirectoryExists(slash))
             {
-                throw new Exception("StreamingAssets root not accessible.");
+                throw new Exception(
+                    "StreamingAssets root not accessible.");
             }
-            string[] paths = BetterStreamingAssets.GetFiles(slash, "*", SearchOption.AllDirectories);
+            string[] paths = 
+                BetterStreamingAssets.GetFiles(
+                    slash,
+                    "*",
+                    SearchOption.AllDirectories);
 
             if (paths.Length == 0)
             {
-                throw new Exception("StreamingAssets has no files in it.");
+                throw new Exception(
+                    "StreamingAssets has no files in it.");
             }
             foreach (var sourcePath in paths)
             {
@@ -122,7 +126,7 @@ namespace UnityScripts.Disk
                 using (Stream fs1 = File.OpenRead(targetPath))
                 using (Stream fs2 = BetterStreamingAssets.OpenRead(sourcePath))
                 {
-                    if (FilesStreamsAreSame(fs1, fs2))
+                    if (FileHelpers.FileStreamsAreEqual(fs1, fs2))
                     {
                         //do nothing
                     }
@@ -138,17 +142,8 @@ namespace UnityScripts.Disk
                         BetterStreamingAssets.ReadAllBytes(sourcePath),
                         targetPath);
                 }
-
             }
-
             return updatedFiles;
-        }
-
-        // true if same data in both files.
-        // false if either source or dest file is missing
-        private bool FilesStreamsAreSame(Stream fs1, Stream fs2)
-        {
-            return FileHelpers.FileStreamsAreEqual(fs1, fs2);
         }
     }
 }
