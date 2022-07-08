@@ -36,8 +36,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: StandaloneWindows64 
-          targetPlatform: Android 
+          targetPlatform: [StandaloneWindows64, Android]
 
       # Output
       - uses: actions/upload-artifact@v2
