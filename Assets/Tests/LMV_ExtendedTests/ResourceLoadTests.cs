@@ -5,7 +5,7 @@ using OpenMetaverse;
 using OpenMetaverse.Imaging;
 using UnityEngine.TestTools;
 
-namespace Raindrop.Tests
+namespace Raindrop.Tests.LMV_ExtendedTests
 {
     [TestFixture]
 
@@ -18,7 +18,7 @@ namespace Raindrop.Tests
             var instance = new RaindropInstance(new GridClient());
             
             string res_file_name = "upperbody_color.tga";
-            using (Stream stream = Helpers.GetResourceStream(res_file_name, OpenMetaverse.Settings.RESOURCE_DIR))
+            using (Stream stream = OpenMetaverse.Helpers.GetResourceStream(res_file_name, OpenMetaverse.Settings.RESOURCE_DIR))
             {
                 //can open => passed! :)
                 Assert.Pass();  
