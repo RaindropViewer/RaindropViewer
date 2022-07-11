@@ -17,11 +17,16 @@ namespace Raindrop.Services.Bootstrap
     //Just attach this script as a component of the game manager. You don't need anything else, unless you want the UI.
     public class RaindropBootstrapper : MonoBehaviour
     {
+        [SerializeField] public bool startUI = false;
+        
         private void Awake()
         {
             Start_Raindrop_CoreDependencies();
 
-            StartUIScene();
+            if (startUI)
+            {
+                StartUIScene();
+            }
         }
 
         private void StartUIScene()
