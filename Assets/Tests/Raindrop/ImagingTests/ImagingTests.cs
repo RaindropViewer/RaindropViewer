@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Raindrop.Tests.ImagingTests
+namespace Tests.Raindrop
 {
     public class ImagingTests
     {
