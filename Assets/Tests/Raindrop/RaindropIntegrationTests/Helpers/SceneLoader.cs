@@ -11,17 +11,21 @@ namespace Raindrop.Tests.RaindropIntegrationTests.Helpers
     {
         // load a empty scene with :
         // - bootstrapper (raindropinstance + servicelocator)
-        // - mainthreaddispatcher object
+        // - mainthreaddispatcher gameobject
         public static IEnumerator LoadHeadlessScene()
         {
-            SceneManager.LoadScene("Tests/HeadlessBootstrapScene");
-            yield return new WaitForFixedUpdate(); //testing out if this is a ok replacement to just witing an arbitrary amount of seconds.
+            var loadSceneOperation = 
+                SceneManager.LoadSceneAsync("Tests/HeadlessBootstrapScene");
+            while (!loadSceneOperation.isDone)
+            {
+                yield return null;
+            }
 
             var bootstrap = GameObject.Find("Bootstrapper");
             Assert.True(bootstrap, "bootstrapper object not found");
-
-            var rdbs = bootstrap.GetComponent<RaindropBootstrapper>();
-            Assert.True(rdbs);
+            var raindropBootstrapper = 
+                bootstrap.GetComponent<RaindropBootstrapper>();
+            Assert.True(raindropBootstrapper);
 
             var instance = ServiceLocator.Instance.Get<RaindropInstance>();
             Assert.True(instance != null);
@@ -30,7 +34,6 @@ namespace Raindrop.Tests.RaindropIntegrationTests.Helpers
         public static void UnloadHeadlessScene()
         {
             SceneManager.UnloadSceneAsync("Tests/HeadlessBootstrapScene");
-
         }
     }
 }
