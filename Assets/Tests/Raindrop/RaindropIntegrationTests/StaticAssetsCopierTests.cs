@@ -7,45 +7,23 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
+namespace Tests.Raindrop.RaindropIntegrationTests
 {
-    //test that the static copier works in the product.
+    // test that the product copies the required static assets to the user
+    // folder.
     public class StaticAssetsCopierTests
     {
-        
         [UnityTest]
         public IEnumerator StaticAssets_MainSceneOnBoot_AreCopied()
         {
-            // dont want to do this kind of deletion in my test anymore.
             // 1. delete any files in the local cache folder
-            // System.IO.DirectoryInfo localCacheFolder 
-            //     = new DirectoryInfo(DirectoryHelpers.GetInternalCacheDir());
-            // foreach (FileInfo file in localCacheFolder.GetFiles())
-            // {
-            //     try
-            //     {
-            //         file.Delete();
-            //     }
-            //     catch
-            //     {
-            //         OpenMetaverse.Logger.Log("delete failed: " + 
-            //                    file.ToString(),
-            //             Helpers.LogLevel.Warning);
-            //     }
-            // }
-            // foreach (DirectoryInfo dir in localCacheFolder.GetDirectories())
-            // {
-            //     dir.Delete(true); 
-            // }
-            
+            DeleteLocalCacheFiles();
+
             // 2. start main scene, which includes the startupCopier
             SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
-            // var startupCopierObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // var startupCopier = startupCopierObj.AddComponent<CopyStreamingAssetsToPersistentDataPath>();
 
             //wait for abit...
             yield return new WaitForSeconds(10);
-            // Assert.True(startupCopier.copyIsDone);
             
             string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
                 "grids.xml");
@@ -58,6 +36,30 @@ namespace Raindrop.Tests.Raindrop.RaindropIntegrationTests
 
             
             yield break;
+        }
+
+        public static void DeleteLocalCacheFiles()
+        {
+            System.IO.DirectoryInfo localCacheFolder
+                = new DirectoryInfo(DirectoryHelpers.GetInternalStorageDir());
+            foreach (FileInfo file in localCacheFolder.GetFiles())
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch
+                {
+                    OpenMetaverse.Logger.Log("delete failed: " +
+                                             file.ToString(),
+                        Helpers.LogLevel.Warning);
+                }
+            }
+
+            foreach (DirectoryInfo dir in localCacheFolder.GetDirectories())
+            {
+                dir.Delete(true);
+            }
         }
     }
 }
