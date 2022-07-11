@@ -13,9 +13,12 @@ namespace Tests.Raindrop
         // test if the j2p decode and encode can work.
         // test if able to write to disk.
         // have to manual check the images on the disk to see if the test passes.
+        
+        public static string _inputImageSubPath = "test/menhara.jp2";
+
+        #region Setup, teardown
         private static RaindropInstance instance;
         public static string clientDir;
-        public static string _inputImageSubPath = "test/menhara.jp2";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -30,6 +33,7 @@ namespace Tests.Raindrop
         {
             instance.CleanUp();
         }
+        #endregion
         
         //can read the image data from path.
         [Test]
