@@ -18,11 +18,17 @@ namespace Tests.Raindrop
         public static string _inputImageSubPath = "test/menhara.jp2";
 
         [OneTimeSetUp]
-        public void setup()
+        public void OneTimeSetUp()
         {
             BetterStreamingAssets.Initialize(); //fuck, this is easy to forget.
             instance = new RaindropInstance(new GridClient());
             clientDir = instance.ClientDir;
+        }
+        
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            instance.CleanUp();
         }
         
         //can read the image data from path.
