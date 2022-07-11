@@ -59,7 +59,6 @@ namespace Raindrop.Tests.LMV_ExtendedTests
                     if (error == null && responseData != null) // success
                     {
                         Debug.Log("Download Success.");
-                        Assert.Pass();
                     }
                     else // download failed
                     {
