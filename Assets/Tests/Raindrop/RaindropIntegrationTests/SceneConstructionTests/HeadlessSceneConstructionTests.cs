@@ -9,7 +9,7 @@ namespace Raindrop.Tests.RaindropIntegrationTests.HeadlessScene
     //the test scene contains no UI, but has a bootstrapped raindropinstance
     [TestFixture()]
 
-    public class HeadlessScene_ConstructionTests
+    public class HeadlessSceneConstructionTests
     {
         [UnityTest]
         public IEnumerator SceneLoading_Bootstrapper_IsSuccessful()
