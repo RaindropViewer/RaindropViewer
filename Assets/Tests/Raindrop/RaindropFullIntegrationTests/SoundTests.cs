@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-namespace Raindrop.Tests.Sounds
+namespace Tests.Raindrop.SoundTests
 {
     [TestFixture()]
     public class SoundTests
