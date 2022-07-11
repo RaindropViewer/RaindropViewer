@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using Disk;
+﻿using Disk;
 using NUnit.Framework;
 using OpenMetaverse;
 using OpenMetaverse.Imaging;
 using Raindrop;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace Tests.Raindrop
 {
@@ -19,14 +13,16 @@ namespace Tests.Raindrop
         // test if the j2p decode and encode can work.
         // test if able to write to disk.
         // have to manual check the images on the disk to see if the test passes.
-        private static RaindropInstance instance = new RaindropInstance(new GridClient());
-        public static string clientDir = instance.ClientDir;
+        private static RaindropInstance instance;
+        public static string clientDir;
         public static string _inputImageSubPath = "test/menhara.jp2";
 
         [OneTimeSetUp]
         public void setup()
         {
             BetterStreamingAssets.Initialize(); //fuck, this is easy to forget.
+            instance = new RaindropInstance(new GridClient());
+            clientDir = instance.ClientDir;
         }
         
         //can read the image data from path.
