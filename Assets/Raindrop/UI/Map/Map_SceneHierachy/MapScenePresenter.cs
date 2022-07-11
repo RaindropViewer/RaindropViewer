@@ -217,7 +217,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                             }
                             catch (Exception e)
                             {
-                                throw new DecodeException("maptile (jp2) decode failed at " + e.Message);
+                                Debug.LogError("maptile (jp2) decode failed at " + e.Message);
                             }
                             finally
                             {
@@ -385,13 +385,6 @@ namespace Raindrop.UI.map.Map_SceneHierachy
 
     }
 
-    internal class DecodeException : Exception
-    {
-        public DecodeException(string cannotReadJ2kHeader)
-        {
-            throw new NotImplementedException(); //change to another ecception.
-        }
-    }
 
     internal class MapSceneData
     {
