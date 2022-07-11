@@ -12,7 +12,7 @@ namespace Raindrop.Tests.RaindropIntegrationTests.HeadlessScene
     public class HeadlessSceneConstructionTests
     {
         [UnityTest]
-        public IEnumerator SceneLoading_Bootstrapper_IsSuccessful()
+        public IEnumerator SceneLoading_HeadlessBootstrapScene_IsSuccessful()
         {
             yield return SceneLoader.LoadHeadlessScene();
             yield break;
