@@ -1,39 +1,38 @@
-using Raindrop;
-using Raindrop.Presenters;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Plugins.CommonDependencies;
+using Raindrop.Presenters;
 using UnityEngine;
 
 //assign the target for the cinemachine freelook camera to look at.
-public class RaindropCinemachineAssignLookAtAvatar : MonoBehaviour
+namespace Raindrop.Camera
 {
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
-    //private RaindropNetcom netcom { get { return instance.Netcom; } }
-    bool Active => instance.Client.Network.Connected;
+    public class RaindropCinemachineAssignLookAtAvatar : MonoBehaviour
+    {
+        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        //private RaindropNetcom netcom { get { return instance.Netcom; } }
+        bool Active => instance.Client.Network.Connected;
 
-    public AgentPresenter agents;
-    public Cinemachine.CinemachineFreeLook cinemachine;
-    private void Update()
-    {
-        TrySetTarget();
-    }
-    public void TrySetTarget()
-    {
-        if (Active)
+        public AgentPresenter agents;
+        public Cinemachine.CinemachineFreeLook cinemachine;
+        private void Update()
         {
-            if (agents.agentReference != null) //todo: ok we should do a event driven way instead
+            TrySetTarget();
+        }
+        public void TrySetTarget()
+        {
+            if (Active)
             {
-                SetCinemachineTarget(agents.agentReference);
+                if (agents.agentReference != null) //todo: ok we should do a event driven way instead
+                {
+                    SetCinemachineTarget(agents.agentReference);
+                }
             }
+
         }
 
-    }
-
-    private void SetCinemachineTarget(GameObject agentReference)
-    {
-        cinemachine.LookAt = agentReference.transform;
-        cinemachine.Follow = agentReference.transform;
+        private void SetCinemachineTarget(GameObject agentReference)
+        {
+            cinemachine.LookAt = agentReference.transform;
+            cinemachine.Follow = agentReference.transform;
+        }
     }
 }

@@ -1,95 +1,96 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using OpenMetaverse;
 using UnityEngine;
 
-public class CamerasManager : MonoBehaviour
+namespace Raindrop.Camera
 {
-    #region Monobehavior Singleton stuff
-    
-    private static CamerasManager _instance;
-    
-    public static CamerasManager Instance
+    public class CamerasManager : MonoBehaviour
     {
-        get
+        #region Monobehavior Singleton
+    
+        private static CamerasManager _instance;
+    
+        public static CamerasManager Instance
         {
-            if (_instance == null)
+            get
             {
-                Debug.LogError("you forget to attach the singleton CamerasManager script.");
+                if (_instance == null)
+                {
+                    Debug.LogError("you forget to attach the singleton CamerasManager script.");
+                }
+
+                return _instance;
+            } 
+        }
+    
+        void Awake()
+        {
+            _instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+    
+        #endregion
+
+        private Dictionary<CameraIdentifier.CameraType, UnityEngine.Camera> cameras = 
+            new Dictionary<CameraIdentifier.CameraType, UnityEngine.Camera>();
+        public CameraIdentifier.CameraType currentCam;
+        //private CameraIdentifier.CameraType CurrentCamType;
+        public bool Ready { get; set; } = false;
+
+        private void Start()
+        {
+            //get all cameras.
+            foreach(Transform child in transform)
+            {
+                RegisterCamera(child.gameObject);
             }
 
-            return _instance;
-        } 
-    }
-    
-    void Awake()
-    {
-        _instance = this;
-        DontDestroyOnLoad(this.gameObject);
-    }
-    
-    #endregion
+            //get ready for work.
+            Ready = true;
 
-    private Dictionary<CameraIdentifier.CameraType, Camera> cameras = 
-        new Dictionary<CameraIdentifier.CameraType, Camera>();
-    public CameraIdentifier.CameraType currentCam;
-    //private CameraIdentifier.CameraType CurrentCamType;
-    public bool Ready { get; set; } = false;
-
-    private void Start()
-    {
-        //get all cameras.
-        foreach(Transform child in transform)
-        {
-            RegisterCamera(child.gameObject);
+            ActivateCamera(currentCam);
         }
 
-        //get ready for work.
-        Ready = true;
-
-        ActivateCamera(currentCam);
-    }
-
-    private void DeactivateAllCameras()
-    {
-        foreach(var cam in cameras)
+        private void DeactivateAllCameras()
         {
-            cam.Value.enabled = false;
+            foreach(var cam in cameras)
+            {
+                cam.Value.enabled = false;
+            }
         }
-    }
 
-    private void RegisterCamera(GameObject Camera)
-    {
-        Camera cam = Camera.GetComponent<Camera>();
-        var type = Camera.GetComponent<CameraIdentifier>();
-        if (cam && type)
+        private void RegisterCamera(GameObject Camera)
         {
-            cameras.Add(type.type, cam);
+            UnityEngine.Camera cam = Camera.GetComponent<UnityEngine.Camera>();
+            var type = Camera.GetComponent<CameraIdentifier>();
+            if (cam && type)
+            {
+                cameras.Add(type.type, cam);
+            }
         }
-    }
 
-    public void ActivateCamera(CameraIdentifier.CameraType type)
-    {
-        if (!Ready)
-            return;
+        public void ActivateCamera(CameraIdentifier.CameraType type)
+        {
+            if (!Ready)
+                return;
         
-        try
-        {
-            currentCam = type;
-            DeactivateAllCameras();
-            cameras[currentCam].enabled = true;
-            return;
-        }
-        catch (Exception e)
-        {
-            OpenMetaverse.Logger.Log("camera not available: " + type.ToString()
-                , Helpers.LogLevel.Error);
+            try
+            {
+                currentCam = type;
+                DeactivateAllCameras();
+                cameras[currentCam].enabled = true;
+                return;
+            }
+            catch (Exception e)
+            {
+                OpenMetaverse.Logger.Log("camera not available: " + type.ToString()
+                    , Helpers.LogLevel.Error);
+                return;
+            }
+
             return;
         }
 
-        return;
     }
-
 }

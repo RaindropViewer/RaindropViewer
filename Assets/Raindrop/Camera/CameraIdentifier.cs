@@ -1,16 +1,15 @@
-using Raindrop;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraIdentifier : MonoBehaviour
+namespace Raindrop.Camera
 {
-    public CameraType type;
-
-
-    public enum CameraType
+    public class CameraIdentifier : MonoBehaviour
     {
-        Main,
-        Minimap
+        public CameraType type;
+
+        public enum CameraType
+        {
+            Main,
+            Minimap
+        }
     }
 }
