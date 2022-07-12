@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using OpenMetaverse;
 using Plugins.CommonDependencies;
+using Raindrop.Camera;
 using UnityEngine;
 
 using Raindrop.UI.map.Map_SceneHierachy;

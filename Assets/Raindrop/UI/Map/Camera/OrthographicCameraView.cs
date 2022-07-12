@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UE = UnityEngine;
@@ -16,7 +15,7 @@ namespace Raindrop.UI.Views
         private float MinZoom = 0.1f;
         [SerializeField]
         private float MaxZoom = 10f;
-        [FormerlySerializedAs("cam")] [FormerlySerializedAs("camera")] public Camera Cam;
+        [FormerlySerializedAs("cam")] [FormerlySerializedAs("camera")] public UE.Camera Cam;
 
         // Obtain the bottom left corner of the viewable region
         // unity units. -- you need to x256 to get handle-units
