@@ -2,8 +2,8 @@
 using OpenMetaverse;
 using OpenMetaverse.StructuredData;
 using Plugins.CommonDependencies;
+using Raindrop.Bootstrap;
 using Raindrop.Netcom;
-using Raindrop.Services.Bootstrap;
 
 namespace Raindrop.UI.Login
 {

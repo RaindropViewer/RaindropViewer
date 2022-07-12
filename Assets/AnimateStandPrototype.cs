@@ -4,7 +4,6 @@ using OpenMetaverse;
 using OpenMetaverse.Assets;
 using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using Animation = UnityEngine.Animation;
 using Logger = OpenMetaverse.Logger;

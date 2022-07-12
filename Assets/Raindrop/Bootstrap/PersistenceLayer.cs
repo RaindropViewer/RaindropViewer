@@ -1,9 +1,9 @@
-﻿using System;
-using Plugins.CommonDependencies;
+﻿using Plugins.CommonDependencies;
+using Raindrop.Services;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Raindrop.Services.Bootstrap
+namespace Raindrop.Bootstrap
 {
     //maintain the impression of "persistence" of the connection
     // on app is running:

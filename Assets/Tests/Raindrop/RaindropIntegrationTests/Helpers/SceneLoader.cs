@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using NUnit.Framework;
 using Plugins.CommonDependencies;
-using Raindrop.Services.Bootstrap;
+using Raindrop.Bootstrap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
