@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using Raindrop.Presenters;
+﻿using Raindrop.Presenters;
 using Raindrop.UI.LoadingScreen;
 using Raindrop.UI.Views;
 using UnityEngine;
 
-namespace Raindrop.Services.Bootstrap
+namespace Raindrop.Bootstrap
 {
     //this class is in the main scene, where you can give it references to monobehaviors in order to inject them.
     // of course, runtime- created monobehaviors cannot be injected this way, so you will need to find some other way for those.

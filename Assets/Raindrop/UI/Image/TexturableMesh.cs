@@ -1,5 +1,5 @@
 using OpenMetaverse;
-using Raindrop.Services.Bootstrap;
+using Raindrop.Bootstrap;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Logger = UnityEngine.Logger;

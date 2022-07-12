@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMetaverse;
-using Raindrop.Services.Bootstrap;
 
 namespace Raindrop
 {

@@ -3,7 +3,7 @@ using OpenMetaverse;
 using OpenMetaverse.Rendering;
 using Plugins.CommonDependencies;
 using Raindrop;
-using Raindrop.Services.Bootstrap;
+using Raindrop.Bootstrap;
 using UnityEngine;
 using ObjectManager = Raindrop.Presenters.ObjectManager;
 using Vector3 = OpenMetaverse.Vector3;

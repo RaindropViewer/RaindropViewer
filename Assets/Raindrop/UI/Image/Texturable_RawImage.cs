@@ -7,7 +7,6 @@ using OpenMetaverse.Imaging;
 using Plugins.CommonDependencies;
 using Plugins.ObjectPool;
 using Raindrop;
-using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
 

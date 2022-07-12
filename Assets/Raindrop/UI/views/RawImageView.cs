@@ -4,7 +4,6 @@ using UnityEngine;
 using System.IO;
 using Plugins.ObjectPool;
 using Raindrop;
-using Raindrop.Services.Bootstrap;
 using UnityEngine.UI;
 
 // An implementation of rawimage view. Attach to GO that has rawimage.

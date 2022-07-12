@@ -12,9 +12,9 @@ using UnityEngine;
 using Object = System.Object;
 using System.Text.RegularExpressions;
 using Plugins.CommonDependencies;
+using Raindrop.Bootstrap;
 using Raindrop.Core;
 using Raindrop.Services;
-using Raindrop.Services.Bootstrap;
 using Raindrop.UI.chat.printer_component;
 using Logger = OpenMetaverse.Logger;
 

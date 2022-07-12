@@ -1,10 +1,8 @@
-﻿using System;
-using System.Threading;
-using OpenMetaverse.Rendering;
+﻿using OpenMetaverse.Rendering;
 using Plugins.ObjectPool;
 using UnityEngine;
 
-namespace Raindrop.Services.Bootstrap
+namespace Raindrop.Bootstrap
 {
     public class Globals : MonoBehaviour
     {

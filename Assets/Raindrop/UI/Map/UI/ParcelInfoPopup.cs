@@ -2,7 +2,6 @@
 using System.Threading;
 using OpenMetaverse;
 using Plugins.CommonDependencies;
-using Raindrop.Services.Bootstrap;
 using TMPro;
 using UnityEngine;
 

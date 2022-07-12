@@ -4,7 +4,6 @@ using OpenMetaverse.Assets;
 using Plugins.CommonDependencies;
 using Raindrop;
 using Raindrop.Netcom;
-using Raindrop.Services.Bootstrap;
 
 public class LandmarkController : IDisposable
 {

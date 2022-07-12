@@ -1,10 +1,10 @@
 ﻿using Plugins.CommonDependencies;
 using Raindrop.Map.Model;
 using Raindrop.Netcom;
+using Raindrop.Services;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace Raindrop.Services.Bootstrap
+namespace Raindrop.Bootstrap
 {
     // link all the UI together
     class UIBootstrapper : MonoBehaviour
@@ -12,7 +12,7 @@ namespace Raindrop.Services.Bootstrap
         private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
         private RaindropNetcom netcom => instance.Netcom;
 
-        [FormerlySerializedAs("Injector")] [SerializeField] public References references;
+        [SerializeField] public References references;
         // bootstraps the UI.
         // 1. it first bootstraps the base layer of RaindropInstance
         // 2. then it find all the canvasmanager and modal managers.

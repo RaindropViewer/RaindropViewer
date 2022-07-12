@@ -9,15 +9,19 @@ using UnityEngine.SceneManagement;
 using UnityScripts.Disk;
 using Logger = OpenMetaverse.Logger;
 
-namespace Raindrop.Services.Bootstrap
+namespace Raindrop.Bootstrap
 {
-    //This sets up and tears down the raindrop instance service.
-    // inspired by https://medium.com/medialesson/simple-service-locator-for-your-unity-project-40e317aad307
+    // This sets up and tears down the raindrop instance service.
 
-    //Just attach this script as a component of the game manager. You don't need anything else, unless you want the UI.
+    // To use,
+    // Just attach this script as a component of a gameobject in bootstrap
+    // scene.
+    // Then, you can disable/enable UI-scene loading using the boolean
+    
+    // Disable UI scene loading for headless tests
     public class RaindropBootstrapper : MonoBehaviour
     {
-        [SerializeField] public bool startUI = false;
+        [SerializeField] public bool startUI;
         
         private void Awake()
         {
@@ -107,7 +111,7 @@ namespace Raindrop.Services.Bootstrap
             Quit_Application();
         }
 
-        // globally- accessible quit method.
+        // globally-accessible quit method.
         public void Quit_Application()
         {
             void SaveInventoryToDiskAndLogout(RaindropInstance raindropInstance, RaindropNetcom raindropNetcom)
@@ -178,6 +182,5 @@ namespace Raindrop.Services.Bootstrap
 
             instance.CleanUp();
         }
-
     }
 }

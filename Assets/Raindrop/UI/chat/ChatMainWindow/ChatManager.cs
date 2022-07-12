@@ -5,7 +5,6 @@ using Plugins.CommonDependencies;
 using Raindrop.Netcom;
 using Raindrop.Presenters;
 using Raindrop.Services;
-using Raindrop.Services.Bootstrap;
 using UnityEngine;
 using Logger = OpenMetaverse.Logger;
 
