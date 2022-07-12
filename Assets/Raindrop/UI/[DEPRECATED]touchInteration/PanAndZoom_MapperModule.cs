@@ -5,6 +5,7 @@ using OpenMetaverse;
 using Plugins.CommonDependencies;
 using Raindrop.Map.Model;
 using Raindrop.Services;
+using Raindrop.UI.Pancake;
 using Raindrop.Utilities;
 using UnityEngine;
 using UnityEngine.Assertions;
