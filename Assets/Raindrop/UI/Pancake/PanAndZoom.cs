@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Raindrop
+namespace Raindrop.UI.Pancake
 {
     /// <summary> A modular and easily customisable Unity MonoBehaviour for handling swipe and pinch motions on mobile. </summary>
     public class PanAndZoom : MonoBehaviour
@@ -36,7 +36,7 @@ namespace Raindrop
         [Tooltip("Does the script control camera movement?")]
         public bool controlCamera = true;
         [Tooltip("The controlled camera, ignored of controlCamera=false")]
-        public Camera cam;
+        public UnityEngine.Camera cam;
 
         [Header("UI")]
         [Tooltip("Are touch motions listened to if they are over UI elements?")]
@@ -234,7 +234,7 @@ namespace Raindrop
 
             if (controlCamera && cameraControlEnabled)
             {
-                if (cam == null) cam = Camera.main;
+                if (cam == null) cam = UnityEngine.Camera.main;
 
                 cam.transform.position -= (cam.ScreenToWorldPoint(deltaPosition) - cam.ScreenToWorldPoint(Vector2.zero));
             }
@@ -248,7 +248,7 @@ namespace Raindrop
 
             if (controlCamera && cameraControlEnabled)
             {
-                if (cam == null) cam = Camera.main;
+                if (cam == null) cam = UnityEngine.Camera.main;
 
                 if (cam.orthographic)
                 {
