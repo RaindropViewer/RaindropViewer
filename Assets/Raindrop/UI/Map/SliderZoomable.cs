@@ -1,10 +1,8 @@
 using Raindrop.UI.Views;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Raindrop.UI.Views
+namespace Raindrop.UI.Map
 {
     public class SliderZoomable : MonoBehaviour
     {
