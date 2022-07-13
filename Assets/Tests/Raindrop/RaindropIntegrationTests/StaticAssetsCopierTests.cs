@@ -3,6 +3,7 @@ using System.IO;
 using Disk;
 using NUnit.Framework;
 using OpenMetaverse;
+using Raindrop.Bootstrap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -20,7 +21,7 @@ namespace Tests.Raindrop.RaindropIntegrationTests
             DeleteLocalCacheFiles();
 
             // 2. start main scene, which includes the startupCopier
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
+            RaindropLoader.Load();
 
             //wait for abit...
             yield return new WaitForSeconds(10);
@@ -29,12 +30,10 @@ namespace Tests.Raindrop.RaindropIntegrationTests
                 "grids.xml");
             
             Assert.True(File.Exists(expectedToExist),"file not exist: " + expectedToExist);
-            //
-            // SceneManager.LoadScene("Scenes/empty");
-            // SceneManager.UnloadSceneAsync("Raindrop/Bootstrap/BootstrapScene");
-            // yield return new WaitForSeconds(2);
-
             
+            // 3. don't forget to unload the scene!
+            RaindropLoader.Unload();
+
             yield break;
         }
 

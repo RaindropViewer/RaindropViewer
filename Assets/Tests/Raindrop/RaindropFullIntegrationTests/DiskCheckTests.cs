@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using NUnit.Framework;
+using Raindrop.Bootstrap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -12,14 +13,13 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         [UnityTest]
         public IEnumerator StaticCacheCopier_Test()
         {            
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
+            RaindropLoader.Load();
 
             yield return new WaitForSeconds(3);
 
             Assert.True(StaticFilesCopier.GetInstance().CopyIsDoneAndNoErrors);
+            
+            RaindropLoader.Unload();
         }
-
-        
-        
     }
 }
