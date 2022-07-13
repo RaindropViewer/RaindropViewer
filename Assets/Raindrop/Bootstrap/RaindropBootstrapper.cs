@@ -32,10 +32,19 @@ namespace Raindrop.Bootstrap
                 StartUIScene();
             }
         }
+        
+        public void OnDestroy()
+        {
+            Quit_Application();
+        }
 
+        #region Bootstrap functions
+        
         private void StartUIScene()
         {
-            SceneManager.LoadScene("Raindrop/Bootstrap/MainScene");
+            SceneManager.LoadScene(
+                "Raindrop/Bootstrap/MainScene", 
+                LoadSceneMode.Additive);
         }
 
         // prep user file system for LMV's usage, by copying static files.
@@ -45,13 +54,18 @@ namespace Raindrop.Bootstrap
             var copy_result = copier.Work();
             if (copy_result == -1)
             {
-                Logger.Log("static files copier failed", Helpers.LogLevel.Error);
+                Logger.Log(
+                    "static files copier failed", 
+                    Helpers.LogLevel.Error);
             }
         }
 
         private static void SendStartupMessageToLogger()
         {
-            Logger.Log("RaindropBootstrapper.cs : RaindropInstance Started and succesfully linked to servicelocator.", Helpers.LogLevel.Info);
+            Logger.Log("RaindropBootstrapper.cs : " +
+                       "RaindropInstance Started and " +
+                       "succesfully linked to servicelocator.", 
+                Helpers.LogLevel.Info);
         }
 
         public static void Start_Raindrop_CoreDependencies()
@@ -106,10 +120,6 @@ namespace Raindrop.Bootstrap
         }
         
         
-        public void OnApplicationQuit()
-        {
-            Quit_Application();
-        }
 
         // globally-accessible quit method.
         public void Quit_Application()
@@ -157,10 +167,14 @@ namespace Raindrop.Bootstrap
             }
 
             frmMain_Disposed(instance);
+
+            Unregister_RaindropInstance();
+            
             Debug.Log("disposed netcom and client! :) This marks the end of the app.");
         }
 
-        //wraps up the netcom and client.
+        // wraps up the netcom (synchronisation context) ,
+        // followed by the client instance.
         void frmMain_Disposed(RaindropInstance instance)
         {
             RaindropNetcom netcom = instance.Netcom;
@@ -182,5 +196,15 @@ namespace Raindrop.Bootstrap
 
             instance.CleanUp();
         }
+        
+        public static void Unregister_RaindropInstance()
+        {
+            if (ServiceLocator.Instance.IsRegistered<RaindropInstance>())
+            {
+                ServiceLocator.Instance.Unregister<RaindropInstance>();
+            }
+        }
+        #endregion
+
     }
 }

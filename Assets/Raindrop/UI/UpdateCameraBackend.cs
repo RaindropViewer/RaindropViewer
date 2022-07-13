@@ -12,13 +12,15 @@ using Camera = UnityEngine.Camera;
 [RequireComponent(typeof(Camera))]
 public class UpdateCameraBackend : MonoBehaviour
 {
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
-    bool Active => instance.Client.Network.Connected && (instance.Client.Network.CurrentSim != null);
+    private RaindropInstance instance;
+    bool Active => instance.Client.Network.Connected &&
+                   (instance.Client.Network.CurrentSim != null);
 
     public Camera cam;
     void Start()
     {
         cam = GetComponent<Camera>();
+        instance = ServiceLocator.Instance.Get<RaindropInstance>();
     }
 
     private void Update()

@@ -20,7 +20,7 @@ namespace Raindrop.Services
         //   Notification - manages app-wide notifications. 
         //   <deprecated> LoadingCanvasPresenter - this particular modal/screen is tricky; it appears only when the scene is loading.
 
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance;
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 
@@ -45,9 +45,11 @@ namespace Raindrop.Services
          *          +UIService.showScreen(UIBuilder(CanvasType.Login))
          *          +UIService.showModal
          */
-        public UIService(ScreenStackManager cm, ModalsManager mm, LoadingView loadingView,
+        public UIService(RaindropInstance raindropInstance,
+            ScreenStackManager cm, ModalsManager mm, LoadingView loadingView,
             ChatPresenter ChatPresenter)
         {
+            instance = raindropInstance;
             ScreenStackManager = cm;
             ModalsManager = mm;
             _loadingController = new LoadingController(loadingView);

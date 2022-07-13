@@ -5,6 +5,7 @@ using NUnit.Framework;
 using OpenMetaverse;
 using Plugins.CommonDependencies;
 using Raindrop;
+using Raindrop.Bootstrap;
 using Raindrop.Media;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,11 +16,19 @@ namespace Tests.Raindrop.SoundTests
     [TestFixture()]
     public class SoundTests
     {
-
+        // TODO: note that current soundtests is not failing on warnings of the type:
+        // Failed to initialize the sound system: Raindrop.Media.MediaException: FMOD error! ERR_MEMORY - Not enough memory or resources.
+        
         [SetUp]
         public void Setup()
         {
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
+            RaindropLoader.Load();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            RaindropLoader.Unload();
         }
 
         // copy sample audio to cache.
@@ -63,9 +72,9 @@ namespace Tests.Raindrop.SoundTests
                 {
                     File.Copy(fromPath, toPath);
                 }
-                catch
+                catch (Exception e)
                 {
-                    Debug.Log("failed to copy sample sound file for the test.");
+                    Debug.Log("failed to copy sample sound file for the test: " + e.ToString());
                 }
             }
         }
@@ -107,7 +116,4 @@ namespace Tests.Raindrop.SoundTests
         }
         
     }
-    
-
-    
 }

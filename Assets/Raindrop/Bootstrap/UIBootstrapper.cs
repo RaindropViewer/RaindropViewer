@@ -1,4 +1,5 @@
-﻿using Plugins.CommonDependencies;
+﻿using System;
+using Plugins.CommonDependencies;
 using Raindrop.Map.Model;
 using Raindrop.Netcom;
 using Raindrop.Services;
@@ -20,11 +21,24 @@ namespace Raindrop.Bootstrap
         // has a funny role; in that it will register itself to the UIservice on start/awake.
         // this should really be the other way round - that the UIservice
         // creates/has dependency on the UIrootGO!!!
-        private void Awake()
+        private void Start()
         {
             //RaindropBootstrapper.Start_Raindrop_CoreDependencies(); // hacky - to ensure that the UI's dependencies are ready.
             OpenMetaverse.Logger.Log("UI layer of application Started. Logging Started.", OpenMetaverse.Helpers.LogLevel.Info);
             InitialiseUIVariant();
+        }
+
+        private void OnDestroy()
+        {
+            if (ServiceLocator.Instance.IsRegistered<MapService>())
+            {
+                ServiceLocator.Instance.Unregister<MapService>();
+            }
+            if (ServiceLocator.Instance.IsRegistered<UIService>())
+            {
+                ServiceLocator.Instance.Unregister<UIService>();
+            }
+            
         }
 
         //warn: if this init method is called too early, there can be issues.
@@ -49,6 +63,7 @@ namespace Raindrop.Bootstrap
             references.ll.Init();
 
             var uisrv = new UIService(
+                instance,
                 references.sm,
                 references.mm,
                 references.ll,
