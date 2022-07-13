@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Plugins.CommonDependencies;
+using Raindrop.Bootstrap;
 using Raindrop.Netcom;
 using Raindrop.Services;
 using Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines;
@@ -26,15 +27,13 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         public void OneTimeSetUp()
         {
             //load the main scene.
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
+            RaindropLoader.Load();
         }
         
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            //unload raindropInstance.
-            instance.CleanUp(); // todo: this will do for now, but we should use RaindropBootstrapper.Quit_Application() for full teardown (which includes netcom).
-            // instance.CleanUp();
+            RaindropLoader.Unload();
         }
 
         [UnityTest]

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using NUnit.Framework;
 using Plugins.CommonDependencies;
+using Raindrop.Bootstrap;
 using Raindrop.Map.Model;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,7 +18,13 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         public void OneTimeSetUp()
         {
             //load the main scene.
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene"); 
+            RaindropLoader.Load();
+        }
+        
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            RaindropLoader.Unload();
         }
         
         // test that the (external) map fetcher code is working.

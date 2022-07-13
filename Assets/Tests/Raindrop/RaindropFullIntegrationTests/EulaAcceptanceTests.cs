@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using OpenMetaverse;
 using Plugins.CommonDependencies;
+using Raindrop.Bootstrap;
 using Raindrop.Services;
 using Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         // 4. restart the ui and check it is showing welcome screen
         public IEnumerator Can_Accept_EULA()
         {
-            SceneManager.LoadScene("Raindrop/Bootstrap/BootstrapScene");
+            RaindropLoader.Load();
             yield return new WaitForSeconds(2);
 
             //1. reject the EULA
@@ -87,6 +88,8 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             {
                 Assert.Pass();
             }
+            
+            RaindropLoader.Unload();
             yield break;
         }
     }
