@@ -27,8 +27,8 @@ namespace Raindrop.Tests.LMV_ExtendedTests
              * UnityEngine.TestTools.LogAssert.Expect   */
             instance.Client.Settings.SEND_AGENT_APPEARANCE = false;
 
-            var fullUsername = Secrets.GridUsers[userIdx];
-            var password = Secrets.GridPass[userIdx];
+            var fullUsername = Secrets.GetUsername();
+            var password = Secrets.GetPassword();
             Assert.IsFalse(string.IsNullOrWhiteSpace(fullUsername),
                 "LMVTestAgentUsername is empty. " +
                 "Live NetworkTests cannot be performed.");
