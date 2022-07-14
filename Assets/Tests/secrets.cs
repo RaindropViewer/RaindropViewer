@@ -1,34 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using UnityEngine.Assertions;
 
 namespace Tests
 {
     //store the passwords used in integration test.
     public static class Secrets
     {
-        // the names of the grid service, defined in the friendlyname attribute in the grids.xml file.
-        public static List<string> _gridFriendlyNames = new List<string>()
+        public static string GetUsername()
         {
-            "Second Life (agni)",
-            "Metropolis Metaversum",
-            "Local Host"
-            // "https://login.agni.lindenlab.com/cgi-bin/login.cgi",
-            // "login.metro.land"
-        };
-        
-        // user name
-        public static List<string> GridUsers = new List<string>()
+            string res =
+                Environment.GetEnvironmentVariable("USERNAME_SECONDLIFE");
+            Assert.IsTrue(
+                res != null,
+                "Env: USERNAME_SECONDLIFE undefined.");
+            return res;
+        }
+
+        public static string GetPassword()
         {
-            "***REMOVED*** Resident",
-            "Raindrop Raindrop",
-            "Test User"
-        };
-        
-        // password
-        public static List<string> GridPass = new List<string>()
+            string res =
+                Environment.GetEnvironmentVariable("PASSWORD_SECONDLIFE");
+            Assert.IsTrue(
+                res != null,
+                "Env: PASSWORD_SECONDLIFE undefined.");
+            return res;
+        }
+        public static string GetGridFriendlyName()
         {
-            "I am a little ",
-            "silly to put the password ",
-            "into source control "
-        };
+            string res =
+                Environment.GetEnvironmentVariable("GRIDFRIENDLYNAME_SECONDLIFE");
+            Assert.IsTrue(
+                res != null,
+                "Env: GRIDFRIENDLYNAME_SECONDLIFE undefined.");
+            return res;
+        }
     }
 }

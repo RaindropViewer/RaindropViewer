@@ -68,17 +68,14 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             var uiSrv = ServiceLocator.Instance.Get<UIService>();
 
             
-            //Finally, perform 2x login-logout for each test-user!
-            for (int loginCredIdx = 0; loginCredIdx < Secrets.GridUsers.Count; loginCredIdx++)
-            {
-                int times = 2;
-                yield return Login.DoExhaustiveLogins(
-                    Secrets.GridUsers[loginCredIdx], 
-                    Secrets.GridPass[loginCredIdx],
-                    Secrets._gridFriendlyNames[loginCredIdx],
-                    times,
-                    instance, uiSrv);
-            }
+            // Login,logout 2 times for the test-user
+            int times = 2;
+            yield return Login.DoExhaustiveLogins(
+                Secrets.GetUsername(), 
+                Secrets.GetPassword(),
+                Secrets.GetGridFriendlyName(),
+                times,
+                instance, uiSrv);
             
             yield break;
         }
@@ -87,9 +84,9 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         [Timeout(100000000)]
         public IEnumerator LoginAndDoNothing()
         {
-            int userIdx = 2;
-            
-            Debug.Log("Logging to " + Secrets._gridFriendlyNames[userIdx]);
+            string friendlyName_grid = Secrets.GetGridFriendlyName();
+
+            Debug.Log("Logging to " + friendlyName_grid);
             
             GetTo_LoginScreen();
 
@@ -107,7 +104,6 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             // 1c. do "select grid by ui"
             //get knwon grids
             var grids = instance.GridManger.Grids;
-            string friendlyName_grid = Secrets._gridFriendlyNames[userIdx];
             yield return LoginTests.Utils.UIHelpers.Click_Dropdown_Then_Select_ByString(
                 "GridDropdown",
                 friendlyName_grid
@@ -119,7 +115,9 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
                 
             //1b. we are on the login screen. do login. assert logged in.
             Assert.IsTrue(uiSrv.GetPresentCanvasType() == CanvasType.Login);
-            yield return Login.StartLogin(Secrets.GridUsers[userIdx], Secrets.GridPass[userIdx]);
+            yield return Login.StartLogin(
+                Secrets.GetUsername(), 
+                Secrets.GetPassword());
             // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
             yield return new WaitForSeconds(12);
 
