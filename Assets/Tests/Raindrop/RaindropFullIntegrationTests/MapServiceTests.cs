@@ -28,7 +28,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         }
         
         // test that the (external) map fetcher code is working.
-        [UnityTest]
+        // [UnityTest]
         public IEnumerator Test_MapService_SingleTile()
         {
             BeginMapFetcher();
