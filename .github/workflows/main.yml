@@ -11,6 +11,7 @@ jobs:
   buildAndTestForSupportedPlatforms:
     name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
     runs-on: ubuntu-latest
+    environment: SecondLife_1
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +43,9 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          USERNAME_SECONDLIFE: ${{ secrets.USERNAME_SECONDLIFE }}
+          PASSWORD_SECONDLIFE: ${{ secrets.PASSWORD_SECONDLIFE }}
+          GRIDFRIENDLYNAME_SECONDLIFE: ${{ secrets.GRIDFRIENDLYNAME_SECONDLIFE }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           unityVersion: ${{ matrix.unityVersion }}
