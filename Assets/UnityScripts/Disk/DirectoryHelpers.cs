@@ -50,7 +50,7 @@ namespace Disk
         // returns the internal storage if android.
         public static string GetInternalStorageDir()
         {
-            #if UNITY_EDITOR || UNITY_STANDALONE_WIN
+            #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
                 return Application.persistentDataPath; //appdata
             #endif
             #if UNITY_ANDROID
