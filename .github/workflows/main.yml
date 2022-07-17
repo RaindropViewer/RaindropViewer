@@ -38,7 +38,7 @@ jobs:
             
       # Test
       - name: Run tests
-        uses: alexiscatnip/unity-test-runner
+        uses: alexiscatnip/unity-test-runner@main
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
