@@ -4,6 +4,7 @@ using Raindrop.Map.Model;
 using Raindrop.Netcom;
 using Raindrop.Services;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Raindrop.Bootstrap
 {
@@ -15,15 +16,10 @@ namespace Raindrop.Bootstrap
 
         [SerializeField] public References references;
         // bootstraps the UI.
-        // 1. it first bootstraps the base layer of RaindropInstance
-        // 2. then it find all the canvasmanager and modal managers.
-        
-        // has a funny role; in that it will register itself to the UIservice on start/awake.
-        // this should really be the other way round - that the UIservice
-        // creates/has dependency on the UIrootGO!!!
         private void Start()
+        // 1. finds all the canvasmanager and modal managers.
+        // 2. registers them to service locator
         {
-            //RaindropBootstrapper.Start_Raindrop_CoreDependencies(); // hacky - to ensure that the UI's dependencies are ready.
             OpenMetaverse.Logger.Log("UI layer of application Started. Logging Started.", OpenMetaverse.Helpers.LogLevel.Info);
             InitialiseUIVariant();
         }
