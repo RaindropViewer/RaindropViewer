@@ -65,8 +65,11 @@ namespace Raindrop.Presenters
         private void Network_SimConnected(object sender, SimConnectedEventArgs e)
         {
             //update the user'sname
-            usernameText.text = client.Self.Name;
-            Debug.Log("Network_SimConnected is raised! wow. not expected. as sim connection should have occured far before this event is registered.");
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                usernameText.text = client.Self.Name;
+                Debug.Log("Network_SimConnected is raised! wow. not expected. as sim connection should have occured far before this event is registered.");
+            });
         }
 
         private void SaveConfig(object state)
