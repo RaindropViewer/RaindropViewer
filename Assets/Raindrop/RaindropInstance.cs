@@ -452,6 +452,12 @@ namespace Raindrop
         {
             MarkEndExecution();
 
+            if (_agentsTracker != null)
+            {
+                _agentsTracker.Dispose();
+                _agentsTracker = null;
+            }
+            
             if (Cof != null)
             {
                 Cof.Dispose();

@@ -9,7 +9,7 @@ namespace Raindrop
     // in particular, it tracks : 
     // region handle
     // 
-    public class AgentsTracker
+    public class AgentsTracker : IDisposable
     {
         //hashtable of agents, and the sim they are last known to reside in.
         public readonly Dictionary<UUID, NearbyAvatar> agentInfos = new Dictionary<UUID, NearbyAvatar>();
@@ -45,12 +45,23 @@ namespace Raindrop
             RegisterClientEvents(instance.Client);   
         }
         
+        public void Dispose()
+        {
+            UnregisterClientEvents(instance.Client);
+        }
         
         private void RegisterClientEvents(GridClient client)
         {
             client.Grid.CoarseLocationUpdate += new EventHandler<CoarseLocationUpdateEventArgs>(Grid_CoarseLocationUpdate);
             // client.Self.TeleportProgress += new EventHandler<TeleportEventArgs>(Self_TeleportProgress);
             client.Network.SimDisconnected += new EventHandler<SimDisconnectedEventArgs>(Network_SimDisconnected);
+        }
+        
+        private void UnregisterClientEvents(GridClient client)
+        {
+            client.Grid.CoarseLocationUpdate -= new EventHandler<CoarseLocationUpdateEventArgs>(Grid_CoarseLocationUpdate);
+            // client.Self.TeleportProgress -= new EventHandler<TeleportEventArgs>(Self_TeleportProgress);
+            client.Network.SimDisconnected -= new EventHandler<SimDisconnectedEventArgs>(Network_SimDisconnected);
         }
 
         #region eventHandlers
