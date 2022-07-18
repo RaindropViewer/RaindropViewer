@@ -647,7 +647,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dbfabecbcda5bb47b7800f9d748db3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiReferences: {fileID: 505369349}
+  references: {fileID: 505369349}
 --- !u!4 &505369348
 Transform:
   m_ObjectHideFlags: 0
@@ -5947,7 +5947,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2444801591097554195, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 126.14349
       objectReference: {fileID: 0}
     - target: {fileID: 2444801591097554195, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.y
@@ -6199,7 +6199,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3149778098593869419, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 126.14349
       objectReference: {fileID: 0}
     - target: {fileID: 3149778098593869419, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.y
@@ -6223,7 +6223,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099217229096, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 126.14349
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099217229096, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.y
@@ -6247,7 +6247,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099782218546, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 126.14349
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099782218546, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.y
@@ -6271,7 +6271,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099957161219, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 126.143555
       objectReference: {fileID: 0}
     - target: {fileID: 3149778099957161219, guid: 46a91e58e1291434285c92319834c817, type: 3}
       propertyPath: m_SizeDelta.y
