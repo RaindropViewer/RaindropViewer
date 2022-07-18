@@ -1,3 +1,4 @@
+using System;
 using OpenMetaverse;
 using Raindrop.Rendering;
 using System.Collections.Generic;
@@ -36,7 +37,13 @@ namespace Raindrop.Presenters
             instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate;
         }
 
-        
+        private void OnApplicationQuit()
+        {
+            instance.Client.Objects.AvatarUpdate -= Objects_AvatarUpdate;
+            instance.Client.Objects.TerseObjectUpdate -= ObjectsOnTerseObjectUpdate;
+        }
+
+
         private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
         {
             if (e.Simulator != instance.Client.Network.CurrentSim)
