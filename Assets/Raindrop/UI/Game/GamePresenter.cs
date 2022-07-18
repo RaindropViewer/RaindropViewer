@@ -61,6 +61,11 @@ namespace Raindrop.Presenters
             usernameText.text = client.Self.Name;
         }
 
+        private void OnApplicationQuit()
+        {
+            client.Network.SimConnected -= Network_SimConnected;
+        }
+
         //its too late bro, the UI is started only after connected to sim has occured.
         private void Network_SimConnected(object sender, SimConnectedEventArgs e)
         {
