@@ -81,6 +81,10 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             RegisterClientEvents();
         }
 
+        public void OnApplicationQuit()
+        {
+            UnregisterClientEvents(Client);
+        }
 
 
         void RegisterClientEvents()
@@ -147,8 +151,15 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             if (e is null)
             {
                 Debug.LogWarning("e is null");
+                return;
             }
-            MapSceneData.regions[e.Region.RegionHandle] = e.Region;
+            if (MapSceneData.regions is null)
+            {
+                Debug.LogWarning("MapSceneData.regions is null");
+                return;
+            }
+            // this is causing some NRE
+            // MapSceneData.regions[e.Region.RegionHandle] = e.Region;
             if (e.Region.Access != SimAccess.NonExistent
                 && e.Region.MapImageID != UUID.Zero
                 && !tileRequests.Contains(e.Region.RegionHandle)
@@ -191,6 +202,10 @@ namespace Raindrop.UI.map.Map_SceneHierachy
                         //give up and stop trying for texture.
                         return;
                     }
+                    
+                    // case: app is already closed.
+                    if (!UnityMainThreadDispatcher.Exists())
+                        return;
                     
                     UnityMainThreadDispatcher.Instance().Enqueue(
                         () =>
