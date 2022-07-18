@@ -48,7 +48,8 @@ namespace Plugins.ObjectPool
                 return fromPool;
             }
 
-            throw new PoolException("insufficient textures in pool");
+            Debug.LogWarning("insufficient textures in pool");
+            return null;
             // var t2d = new Texture2D(256, 256, textureFormat, DefaultMipMapOn);
             // return t2d;
         }
