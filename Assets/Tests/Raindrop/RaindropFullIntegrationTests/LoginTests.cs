@@ -131,7 +131,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
 
             
                         
-            yield return new WaitForSeconds(10000000);
+            yield return new WaitForSeconds(120);
  
         }
 
