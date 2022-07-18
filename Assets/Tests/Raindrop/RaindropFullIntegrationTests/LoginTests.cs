@@ -23,15 +23,15 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+        [SetUp]
+        public void SetUp()
         {
             //load the main scene.
             RaindropLoader.Load();
         }
         
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
+        [TearDown]
+        public void TearDown()
         {
             RaindropLoader.Unload();
         }
