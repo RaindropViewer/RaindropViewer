@@ -58,7 +58,7 @@ namespace OpenMetaverse
         public static System.Net.IPAddress BIND_ADDR = System.Net.IPAddress.Any;
 
         /// <summary>Use XML-RPC Login or LLSD Login, default is XML-RPC Login</summary>
-        public bool USE_LLSD_LOGIN = false; //why is the false by default?
+        public bool USE_LLSD_LOGIN = true; //why is the false by default?
 
         /// <summary>
         /// Maximum number of HTTP connections to open to a particular endpoint.
@@ -184,7 +184,7 @@ namespace OpenMetaverse
 
         /// <summary>Enable/disable automatically setting agent appearance at
         /// login and after sim crossing</summary>
-        public bool SEND_AGENT_APPEARANCE = true;
+        public bool SEND_AGENT_APPEARANCE = false;
 
         /// <summary>Enable/disable automatically setting the bandwidth throttle
         /// after connecting to each simulator</summary>
