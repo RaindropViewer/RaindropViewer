@@ -14,7 +14,6 @@ using Logger = OpenMetaverse.Logger;
 [RequireComponent(typeof(Image))]
 public class connectivityUI : MonoBehaviour
 {
-    private ReactiveProperty<bool> isConnected = new ReactiveProperty<bool>();
     private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
     
     void Start()
@@ -22,11 +21,14 @@ public class connectivityUI : MonoBehaviour
         if (instance == null || instance.Netcom == null)
             Logger.Log("raindrop instance/netcom not available", Helpers.LogLevel.Error);
 
-        isConnected.AsObservable().Subscribe(_ => updateConnectivityUI(_));
-        isConnected.Value = instance.Netcom.IsLoggedIn; // wtf.
-        
         instance.Netcom.ClientLoginStatus += NetcomOnClientLoginStatus;
         instance.Netcom.ClientLoggedOut += NetcomOnClientLoggedOut;
+    }
+
+    private void OnDestroy()
+    {
+        instance.Netcom.ClientLoginStatus -= NetcomOnClientLoginStatus;
+        instance.Netcom.ClientLoggedOut -= NetcomOnClientLoggedOut;
     }
 
     private void updateConnectivityUI(bool isConnected)
@@ -44,18 +46,18 @@ public class connectivityUI : MonoBehaviour
     #region Subscribe to backend connectivity events
     private void NetcomOnClientLoggedOut(object sender, EventArgs e)
     {
-        isConnected.Value = false;
+        updateConnectivityUI(false);
     }
 
     private void NetcomOnClientLoginStatus(object sender, LoginProgressEventArgs e)
     {
         if (e.Status == LoginStatus.Success)
-        {        
-            isConnected.Value = true;
+        {
+            updateConnectivityUI(true);
         }
         else if (e.Status == LoginStatus.Failed)
         {
-            isConnected.Value = false;
+            updateConnectivityUI(false);
         }
     }
     #endregion
