@@ -25,7 +25,7 @@ public class connectivityUI : MonoBehaviour
         instance.Netcom.ClientLoggedOut += NetcomOnClientLoggedOut;
     }
 
-    private void OnDestroy()
+    private void OnApplicationQuit()
     {
         instance.Netcom.ClientLoginStatus -= NetcomOnClientLoginStatus;
         instance.Netcom.ClientLoggedOut -= NetcomOnClientLoggedOut;
