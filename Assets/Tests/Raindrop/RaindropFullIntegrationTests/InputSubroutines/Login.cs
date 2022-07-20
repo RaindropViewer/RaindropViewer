@@ -85,21 +85,24 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines
 
                 yield return Login.StartLogin(username, password);
                 // Assert.True(uiSrv._loadingController.IsVisible, "expected: loading screen is visible.");
-                yield return new WaitForSeconds(12);
-
-                //for login successful, the loading will fade by itself.
-                //UIHelpers.Click_ButtonByUnityName("CloseLoadingScreenButton");
-                yield return new WaitForSeconds(8);
+               
+                yield return new WaitForSeconds(10);
                 Assert.False(uiSrv._loadingController.isInteractable,
-                    $"login has failed for {gridFriendlyName}. the message is {instance.Client.Network.LoginMessage}, status code {instance.Client.Network.LoginStatusCode}");
+                    $"login has failed for {gridFriendlyName}. " +
+                    $"the message is {instance.Client.Network.LoginMessage}, " +
+                    $"status code {instance.Client.Network.LoginStatusCode}");
             
                 //assert the backend API; that we are logged in.
-                Assert.True(instance.Client.Network.Connected == true, "check API that we are logged in");
+                Assert.True(
+                    instance.Client.Network.Connected == true, 
+                    "checked API, we are not logged in.");
             
                 //finally, disconnect. assert disconnected.
                 UIHelpers.Click_ButtonByUnityName("LogoutBtn");
                 yield return new WaitForSeconds(10);
-                Assert.True(instance.Client.Network.Connected == false, "check API that we are logged out");
+                Assert.True(
+                    instance.Client.Network.Connected == false, 
+                    "check API that we are logged out");
                 
                 yield return new WaitForSeconds(4);
             }
