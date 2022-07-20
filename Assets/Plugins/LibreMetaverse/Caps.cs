@@ -292,8 +292,8 @@ namespace OpenMetaverse
                 ((HttpWebResponse)exception.Response).StatusCode == HttpStatusCode.NotFound)
             {
                 // 404 error
-                Logger.Log("Seed capability returned a 404, capability system is aborting",
-                    Helpers.LogLevel.Error);
+                Logger.Log("Seed capability returned a 404, capability system is aborting : "+ client._CapName,
+                    Helpers.LogLevel.Warning);
             }
             else
             {
