@@ -44,7 +44,7 @@ namespace OpenMetaverse.Http
         public object UserData;
 
         protected Uri _Address;
-        protected string _CapName;
+        protected internal string _CapName;
         protected byte[] _PostData;
         protected X509Certificate2 _ClientCert;
         protected string _ContentType;
