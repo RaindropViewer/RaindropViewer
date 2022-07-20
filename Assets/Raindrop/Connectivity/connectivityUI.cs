@@ -65,11 +65,17 @@ public class connectivityUI : MonoBehaviour
     #region view
     private void show_notConnected()
     {
-        this.GetComponent<Image>().color = Color.red;
+        if (this != null)
+        {
+            this.GetComponent<Image>().color = Color.red;
+        }
     }
     private void show_isConnected()
     {
-        this.GetComponent<Image>().color = Color.green;
+        if (this != null)
+        {
+            this.GetComponent<Image>().color = Color.green;
+        }
     }
     #endregion
 }
