@@ -816,7 +816,11 @@ namespace OpenMetaverse
         /// <param name="message">Shutdown message</param>
         public void Shutdown(DisconnectType type, string message)
         {
-            Logger.Log("NetworkManager shutdown initiated", Helpers.LogLevel.Info, Client);
+            Logger.Log(
+                "NetworkManager shutdown initiated. Reason: " 
+                + message, 
+                Helpers.LogLevel.Info, 
+                Client);
 
             // Send a CloseCircuit packet to simulators if we are initiating the disconnect
             bool sendCloseCircuit = (type == DisconnectType.ClientInitiated || type == DisconnectType.NetworkTimeout);
