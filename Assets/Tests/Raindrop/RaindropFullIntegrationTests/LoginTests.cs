@@ -137,7 +137,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
 
         private static GameObject Get_ViewsManager()
         {
-            var gm = GameObject.Find("GameManager");
+            var gm = GameObject.Find("UIManager");
             var vm = GameObject.Find("ViewsManager");
             var mm = GameObject.Find("ModalManager");
             var go = GameObject.Find("GlobalOverlay");
