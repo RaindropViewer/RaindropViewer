@@ -60,6 +60,8 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          # https://github.com/RaindropViewer/RaindropViewer/issues/18
+          allowDirtyBuild: true
 
       # Output
       - uses: actions/upload-artifact@v2
