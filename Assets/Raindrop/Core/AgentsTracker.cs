@@ -162,11 +162,10 @@ namespace Raindrop
 
                         Avatar foundAvi = e.Simulator.ObjectsAvatars.Find(av => av.ID == agentID);
                         
-                        // fix: replace CoarseLocationUpdate's height with known, more accurate height. due to edge case.
-                        
                         // CoarseLocationUpdate gives us height of 0 when actual height is
                         // between 1024-4096m on OpenSim grids. 1020 on SL
-                        bool unknownAltitude = instance.Netcom.LoginOptions.Grid.Platform == "SecondLife" ? agentPos.Z == 1020f : agentPos.Z == 0f;
+                        bool isSL = instance.Netcom.IsSecondlife;
+                        bool unknownAltitude = isSL ? agentPos.Z == 1020f : agentPos.Z == 0f;
                         if (unknownAltitude && (foundAvi != null))
                         {
                             ExtractAltitudeFromSimulatorModel(e, foundAvi, ref agentPos);
