@@ -61,7 +61,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         [Timeout(100000000)]
         public IEnumerator LoginLogoutTest()
         {
-            GetTo_LoginScreen();
+            yield return GetTo_LoginScreen();
 
             SetClient_SettingsMinimal();
             
@@ -88,7 +88,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
 
             Debug.Log("Logging to " + friendlyName_grid);
             
-            GetTo_LoginScreen();
+            yield return GetTo_LoginScreen();
 
             // SetClient_SettingsMinimal();
             
@@ -98,7 +98,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             //1b. we are on the welcome screen.
             Assert.True(
                 uiSrv.GetPresentCanvasType() == CanvasType.Welcome,
-                "expect current view to be welcome canvas");
+                "expect current view to be welcome canvas. instead, it is : " + uiSrv.GetPresentCanvasType().ToString());
             yield return new WaitForSeconds(5);
                 
             // 1c. do "select grid by ui"
