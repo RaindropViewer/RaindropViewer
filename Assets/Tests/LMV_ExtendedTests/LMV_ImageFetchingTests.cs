@@ -15,7 +15,7 @@ using Tests;
 namespace Raindrop.Tests.LMV_ExtendedTests
 {
     [TestFixture]
-    public class LMVLibraryImageFetchingTests
+    public class LMV_LibraryImageFetchingTests
     {
         private static RaindropInstance instance;
 
