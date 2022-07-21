@@ -18,7 +18,6 @@ jobs:
         unityVersion:
           - 2020.3.29f1
         targetPlatform:
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
           - Android # Build a Android standalone.
 
     steps:
