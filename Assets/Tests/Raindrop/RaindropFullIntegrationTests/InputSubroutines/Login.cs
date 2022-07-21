@@ -92,10 +92,8 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests.InputSubroutines
                     $"the message is {instance.Client.Network.LoginMessage}, " +
                     $"status code {instance.Client.Network.LoginStatusCode}");
             
-                //assert the backend API; that we are logged in.
-                Assert.True(
-                    instance.Client.Network.Connected == true, 
-                    "checked API, we are not logged in.");
+                Debug.Log("Waiting for login to complete... ");
+                yield return new WaitUntil(() => instance.Client.Network.Connected == true);
             
                 //finally, disconnect. assert disconnected.
                 UIHelpers.Click_ButtonByUnityName("LogoutBtn");
