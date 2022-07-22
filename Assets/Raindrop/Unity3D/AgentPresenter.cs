@@ -1,9 +1,8 @@
-using System;
 using OpenMetaverse;
 using Raindrop.Rendering;
 using System.Collections.Generic;
-using System.Threading;
 using Plugins.CommonDependencies;
+using Raindrop.Netcom;
 using UE = UnityEngine ;
 using UnityEngine ;
 
@@ -19,15 +18,18 @@ namespace Raindrop.Presenters
         public uint z_MinimapAgents;
 
         private object avatarsDictLock = new object();
-        private Dictionary<UUID, UnityEngine.GameObject> avatarsDict 
+        private Dictionary<UUID, GameObject> avatarsDict 
             = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject 
-        private Dictionary<UUID, UnityEngine.GameObject> avatarsDictMinimap
+        private Dictionary<UUID, GameObject> avatarsDictMinimap
             = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject in minimap
         public GameObject agentReference; //reference to the agent, if rezzed - it should.
 
         private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
-        //private RaindropNetcom netcom { get { return instance.Netcom; } }
-        bool Active => instance.Client.Network.Connected;
+        private RaindropNetcom netcom { get { return instance?.Netcom; } }
+        private GridClient client { get { return instance?.Client; } }
+        bool IsNetworkLayerActive => (instance != null) &&
+                                     (instance.Client != null) && 
+                                     instance.Client.Network.Connected;
 
         void Start()
         {
@@ -39,13 +41,19 @@ namespace Raindrop.Presenters
 
         private void OnDisable()
         {
-            instance.Client.Objects.AvatarUpdate -= Objects_AvatarUpdate;
-            instance.Client.Objects.TerseObjectUpdate -= ObjectsOnTerseObjectUpdate;
+            if (client == null)
+                return;
+            
+            client.Objects.AvatarUpdate -= Objects_AvatarUpdate;
+            client.Objects.TerseObjectUpdate -= ObjectsOnTerseObjectUpdate;
         }
 
 
         private void ObjectsOnTerseObjectUpdate(object sender, TerseObjectUpdateEventArgs e)
         {
+            if (! IsNetworkLayerActive)
+                return;
+            
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
@@ -75,6 +83,9 @@ namespace Raindrop.Presenters
         }
         private void Objects_AvatarUpdate(object sender, AvatarUpdateEventArgs e)
         {
+            if (! IsNetworkLayerActive)
+                return;
+
             if (e.Simulator != instance.Client.Network.CurrentSim)
                 return;
             
