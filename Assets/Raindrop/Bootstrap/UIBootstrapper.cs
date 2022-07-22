@@ -15,6 +15,9 @@ namespace Raindrop.Bootstrap
         private RaindropNetcom netcom => instance.Netcom;
 
         [SerializeField] public References references;
+
+        private UIService _uisrv;
+
         // bootstraps the UI.
         private void Start()
         // 1. finds all the canvasmanager and modal managers.
@@ -34,6 +37,7 @@ namespace Raindrop.Bootstrap
             {
                 ServiceLocator.Instance.Unregister<UIService>();
             }
+            _uisrv.Dispose();
             
         }
 
@@ -58,15 +62,15 @@ namespace Raindrop.Bootstrap
                 Debug.LogError("loadingscreen not present");
             references.ll.Init();
 
-            var uisrv = new UIService(
+            _uisrv = new UIService(
                 instance,
                 references.sm,
                 references.mm,
                 references.ll,
                 references.chatPresenter);
-            ServiceLocator.Instance.Register<UIService>(uisrv);
+            ServiceLocator.Instance.Register<UIService>(_uisrv);
 
-            uisrv.MapFacade = references.mapUI;
+            _uisrv.MapFacade = references.mapUI;
             
             //3. start the chat window right.
             references.chatPresenter.Initialise();
