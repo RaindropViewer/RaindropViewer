@@ -37,7 +37,7 @@ namespace Raindrop.Presenters
             instance.Client.Objects.TerseObjectUpdate += ObjectsOnTerseObjectUpdate;
         }
 
-        private void OnApplicationQuit()
+        private void OnDisable()
         {
             instance.Client.Objects.AvatarUpdate -= Objects_AvatarUpdate;
             instance.Client.Objects.TerseObjectUpdate -= ObjectsOnTerseObjectUpdate;

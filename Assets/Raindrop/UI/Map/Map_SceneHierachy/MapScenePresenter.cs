@@ -81,7 +81,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             RegisterClientEvents();
         }
 
-        public void OnApplicationQuit()
+        public void OnDisable()
         {
             UnregisterClientEvents(Client);
         }

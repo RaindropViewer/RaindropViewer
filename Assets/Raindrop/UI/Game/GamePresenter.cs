@@ -61,7 +61,7 @@ namespace Raindrop.Presenters
             usernameText.text = client.Self.Name;
         }
 
-        private void OnApplicationQuit()
+        private void OnDisable()
         {
             client.Network.SimConnected -= Network_SimConnected;
         }
