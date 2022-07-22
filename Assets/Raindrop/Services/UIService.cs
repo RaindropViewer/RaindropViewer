@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Raindrop.Services
 {
-    public class UIService : IGameService
+    public class UIService : IGameService, IDisposable
     {
         //UI is a service. it will always be available.
         // presenters themselves provide the logic of ui-traversal.
@@ -66,8 +66,10 @@ namespace Raindrop.Services
             initialise();
         }
 
-        ~UIService()
+        public void Dispose()
         {
+            _loadingController?.Dispose();
+            
             netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
             netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
             netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
