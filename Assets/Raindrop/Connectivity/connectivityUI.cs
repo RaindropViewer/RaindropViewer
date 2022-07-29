@@ -27,6 +27,8 @@ public class connectivityUI : MonoBehaviour
 
     private void OnDisable()
     {
+        if (instance == null)
+            return;
         instance.Netcom.ClientLoginStatus -= NetcomOnClientLoginStatus;
         instance.Netcom.ClientLoggedOut -= NetcomOnClientLoggedOut;
     }
