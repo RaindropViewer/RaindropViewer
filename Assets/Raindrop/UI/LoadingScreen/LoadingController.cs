@@ -36,9 +36,10 @@ namespace Raindrop.UI.LoadingScreen
 
         private void RemoveLoginEvents()
         {
+            if (netcom == null)
+                return;
             netcom.ClientLoggingIn -= new EventHandler<OverrideEventArgs>(netcom_ClientLoggingIn);
             netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
-
         }
 
         

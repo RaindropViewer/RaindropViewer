@@ -104,6 +104,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
             Client.Grid.GridRegion -= new EventHandler<GridRegionEventArgs>(Grid_GridRegion);
             Client.Grid.GridLayer -= new EventHandler<GridLayerEventArgs>(Grid_GridLayer);
             
+            if (Instance == null) return;
             Instance.Netcom.ClientConnected -= NetcomOnClientConnected;
             Instance.Netcom.ClientDisconnected -= NetcomOnClientDisconnected;
         }
