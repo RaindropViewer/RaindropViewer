@@ -1,9 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using Disk;
 using OpenMetaverse;
 using Plugins.CommonDependencies;
 using Raindrop.Netcom;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityScripts.Disk;
@@ -19,23 +21,43 @@ namespace Raindrop.Bootstrap
     // Then, you can disable/enable UI-scene loading using the boolean
     
     // Disable UI scene loading for headless tests
-    public class RaindropBootstrapper : MonoBehaviour
+    
+    public class RaindropBootstrapper : ScriptableObject
     {
-        [SerializeField] public bool startUI;
-        
-        private void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void Start()
         {
+            RegisterToAppTeardownEvent();
             Start_Raindrop_CoreDependencies();
-
-            if (startUI)
-            {
-                StartUIScene();
-            }
         }
-        
-        public void OnDestroy()
+
+        private static void RegisterToAppTeardownEvent()
         {
-            Quit_Application();
+#if !UNITY_EDITOR
+            Application.quitting += Quit_Application;
+#endif
+#if UNITY_EDITOR
+            
+            EditorApplication.playModeStateChanged -=
+                InternalPlayModeStateChanged;
+            EditorApplication.playModeStateChanged +=
+                InternalPlayModeStateChanged;
+#endif
+        }
+
+        /// <summary>For in-editor usage only.</summary>
+        public static void InternalPlayModeStateChanged(PlayModeStateChange state)
+        {
+            switch (state)
+            {
+                case PlayModeStateChange.ExitingPlayMode:
+                    Quit_Application();
+                    break;
+                case PlayModeStateChange.ExitingEditMode:
+                case PlayModeStateChange.EnteredPlayMode:
+                case PlayModeStateChange.EnteredEditMode:
+                    break;
+            }
         }
 
         #region Bootstrap functions
@@ -122,7 +144,7 @@ namespace Raindrop.Bootstrap
         
 
         // globally-accessible quit method.
-        public void Quit_Application()
+        public static void Quit_Application()
         {
             void SaveInventoryToDiskAndLogout(RaindropInstance raindropInstance, RaindropNetcom raindropNetcom)
             {
@@ -175,7 +197,7 @@ namespace Raindrop.Bootstrap
 
         // wraps up the netcom (synchronisation context) ,
         // followed by the client instance.
-        void frmMain_Disposed(RaindropInstance instance)
+        static void frmMain_Disposed(RaindropInstance instance)
         {
             RaindropNetcom netcom = instance.Netcom;
 
