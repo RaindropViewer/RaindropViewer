@@ -12,7 +12,7 @@ using UnityEngine.Serialization;
 public class PeopleView : MonoBehaviour, IPointerClickHandler
 {
     public GridClient client => Instance.Client;
-    public RaindropInstance Instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    public RaindropInstance Instance => RaindropInstance.GlobalInstance;
 
     
     [SerializeField] public UUID agentID;

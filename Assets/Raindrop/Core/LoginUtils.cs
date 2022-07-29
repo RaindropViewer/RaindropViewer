@@ -59,7 +59,7 @@ namespace Raindrop
 
             public override string ToString()
             {
-                RaindropInstance instance = ServiceLocator.Instance.Get<RaindropInstance>();
+                RaindropInstance instance = RaindropInstance.GlobalInstance;
                 string gridName;
                 if (GridID == "custom_login_uri")
                 {

@@ -13,7 +13,7 @@ namespace Raindrop.UI.Login
 {
     public class LoginPresenter : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
 
         private UIService Uimanager =>
             ServiceLocator.Instance.Get<UIService>();

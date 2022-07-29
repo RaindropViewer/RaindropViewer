@@ -12,7 +12,7 @@ using Vector2 = UnityEngine.Vector2;
 //update the backend on user's (u,d,l,r)
 public class UpdateMovementBackend : MonoBehaviour
 {
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
     private RaindropNetcom netcom { get { return instance.Netcom; } }
     private GridClient client { get { return instance.Client; } }
     bool Active => instance.Client.Network.Connected;

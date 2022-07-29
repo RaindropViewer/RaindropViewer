@@ -8,7 +8,7 @@ using UnityEngine;
 public class Origin_SimHandle : MonoBehaviour
 {
     public ulong simHandle => instance.Client.Network.CurrentSim.Handle;
-    private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    private RaindropInstance instance => RaindropInstance.GlobalInstance;
     
     public ulong GetSimHandle()
     {

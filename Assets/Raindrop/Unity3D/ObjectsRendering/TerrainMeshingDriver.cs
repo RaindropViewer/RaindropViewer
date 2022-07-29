@@ -10,7 +10,7 @@ namespace Raindrop.Unity3D
     {
         public TerrainMeshView TerrainMeshView;
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
 
         private float lastRenderTime = 0;
         private void OnEnable()

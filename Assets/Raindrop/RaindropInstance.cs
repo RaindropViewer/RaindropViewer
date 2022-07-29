@@ -17,9 +17,12 @@ using Logger = OpenMetaverse.Logger;
 namespace Raindrop
 {
     // The singleton instance of the game client.
-    public class RaindropInstance : IGameService
+    public class RaindropInstance
     {
-        //composition of many things...
+        // Singleton, there can be only one instance
+        private static RaindropInstance globalInstance = null;
+        public static RaindropInstance GlobalInstance => 
+            globalInstance ??= new RaindropInstance(new GridClient());
         
         private GridClient _client; //backend monolith API
         private RaindropNetcom _netcom;

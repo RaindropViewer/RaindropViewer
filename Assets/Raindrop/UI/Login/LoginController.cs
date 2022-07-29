@@ -9,7 +9,7 @@ namespace Raindrop.UI.Login
 {
     public class LoginController
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
         public RaindropNetcom netcom => instance.Netcom;
         private LoginPresenter view;
         public bool isDoingLogin;

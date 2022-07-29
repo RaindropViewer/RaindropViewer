@@ -125,11 +125,7 @@ namespace Raindrop.Bootstrap
 
         public static void CreateAndRegister_RaindropInstance()
         {
-            if (ServiceLocator.Instance.IsRegistered<RaindropInstance>()) 
-                return;
-            
-            var rdi = new RaindropInstance(new GridClient());
-            ServiceLocator.Instance.Register<RaindropInstance>(rdi);
+            var instance = RaindropInstance.GlobalInstance;
             SendStartupMessageToLogger();
         }
 
@@ -164,7 +160,7 @@ namespace Raindrop.Bootstrap
             RaindropInstance instance;
             try
             {
-                instance = ServiceLocator.Instance.Get<RaindropInstance>();
+                instance = RaindropInstance.GlobalInstance;
             }
             catch
             {
@@ -190,8 +186,6 @@ namespace Raindrop.Bootstrap
 
             frmMain_Disposed(instance);
 
-            Unregister_RaindropInstance();
-            
             Debug.Log("disposed netcom and client! :) This marks the end of the app.");
         }
 
@@ -217,14 +211,6 @@ namespace Raindrop.Bootstrap
             // }
 
             instance.CleanUp();
-        }
-        
-        public static void Unregister_RaindropInstance()
-        {
-            if (ServiceLocator.Instance.IsRegistered<RaindropInstance>())
-            {
-                ServiceLocator.Instance.Unregister<RaindropInstance>();
-            }
         }
         #endregion
 

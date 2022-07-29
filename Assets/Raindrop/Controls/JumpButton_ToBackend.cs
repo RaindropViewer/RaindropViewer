@@ -13,7 +13,7 @@ namespace Assets.Raindrop.UI.Movement
     {
         public Button btn;
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
 
         public void OnPointerDown(PointerEventData eventData)
         {

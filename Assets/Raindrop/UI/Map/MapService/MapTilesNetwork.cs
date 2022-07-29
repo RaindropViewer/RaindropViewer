@@ -11,7 +11,7 @@ namespace Raindrop.Map.Model
     // for you to get map tiles from the network.
     public class MapTilesNetwork 
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
 
         List<ulong> tileRequests = new List<ulong>(); // a list of pending fetch requests. the ulongs are the x and y world coordinates (gridX * 256), packed.
         private DownloadManager downloader;

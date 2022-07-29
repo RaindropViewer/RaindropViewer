@@ -128,7 +128,7 @@ public class ModalsManager : MonoBehaviour
         ui.ModalsManager.showModal_NotificationGeneric(
             "The desired feature is not implemented yet: ",
             type.ToString() + " UI + \n \n + Stay tuned for updates!");
-        var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+        var instance = RaindropInstance.GlobalInstance;
         instance.MediaManager.PlayUISound(UISounds.Warning);
     }
 }

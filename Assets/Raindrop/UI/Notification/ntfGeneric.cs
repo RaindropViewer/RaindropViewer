@@ -9,7 +9,7 @@ namespace Raindrop
     public class ntfGeneric : MonoBehaviour
     {
         private RaindropInstance instance =>
-            ServiceLocator.Instance.Get<RaindropInstance>();
+            RaindropInstance.GlobalInstance;
 
         public TMPro.TMP_Text txtMessage;
         public void Init(string msg)

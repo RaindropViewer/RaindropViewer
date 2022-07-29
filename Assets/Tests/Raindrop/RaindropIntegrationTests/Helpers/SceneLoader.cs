@@ -27,7 +27,7 @@ namespace Raindrop.Tests.RaindropIntegrationTests.Helpers
                 bootstrap.GetComponent<RaindropBootstrapper>();
             Assert.True(raindropBootstrapper);
 
-            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var instance = RaindropInstance.GlobalInstance;
             Assert.True(instance != null);
         }
         

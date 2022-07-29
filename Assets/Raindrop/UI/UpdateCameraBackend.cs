@@ -20,7 +20,7 @@ public class UpdateCameraBackend : MonoBehaviour
     void Start()
     {
         cam = GetComponent<Camera>();
-        instance = ServiceLocator.Instance.Get<RaindropInstance>();
+        instance = RaindropInstance.GlobalInstance;
     }
 
     private void Update()

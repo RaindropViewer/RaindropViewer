@@ -39,7 +39,7 @@ namespace Raindrop.Map.Model
         private MapTilesRAM _mapTilesRam;
         private MapTilesNetwork mapTilesNetwork;
         
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
         // private bool Secondlife; //=> instance.Netcom.LoginOptions.Grid.Platform == "SecondLife";
         public bool isReady = false;
 

@@ -17,7 +17,7 @@ namespace Raindrop.UI.chat
         // | hello there.. |SEND|
         // _____________________
 
-        public RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        public RaindropInstance instance => RaindropInstance.GlobalInstance;
 
         public IMPresenter DestChatInputAcceptor; // the monobehavior that accepts our input.
 

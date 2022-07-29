@@ -23,7 +23,7 @@ namespace Raindrop.Bootstrap
         {
             var ui = ServiceLocator.Instance.Get<UIService>();
             Assert.IsNotNull(ui, "ui is not found.");
-            // var instance = ServiceLocator.ServiceLocator.Instance.Get<RaindropInstance>();
+            // var instance = ServiceLocator.RaindropInstance.GlobalInstance;
             // ui.modalManager.showModal_NtfGeneric("Quick Re-log",
             //     "Would you like to login with previous credentials: \n" +
             //     instance.GlobalSettings["a"]

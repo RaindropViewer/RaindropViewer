@@ -29,7 +29,7 @@ namespace Raindrop
         public ChatListView chatListView => presenter.chatListView;
 
 
-        RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        RaindropInstance instance => RaindropInstance.GlobalInstance;
         public ChatManager(ChatPresenter view)
         {
             this.presenter = view;

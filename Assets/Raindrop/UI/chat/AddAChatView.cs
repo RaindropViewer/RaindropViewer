@@ -10,7 +10,7 @@ using UnityEngine.UI;
 // View logic for the modal that allows us to select a person to IM with. 
 public class AddAChatView : MonoBehaviour
 {
-    public RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    public RaindropInstance instance => RaindropInstance.GlobalInstance;
 
     public Button FriendsTab;
     public Button GroupsTab;

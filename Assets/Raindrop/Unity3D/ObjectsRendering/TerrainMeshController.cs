@@ -17,7 +17,7 @@ namespace Raindrop.Unity3D
     // it subscribes to the terrain of the sim it is responsible for rendering. 
     public class TerrainMeshController 
     {
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private GridClient Client { get { return instance.Client; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;

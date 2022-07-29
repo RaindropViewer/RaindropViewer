@@ -25,7 +25,7 @@ namespace Raindrop.UI.Views
 
         public MapScenePresenter MapScenePresenter;
 
-        private GridClient Client => ServiceLocator.Instance.Get<RaindropInstance>().Client;
+        private GridClient Client => RaindropInstance.GlobalInstance.Client;
        
         //global handle: handle + the offset within the simulator.
         public void OnFocusMapPosition(ulong global_handle, RaycastHit raycastHit)

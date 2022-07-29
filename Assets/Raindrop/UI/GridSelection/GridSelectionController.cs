@@ -14,7 +14,7 @@ namespace Raindrop.GridSelection
 
         //reference to model
         private RaindropInstance instance => 
-            ServiceLocator.Instance.Get<RaindropInstance>();
+            RaindropInstance.GlobalInstance;
         private bool Ready => !(instance is null);
         private bool Connected => instance.Client.Network.Connected;
 

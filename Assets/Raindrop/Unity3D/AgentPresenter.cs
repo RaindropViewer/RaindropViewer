@@ -24,7 +24,7 @@ namespace Raindrop.Presenters
             = new Dictionary<UUID, GameObject>(); //user UUID -> user gameobject in minimap
         public GameObject agentReference; //reference to the agent, if rezzed - it should.
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance?.Netcom; } }
         private GridClient client { get { return instance?.Client; } }
         bool IsNetworkLayerActive => (instance != null) &&

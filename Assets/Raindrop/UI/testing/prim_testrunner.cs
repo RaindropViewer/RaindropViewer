@@ -12,7 +12,7 @@ using Vector3 = OpenMetaverse.Vector3;
 public class prim_testrunner : MonoBehaviour
 {
     public ObjectManager obj_mgr;
-    public GridClient client => ServiceLocator.Instance.Get<RaindropInstance>().Client;
+    public GridClient client => RaindropInstance.GlobalInstance.Client;
 
     void Start()
     {
