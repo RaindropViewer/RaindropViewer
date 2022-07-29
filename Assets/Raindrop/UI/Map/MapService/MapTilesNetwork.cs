@@ -15,13 +15,11 @@ namespace Raindrop.Map.Model
 
         List<ulong> tileRequests = new List<ulong>(); // a list of pending fetch requests. the ulongs are the x and y world coordinates (gridX * 256), packed.
         private DownloadManager downloader;
-        UnityMainThreadDispatcher mainThreadInstance;
 
         public MapTilesNetwork(int parallelDownloads)
         {
             downloader = new DownloadManager();
             downloader.ParallelDownloads = parallelDownloads;
-            mainThreadInstance = UnityMainThreadDispatcher.Instance();
         }
 
         //get region tile using SL map API -- JPEG images.
@@ -77,7 +75,8 @@ namespace Raindrop.Map.Model
                                 // }
 
                                 //start to run jpeg decoding on the main thread.
-                                mainThreadInstance.Enqueue(DecodeDataToTexAsync(res, responseData));
+                                UnityMainThreadDispatcher.Instance().
+                                    Enqueue(DecodeDataToTexAsync(res, responseData));
 
                                 // remove from request list
                                 lock (tileRequests)
