@@ -60,7 +60,6 @@ namespace Raindrop.Bootstrap
 
             if (references.ll == null)
                 Debug.LogError("loadingscreen not present");
-            references.ll.Init();
 
             _uisrv = new UIService(
                 instance,
