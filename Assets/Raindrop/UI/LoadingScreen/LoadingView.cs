@@ -20,7 +20,7 @@ namespace Raindrop.UI.LoadingScreen
         [SerializeField] public float delayBeforeFade = 2;
 
         
-        public void Init()
+        public void OnEnable()
         {
             loginMsg = new ReactiveProperty<string>(""); //"" is a magic value that is required to prevent showing the modal immediately on load.
             loginMsg.AsObservable().Subscribe(
