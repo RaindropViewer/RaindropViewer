@@ -9,7 +9,7 @@ namespace Raindrop.UI.Views
 {
     public class ParcelInfoPopup : MonoBehaviour
     {
-        private GridClient Client => ServiceLocator.Instance.Get<RaindropInstance>().Client;
+        private GridClient Client => RaindropInstance.GlobalInstance.Client;
 
         public TMP_Text parcelNameTMP;
         public string parcelName;

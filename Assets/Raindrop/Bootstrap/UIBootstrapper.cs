@@ -11,7 +11,7 @@ namespace Raindrop.Bootstrap
     // link all the UI together
     class UIBootstrapper : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
         private RaindropNetcom netcom => instance.Netcom;
 
         [SerializeField] public References references;

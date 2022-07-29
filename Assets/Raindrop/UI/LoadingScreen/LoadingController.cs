@@ -9,7 +9,7 @@ namespace Raindrop.UI.LoadingScreen
     public class LoadingController : IDisposable
     {
         private LoadingView view;
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
 
         public bool isInteractable => view.canvas.interactable;

@@ -10,7 +10,7 @@ namespace Raindrop.Presenters
 {
     public class IMPresenter : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
         private RaindropNetcom netcom => instance.Netcom;
         public TMPTextFieldPrinter printer; //the component in the textbox
         public IMManager manager;

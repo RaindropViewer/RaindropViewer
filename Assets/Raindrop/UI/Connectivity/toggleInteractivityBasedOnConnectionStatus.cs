@@ -16,7 +16,7 @@
 //     {
 //         notConnected();
 //         
-//         _instance = ServiceLocator.Instance.Get<RaindropInstance>();
+//         _instance = RaindropInstance.GlobalInstance;
 //     }
 //
 //

@@ -166,7 +166,7 @@ namespace Raindrop.Rendering
             if (BasePrim.Velocity != Vector3.Zero)
             {
                 BasePrim.Position = InterpolatedPosition = BasePrim.Position + BasePrim.Velocity * time
-                    * 0.98f * ServiceLocator.Instance.Get<RaindropInstance>()
+                    * 0.98f * RaindropInstance.GlobalInstance
                         .Client.Network.CurrentSim.Stats.Dilation;
                 BasePrim.Velocity += BasePrim.Acceleration * time;
             }
@@ -332,8 +332,8 @@ namespace Raindrop.Rendering
             try
             {
                 string fname = 
-                    ServiceLocator.Instance.Get<RaindropInstance>()
-                        .ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>()
+                    RaindropInstance.GlobalInstance
+                        .ComputeCacheName(RaindropInstance.GlobalInstance
                             .Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -382,7 +382,7 @@ namespace Raindrop.Rendering
         {
             try
             {
-                string fname = ServiceLocator.Instance.Get<RaindropInstance>().ComputeCacheName(ServiceLocator.Instance.Get<RaindropInstance>().Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
+                string fname = RaindropInstance.GlobalInstance.ComputeCacheName(RaindropInstance.GlobalInstance.Client.Settings.ASSET_CACHE_DIR, textureID) + ".rzi";
 
                 using (var f = File.Open(fname, FileMode.Create, FileAccess.Write, FileShare.None))
                 {

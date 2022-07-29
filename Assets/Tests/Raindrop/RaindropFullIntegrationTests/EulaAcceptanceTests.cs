@@ -54,7 +54,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
             yield return new WaitForSeconds(2);
 
             //1. reject the EULA
-            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var instance = RaindropInstance.GlobalInstance;
             instance.GlobalSettings["EulaAccepted"] = false;
             instance.GlobalSettings.Save();
             Assert.False(instance.GlobalSettings["EulaAccepted"]);

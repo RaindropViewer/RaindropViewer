@@ -7,7 +7,7 @@ namespace Raindrop.Camera
 {
     public class RaindropCinemachineAssignLookAtAvatar : MonoBehaviour
     {
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         //private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 

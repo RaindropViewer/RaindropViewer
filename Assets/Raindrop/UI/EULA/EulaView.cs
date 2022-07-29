@@ -9,7 +9,7 @@ using UnityEngine.UI;
 //a monobehavior that makes a toggle toggle the eula acceptance in globalSettings 
 public class EulaView : MonoBehaviour
 {
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
     
     [Tooltip("the Acceptance toggle that allows us to continue past this window")]
     public Toggle EulaToggle;

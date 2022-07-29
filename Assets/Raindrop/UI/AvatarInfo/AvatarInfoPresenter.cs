@@ -16,7 +16,7 @@ namespace Raindrop.Presenters
 
     public class AvatarInfoPresenter : MonoBehaviour
     {
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private UIService uimanager => ServiceLocator.Instance.Get<UIService>();
         

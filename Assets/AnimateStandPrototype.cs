@@ -11,7 +11,7 @@ using Logger = OpenMetaverse.Logger;
 //make the avatar play the standing animation.
 public class AnimateStandPrototype : MonoBehaviour
 {
-    private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    private RaindropInstance instance => RaindropInstance.GlobalInstance;
 
     public UUID standAnim => Animations.STAND;
     public UUID anim => standAnim;

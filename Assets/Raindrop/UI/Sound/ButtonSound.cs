@@ -9,7 +9,7 @@ using UnityEngine;
 public class ButtonSound : MonoBehaviour
 {
     
-    public RaindropInstance Instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    public RaindropInstance Instance => RaindropInstance.GlobalInstance;
 
     private LeanButton btn;
     void Awake()

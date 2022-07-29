@@ -40,7 +40,7 @@ namespace Tests.Raindrop.SoundTests
         {
             yield return new WaitForSeconds(5);
 
-            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var instance = RaindropInstance.GlobalInstance;
             var internalDir = instance.UserDir;
 
             //copy the sound file to cache path in a haphazard manner:
@@ -86,7 +86,7 @@ namespace Tests.Raindrop.SoundTests
         [UnityTest]
         public IEnumerator OfflineUncachedSound_Playable_ButNoSound()
         {
-            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var instance = RaindropInstance.GlobalInstance;
 
             instance.MediaManager.PlayUISound(UUID.Zero); 
 

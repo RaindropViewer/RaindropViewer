@@ -74,7 +74,7 @@ public class ScreenStackManager : MonoBehaviour
 
     private bool IsEulaAccepted()
     {
-        if (ServiceLocator.Instance.Get<RaindropInstance>().GlobalSettings["EulaAccepted"])
+        if (RaindropInstance.GlobalInstance.GlobalSettings["EulaAccepted"])
         {
             return true;
         }

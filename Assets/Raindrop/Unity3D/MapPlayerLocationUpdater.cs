@@ -13,7 +13,7 @@ namespace Raindrop.Unity3D
     // see @ MapCoordinatesConversionTests
     class MapPlayerLocationUpdater : MonoBehaviour
     {
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         bool Active => instance.Client.Network.Connected;
 

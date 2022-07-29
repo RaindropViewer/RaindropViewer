@@ -15,7 +15,7 @@ namespace Raindrop.Presenters
         //2 . notifications - a dragdown list-like UI
         //3 . buttons to access other features.
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private RaindropNetcom netcom { get { return instance.Netcom; } }
         private GridClient client { get { return instance.Client; } }
 

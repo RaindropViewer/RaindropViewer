@@ -46,7 +46,7 @@ namespace Raindrop.Presenters
         // a cache for decoded scuplties
         Dictionary<UUID, Texture2D> sculptCache = new Dictionary<UUID, Texture2D>();
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         private GridClient Client { get { return instance?.Client; } }
         bool Active => instance.Client.Network.Connected;
         

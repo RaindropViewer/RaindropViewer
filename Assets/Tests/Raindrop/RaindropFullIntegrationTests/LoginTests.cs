@@ -21,7 +21,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
     public class LoginTests
     {
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
 
         [SetUp]
         public void SetUp()

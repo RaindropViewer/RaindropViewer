@@ -17,7 +17,7 @@ namespace Assets.Raindrop.UI.Movement
     {
         private Selectable btn;
 
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
         //can the component run?
         bool CanSendCommandsToSimulator => instance.Client.Network.Connected && 
                                   !instance.Netcom.IsTeleporting &&

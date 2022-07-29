@@ -40,7 +40,7 @@ public class LandmarkController : IDisposable
     #endregion
 
     #region globalrefs
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
     private RaindropNetcom netcom { get { return instance.Netcom; } }
     private GridClient client { get { return instance.Client; } }
     bool Active => instance.Client.Network.Connected;

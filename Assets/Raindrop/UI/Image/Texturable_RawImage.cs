@@ -13,7 +13,7 @@ using Logger = OpenMetaverse.Logger;
 //coordinates the loading in of some UIimage.
 public class Texturable_RawImage : MonoBehaviour
 {
-    private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    private RaindropInstance instance => RaindropInstance.GlobalInstance;
     
     public UUID profileID;
     public GameObject LoadingImage;

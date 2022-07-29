@@ -14,7 +14,7 @@ using Logger = OpenMetaverse.Logger;
 [RequireComponent(typeof(Image))]
 public class connectivityUI : MonoBehaviour
 {
-    private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+    private RaindropInstance instance => RaindropInstance.GlobalInstance;
     
     void Start()
     {

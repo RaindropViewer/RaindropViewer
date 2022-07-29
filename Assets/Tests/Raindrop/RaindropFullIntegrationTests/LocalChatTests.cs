@@ -15,7 +15,7 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
     {
         
         private RaindropNetcom netcom { get { return instance.Netcom; } }
-        private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+        private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()

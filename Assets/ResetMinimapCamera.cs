@@ -12,7 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(OrthographicCameraView))]
 public class ResetMinimapCamera : MonoBehaviour
 {
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
     bool Active => instance.Client.Network.Connected;
 
     public OrthographicCameraView cam;

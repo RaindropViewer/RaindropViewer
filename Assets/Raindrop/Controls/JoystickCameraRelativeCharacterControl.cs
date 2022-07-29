@@ -26,7 +26,7 @@ public class JoystickCameraRelativeCharacterControl : MonoBehaviour
     public AgentPresenter agents;
     public bool debug;
 
-    private RaindropInstance instance { get { return ServiceLocator.Instance.Get<RaindropInstance>(); } }
+    private RaindropInstance instance { get { return RaindropInstance.GlobalInstance; } }
     //private RaindropNetcom netcom { get { return instance.Netcom; } }
     bool Active => instance.Client.Network.Connected;
 

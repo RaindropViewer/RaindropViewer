@@ -21,7 +21,7 @@ namespace Raindrop.Tests.RaindropIntegrationTests.GridSelectorTests
             yield return SceneLoader.LoadHeadlessScene();
         
             //at this point, raindropInstance is ready.
-            var instance = ServiceLocator.Instance.Get<RaindropInstance>();
+            var instance = RaindropInstance.GlobalInstance;
             Assert.True(instance!=null, "instance is null");
         
             //+++++++++++++finish load test scene+++++++

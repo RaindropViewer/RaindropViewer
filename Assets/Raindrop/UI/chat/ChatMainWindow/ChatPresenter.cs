@@ -30,7 +30,7 @@ namespace Raindrop.Presenters
         //right pane: the contents of the selected chat in the left pane.+
         //             input bar of the text to send to said chat.
 
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
 
         #region UI elements - left tabs 
         [FormerlySerializedAs("chatList")] [Tooltip("The container of the list of chat tabs.")]

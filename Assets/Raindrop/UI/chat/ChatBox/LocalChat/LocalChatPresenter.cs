@@ -11,7 +11,7 @@ namespace Raindrop.UI.chat
     // for local chat, manage the printer and the input box.
     public class LocalChatPresenter : MonoBehaviour
     {
-        private RaindropInstance instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        private RaindropInstance instance => RaindropInstance.GlobalInstance;
         private RaindropNetcom netcom => instance.Netcom;
         
         public TMPTextFieldPrinter printer; //the component in the textbox

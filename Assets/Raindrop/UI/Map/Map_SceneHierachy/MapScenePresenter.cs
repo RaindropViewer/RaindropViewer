@@ -17,7 +17,7 @@ namespace Raindrop.UI.map.Map_SceneHierachy
 
     public class MapScenePresenter : MonoBehaviour
     {
-        RaindropInstance Instance => ServiceLocator.Instance.Get<RaindropInstance>();
+        RaindropInstance Instance => RaindropInstance.GlobalInstance;
         GridClient Client => Instance.Client;
         
         [SerializeField]
