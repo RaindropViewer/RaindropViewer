@@ -27,7 +27,7 @@ namespace Raindrop.Bootstrap
             InitialiseUIVariant();
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             if (ServiceLocator.Instance.IsRegistered<MapService>())
             {

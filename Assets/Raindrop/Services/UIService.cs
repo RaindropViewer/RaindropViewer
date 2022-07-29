@@ -69,11 +69,14 @@ namespace Raindrop.Services
         public void Dispose()
         {
             _loadingController?.Dispose();
-            
-            netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
-            netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
-            netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
-            instance.Names.NameUpdated -= new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
+
+            if (netcom != null)
+            {
+                netcom.ClientLoginStatus -= new EventHandler<LoginProgressEventArgs>(netcom_ClientLoginStatus);
+                netcom.ClientLoggedOut -= new EventHandler(netcom_ClientLoggedOut);
+                netcom.ClientDisconnected -= new EventHandler<DisconnectedEventArgs>(netcom_ClientDisconnected);
+                instance.Names.NameUpdated -= new EventHandler<UUIDNameReplyEventArgs>(Names_NameUpdated);
+            }
 
             UnregisterClientEvents(client);
         }
