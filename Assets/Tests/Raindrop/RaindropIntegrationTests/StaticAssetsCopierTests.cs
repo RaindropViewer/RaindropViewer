@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using Disk;
 using NUnit.Framework;
 using OpenMetaverse;
 using Raindrop.Bootstrap;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Tests.Raindrop.RaindropIntegrationTests
@@ -17,19 +17,20 @@ namespace Tests.Raindrop.RaindropIntegrationTests
         [UnityTest]
         public IEnumerator StaticAssets_MainSceneOnBoot_AreCopied()
         {
-            // 1. delete any files in the local cache folder
-            DeleteLocalCacheFiles();
-
-            // 2. start main scene, which includes the startupCopier
+            // startupCopier will run on App boot-up, but we load scene anyway.
             RaindropLoader.Load();
 
             //wait for abit...
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(5);
             
-            string expectedToExist = Path.Combine(DirectoryHelpers.GetInternalStorageDir(),
-                "grids.xml");
+            string expectedToExist = 
+                Path.Combine(
+                    DirectoryHelpers.GetInternalStorageDir(),
+                    "grids.xml");
             
-            Assert.True(File.Exists(expectedToExist),"file not exist: " + expectedToExist);
+            Assert.True(
+                File.Exists(expectedToExist),
+                "file not exist: " + expectedToExist);
             
             // 3. don't forget to unload the scene!
             RaindropLoader.Unload();
@@ -37,6 +38,8 @@ namespace Tests.Raindrop.RaindropIntegrationTests
             yield break;
         }
 
+        [Obsolete]
+        // DO NOT use me! only use if your asset-checking is on-scene-load.
         public static void DeleteLocalCacheFiles()
         {
             System.IO.DirectoryInfo localCacheFolder
