@@ -13,25 +13,18 @@ using Logger = OpenMetaverse.Logger;
 
 namespace Raindrop.Bootstrap
 {
-    // This sets up and tears down the raindrop instance service.
-
-    // To use,
-    // Just attach this script as a component of a gameobject in bootstrap
-    // scene.
-    // Then, you can disable/enable UI-scene loading using the boolean
-    
-    // Disable UI scene loading for headless tests
+    // This sets up and tears down the (globally-accessible) raindrop instance.
     
     public class RaindropBootstrapper : ScriptableObject
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void Start()
         {
-            RegisterToAppTeardownEvent();
+            Subscribe_To_AppTeardownEvent();
             Start_Raindrop_CoreDependencies();
         }
 
-        private static void RegisterToAppTeardownEvent()
+        private static void Subscribe_To_AppTeardownEvent()
         {
 #if !UNITY_EDITOR
             Application.quitting += Quit_Application;
