@@ -57,6 +57,14 @@ namespace Raindrop.Tests.DiskAndCache
             Assert.False(File.Exists(GridsXmlFile),
                 "delete grids.xml failed : " + GridsXmlFile);
 
+            //1b. delete EULA file
+            string EulaFile = Path.Combine(
+                DirectoryHelpers.GetInternalStorageDir(),
+                "RD_Eula.txt");
+            File.Delete(EulaFile);
+            Assert.False(File.Exists(EulaFile),
+                "delete RD_Eula.txt failed : " + EulaFile);
+            
             //2. do the startup copy.
             LMV_ExtendedTests.Helpers.DoStartupCopy();
             
@@ -64,6 +72,10 @@ namespace Raindrop.Tests.DiskAndCache
             Assert.True(File.Exists(GridsXmlFile),
                 "failed to copy grids.xml from Streaming assets to this location: " + GridsXmlFile);
             
+            //3b. RD_Eula.txt is expected to be copied
+            Assert.True(File.Exists(EulaFile),
+                "failed to copy RD_Eula.txt from Streaming assets to this location: " + EulaFile);
+
             yield break;
         }
         
