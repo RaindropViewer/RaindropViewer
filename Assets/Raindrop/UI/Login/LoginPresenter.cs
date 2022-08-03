@@ -173,7 +173,7 @@ namespace Raindrop.UI.Login
             if (!isValidUser)
             {
                 credParserErrorString.Value = "bad username. Allowable examples: Kitty Graves , FlyingFox Resident , FlyingFox ";
-                Debug.LogError(" username error; invalid username input : " + Username);
+                Debug.LogWarning(" username error; invalid username input : " + Username);
                 StartCoroutine(EnableButtonCoroutine(1500));
                 return;
             }
@@ -182,7 +182,7 @@ namespace Raindrop.UI.Login
             if (Password.Length <= 0)
             {
                 credParserErrorString.Value = "bad password";
-                Debug.LogError(" password error!");
+                Debug.LogWarning(" password error!");
                 StartCoroutine(EnableButtonCoroutine(1500));
                 return;
             }
