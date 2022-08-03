@@ -41,6 +41,17 @@ namespace Raindrop.Tests.RaindropFullIntegrationTests
         public IEnumerator LoadScene_MainScene_IsOK()
         {
             yield return new WaitForSeconds(10);
+            Assert.True(UnityMainThreadDispatcher.Exists());
+            Assert.Pass();
+            yield break;
+        }
+
+        [UnityTest]
+        //Added due to MT Dispatcher being unstable across scene boots.
+        public IEnumerator LoadScene_MainScene_IsOK_MTDispatcher()
+        {
+            yield return new WaitForSeconds(10);
+            Assert.True(UnityMainThreadDispatcher.Exists());
             Assert.Pass();
             yield break;
         }
