@@ -21,12 +21,6 @@ namespace Raindrop.Tests.RaindropIntegrationTests.Helpers
                 yield return null;
             }
 
-            var bootstrap = GameObject.Find("Bootstrapper");
-            Assert.True(bootstrap, "bootstrapper object not found");
-            var raindropBootstrapper = 
-                bootstrap.GetComponent<RaindropBootstrapper>();
-            Assert.True(raindropBootstrapper);
-
             var instance = RaindropInstance.GlobalInstance;
             Assert.True(instance != null);
         }
