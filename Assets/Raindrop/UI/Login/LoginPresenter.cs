@@ -31,9 +31,10 @@ namespace Raindrop.UI.Login
         #endregion
 
         #region internal representations
-        public string Username { get; set; }
 
-        public string Password { get; set; }
+        public string Username = "";
+
+        public string Password = "";
 
         // public bool isSaveCredentials => true;
 
