@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1eb66cf6e85f814f8370584e7b8fa03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fetchOn: 1
+  fetchOn: 0
   mapTileZBuffer: 10
   mapRoot: {fileID: 438293268}
   mapTilePrefab: {fileID: 4388118593235937986, guid: d4486e9d963742a4a8db3b183db0b919, type: 3}
