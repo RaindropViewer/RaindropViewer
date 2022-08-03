@@ -138,7 +138,11 @@ public class UnityMainThreadDispatcher : MonoBehaviour
 
 	void OnDestroy()
 	{
-		_instance = null;
+		//only perform clean-up for myself.
+		if (_instance == this)
+		{
+			_instance = null;
+		}
 	}
 
 	public static Thread GMainThread;
