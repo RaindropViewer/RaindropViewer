@@ -69,32 +69,42 @@ namespace Raindrop.UI.Login
 
         private void HookupUIEvents()
         {
-            LoginButton.onClick.AsObservable().Subscribe(_ => OnLoginBtnClick());
+            LoginButton.onClick.AsObservable()
+                .Subscribe(_ => OnLoginBtnClick())
+                .AddTo(this);
 
             loginButtonIsClickable.AsObservable()
                 .Subscribe(_ =>
                 {
                     SetLoginButtonVisibilty(_);
-                }); //update the login button availabilty according to this boolean.
+                })
+                .AddTo(this); //update the login button availabilty according to this boolean.
 
-            usernameField.onValueChanged.AsObservable().Subscribe(_ =>
-            {
-                Username = _;
-                credParserErrorString.Value = "";
-            }); //change username property.
-            passwordField.onValueChanged.AsObservable().Subscribe(_ =>
-            {
-                Password = _;
+            usernameField.onValueChanged.AsObservable()
+                .Subscribe(_ =>
+                {
+                    Username = _;
+                    credParserErrorString.Value = "";
+                })
+                .AddTo(this); //change username property.
+            passwordField.onValueChanged.AsObservable()
+                .Subscribe(_ =>
+                {
+                    Password = _;
 
-                credParserErrorString.Value = "";
-            }); //change password.
+                    credParserErrorString.Value = "";
+                })
+                .AddTo(this); //change password.
 
             TOSCheckbox.OnValueChangedAsObservable()
-                .Subscribe(_ => agreeTOS = _); //when toggle checkbox, set boolean to the same value as the toggle-state
+                .Subscribe(_ => agreeTOS = _)
+                .AddTo(this); //when toggle checkbox, set boolean to the same value as the toggle-state
 
             //loginMsg.AsObservable().Where(_ => ! _.Equals("")).Subscribe(_ => UpdateLoginModalContent("Logging in process...", _));
 
-            credParserErrorString.AsObservable().Subscribe(_ => OnCredParseError(_));
+            credParserErrorString.AsObservable()
+                .Subscribe(_ => OnCredParseError(_))
+                .AddTo(this);
 
             //gridDropdown.OnValueChangedAsObservable().Subscribe(_ => gridSelectedItem = _);
             //customURLCheckbox.onValueChanged.AsObservable().Subscribe(_ => cbCustomURL = _); //change username property.
