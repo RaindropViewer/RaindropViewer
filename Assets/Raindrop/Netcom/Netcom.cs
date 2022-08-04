@@ -453,7 +453,7 @@ namespace Raindrop.Netcom
         
         public bool IsSecondlife
         {
-            get { return (instance.Netcom.LoginOptions.Grid.Platform == "SecondLife"); }
+            get { return (this.LoginOptions?.Grid?.Platform == "SecondLife"); }
         }
 
         public LoginOptions LoginOptions
