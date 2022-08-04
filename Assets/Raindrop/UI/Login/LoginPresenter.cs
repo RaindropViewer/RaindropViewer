@@ -130,6 +130,8 @@ namespace Raindrop.UI.Login
 
         private void SetLoginButtonVisibilty(bool _)
         {
+            if (LoginButton == null)
+                return;
             LoginButton.interactable = _;
         }
 
