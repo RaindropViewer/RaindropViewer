@@ -38,6 +38,7 @@ namespace Raindrop.Bootstrap
 #endif
         }
 
+#if UNITY_EDITOR
         /// <summary>For in-editor usage only.</summary>
         public static void InternalPlayModeStateChanged(PlayModeStateChange state)
         {
@@ -53,6 +54,7 @@ namespace Raindrop.Bootstrap
             }
         }
 
+#endif
         #region Bootstrap functions
         
         private void StartUIScene()
