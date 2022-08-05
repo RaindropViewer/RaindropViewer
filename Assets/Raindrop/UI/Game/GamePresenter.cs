@@ -21,7 +21,7 @@ namespace Raindrop.Presenters
 
         private Settings s; //todo. init this.
 
-        bool IsConnectedToServer => instance.Client.Network.Connected;
+        bool IsConnectedToServer => instance.Netcom.IsLoggedIn;
 
 
         #region references to UI elements
